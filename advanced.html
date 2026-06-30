@@ -1,0 +1,1370 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/><meta name="theme-color" content="#14171C"/>
+<title>The Old Man · Advanced</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Old Man +"/>
+<link rel="apple-touch-icon" href="icon-adv.png"/>
+<link rel="icon" type="image/png" href="icon-adv.png"/>
+<style>
+:root{--bg:#14171C;--surface:#1b2026;--surface2:#252c35;--line:#333b45;--ink:#ECE7DA;--muted:#8a93a0;--brass:#CBA152;--brass-dim:#8f7236;--green:#62A07B;--red:#C45B50;
+--serif:"Iowan Old Style","Palatino Linotype",Georgia,serif;--sans:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,monospace;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);overscroll-behavior:none}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.wrap{max-width:540px;margin:0 auto;min-height:100vh;min-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));display:flex;flex-direction:column}
+.view{display:none;flex:1;flex-direction:column}.view.on{display:flex}
+.pad{padding:16px}
+.banner{background:linear-gradient(90deg,rgba(203,161,82,.16),transparent);border-bottom:1px solid var(--line);padding:7px 16px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass)}
+.brand{display:flex;align-items:center;gap:10px}
+.crown{width:30px;height:30px;border:1.5px solid var(--brass);border-radius:50%;display:grid;place-items:center;color:var(--brass);font-size:16px}
+.brand h1{font-family:var(--serif);font-weight:600;font-size:19px;margin:0}.brand .sub{font-size:11px;color:var(--muted);letter-spacing:.13em;text-transform:uppercase}
+.lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:18px 0 8px}
+.seatrow{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px}
+.seatrow .top{display:flex;align-items:center;gap:10px}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:var(--surface2);border:1px solid var(--line);flex:0 0 auto}
+.seatrow input.nm{flex:1;background:transparent;border:0;border-bottom:1px solid var(--line);color:var(--ink);font-family:var(--sans);font-size:15px;font-weight:600;padding:4px 2px}
+.seatrow input.nm:focus{outline:none;border-color:var(--brass-dim)}
+.skillbadge{font-family:var(--mono);font-size:12px;color:var(--brass);min-width:96px;text-align:right}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:3px;background:var(--surface2);margin:12px 0 2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--brass);border:2px solid #1a1407}
+.btn{display:block;width:100%;border:0;border-radius:13px;padding:15px;font-family:var(--sans);font-size:16px;font-weight:650;color:#1a1407;background:linear-gradient(180deg,#d8b463,#c19a45);margin-top:16px}
+.btn.ghost{background:transparent;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.topbar .deal{font-size:12px;color:var(--muted)}.topbar .deal b{color:var(--ink)}
+.topbar .trump{font-size:10px;color:var(--muted);text-align:right;line-height:1.4}
+.table{position:relative;flex:1 1 auto;background:radial-gradient(120% 80% at 50% 34%,#1d2a23,#141a17 72%);min-height:260px;overflow:hidden}
+.opp{position:absolute;display:flex;flex-direction:column;align-items:center;width:104px;transition:opacity .2s}
+.opp .row{display:flex;align-items:center;gap:6px}
+.opp .av{width:38px;height:38px;font-size:21px;transition:box-shadow .2s}
+.opp.active .av{box-shadow:0 0 0 2px var(--brass),0 0 14px rgba(203,161,82,.5)}
+.opp .meta{display:flex;flex-direction:column;line-height:1.12}
+.opp .nm{font-size:12px;font-weight:600}.opp .sk{font-size:9px;color:var(--brass)}
+.opp .score{font-family:var(--mono);font-size:13px;font-weight:600;margin-top:2px}
+.opp .backs{display:flex;margin-top:3px;height:20px}
+.cardback{width:13px;height:19px;border-radius:3px;background:linear-gradient(135deg,#2b3550,#1a2238);box-shadow:inset 0 0 0 1px #3a4a6e;margin-left:-7px}.cardback:first-child{margin-left:0}
+.pickerbadge{font-size:8px;font-weight:800;letter-spacing:.06em;color:#1a1407;background:var(--brass);border-radius:4px;padding:1px 4px;margin-top:2px}
+.partnerbadge{font-size:8px;font-weight:800;letter-spacing:.06em;color:#0c1f14;background:var(--green);border-radius:4px;padding:1px 4px;margin-top:2px}
+.wonpile{font-size:9px;color:var(--muted);margin-top:2px;font-family:var(--mono)}
+.tl{top:8px;left:6px}.tr{top:8px;right:6px}.ml{top:150px;left:0}.mr{top:150px;right:0}
+
+/* play boxes + cards */
+.playbox{position:absolute;width:46px;height:64px;border:1.5px dashed rgba(203,161,82,.28);border-radius:8px;transform:translate(-50%,-50%);transition:box-shadow .3s,border-color .3s}
+.playbox .seatdot{position:absolute;bottom:-15px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap}
+.playbox.win{border-color:var(--green);box-shadow:0 0 12px rgba(98,160,123,.5)}
+.cardlayer-card,#cardlayer .pcard{position:absolute;}
+.pcard{position:absolute;width:46px;height:64px;transform:translate(-50%,-50%);transition:left .5s ease,top .5s ease,opacity .4s ease}
+.card{border-radius:7px;background:#f3efe3;color:#1a1d22;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:4px 5px;font-family:var(--serif);box-shadow:0 1px 3px rgba(0,0,0,.5);user-select:none}
+.card.red{color:#b23b34}.card .r{font-size:14px;font-weight:700;line-height:1}.card .s{font-size:18px;text-align:right;line-height:1}
+.card.trump{box-shadow:0 0 0 2px var(--brass),0 1px 3px rgba(0,0,0,.5)}
+.card.trump::after{content:"";position:absolute;top:3px;right:4px;width:4px;height:4px;border-radius:50%;background:var(--brass)}
+
+/* bury pile (center, face down) */
+.burypile{position:absolute;left:50%;top:13%;transform:translate(-50%,-50%);cursor:pointer;display:flex;flex-direction:column;align-items:center;z-index:2}
+.burypile .stack{position:relative;width:40px;height:56px}
+.bcard{position:absolute;width:32px;height:46px;border-radius:5px;background:linear-gradient(135deg,#2b3550,#1a2238);box-shadow:inset 0 0 0 1px #3a4a6e,0 1px 2px rgba(0,0,0,.5)}
+.bcard:nth-child(1){left:0;top:0;transform:rotate(-7deg)}.bcard:nth-child(2){left:8px;top:4px;transform:rotate(6deg)}
+.bcard.face{background:#f3efe3;box-shadow:0 1px 2px rgba(0,0,0,.5);display:flex;flex-direction:column;justify-content:space-between;padding:3px 4px;font-family:var(--serif);color:#1a1d22}
+.bcard.face.red{color:#b23b34}.bcard .br{font-size:11px;font-weight:700}.bcard .bs{font-size:13px;text-align:right}
+.burypile .stack.fan{width:74px;height:50px}
+.stack.fan .bcard:nth-child(1){left:0;top:2px;transform:rotate(-7deg)}
+.stack.fan .bcard:nth-child(2){left:38px;top:2px;transform:rotate(7deg)}
+.burylbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:17px}
+
+.lasttrickbtn{position:absolute;left:8px;bottom:8px;font-size:11px;color:var(--brass);background:rgba(0,0,0,.4);border:1px solid var(--brass-dim);border-radius:18px;padding:6px 12px;cursor:pointer;display:none}
+.turnmsg{position:absolute;right:8px;bottom:8px;font-size:11px;color:var(--brass);letter-spacing:.06em;text-transform:uppercase;background:rgba(0,0,0,.4);padding:6px 12px;border-radius:18px;max-width:60%;text-align:right}
+
+.peek{position:absolute;inset:0;background:rgba(10,12,15,.9);z-index:6;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.peek.on{display:flex}
+.peek h3{font-family:var(--serif);font-size:18px;margin:0 0 14px}
+.peekcards{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.peekcard{display:flex;flex-direction:column;align-items:center;gap:5px}
+.peekcard .nm{font-size:10px;color:var(--muted)}
+.peekcard.winner .nm{color:var(--green);font-weight:700}
+.peekcard .card{width:46px;height:64px}
+.peek .close{margin-top:18px;font-size:13px;color:var(--brass)}
+
+.youbar{display:flex;align-items:center;gap:10px;padding:9px 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface)}
+.youbar.active .av{box-shadow:0 0 0 2px var(--brass),0 0 14px rgba(203,161,82,.5)}
+.youbar .av{width:36px;height:36px;font-size:21px}
+.youbar .nm{font-weight:600;font-size:14px}.youbar .role{font-size:10px;color:var(--brass);text-transform:uppercase;letter-spacing:.06em}
+.youbar .score{margin-left:auto;font-family:var(--mono);font-weight:600}
+.handzone{padding:10px 10px 22px}
+.handlbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin:0 4px 7px;min-height:14px}
+.hand{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.hand .card{width:48px;height:68px}
+.hand .card.legal{cursor:pointer}.hand .card.legal:active{transform:translateY(-6px)}
+.hand .card.illegal{opacity:.32}
+.prompt{padding:0 14px 14px}.prompt .q{font-family:var(--serif);font-size:17px;text-align:center;margin:4px 0 10px}
+.btnrow{display:flex;gap:10px}.btnrow .btn{margin:0}
+.overlay{position:absolute;inset:0;background:rgba(10,12,15,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;z-index:7}
+.announce{text-align:center;padding:30px 26px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.ann-txt{font-family:var(--serif);font-size:22px;color:var(--ink);line-height:1.35}
+.ann-realcard{width:94px;height:130px;background:#f3efe3;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#1a1d22;box-shadow:0 6px 22px rgba(0,0,0,.55),0 0 0 2px var(--brass)}
+.ann-realcard.red{color:#b23b34}
+.ann-realcard .arc-r{font-family:var(--serif);font-size:46px;font-weight:700;line-height:1}
+.ann-realcard .arc-s{font-size:42px;line-height:1}
+.ann-sub{font-size:11px;color:var(--brass);letter-spacing:.1em;text-transform:uppercase}
+.overlay h2{font-family:var(--serif);font-size:24px;margin:0 0 6px}
+.overlay .res{font-family:var(--mono);font-size:15px;color:var(--brass);margin-bottom:4px}
+.overlay .sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:310px;margin-bottom:18px}
+.overlay .btn{max-width:280px}
+
+/* ---- home ---- */
+.home .hero{font-family:var(--serif);font-size:26px;margin:6px 0 2px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:13px}
+.stat .v{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--brass)}
+.stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+.menu .btn{margin-top:12px}
+.note{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--brass-dim);border-radius:9px;padding:11px 13px;font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:14px}
+.note b{color:var(--ink)}
+.field{margin:14px 0}.field label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px}
+.field input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:11px;color:var(--ink);font-family:var(--sans);font-size:15px;padding:12px}
+.field input:focus{outline:none;border-color:var(--brass-dim)}
+.backlink{font-size:13px;color:var(--brass);padding:6px 0;display:inline-block}
+/* ---- review ---- */
+.rev{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0;margin-bottom:10px;overflow:hidden}
+.rev .h{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;border-bottom:1px solid var(--line)}
+.rev .h .t{font-weight:650;font-size:14px}.rev .h .t span{color:var(--muted);font-weight:400;font-size:12px;margin-left:6px}
+.rev .h .mark{font-family:var(--mono);font-size:13px;font-weight:700;padding:2px 9px;border-radius:20px}
+.mark.ok{color:var(--green);background:rgba(98,160,123,.13)}.mark.no{color:var(--red);background:rgba(196,91,80,.13)}.mark.tie{color:var(--brass);background:rgba(203,161,82,.13)}
+.rev .b{padding:10px 13px;font-size:12.5px;color:var(--muted);line-height:1.6}
+.rev .b b{color:var(--ink)}.rev .b .odds{font-family:var(--mono);color:var(--brass)}
+.revsum{font-family:var(--serif);font-size:18px;text-align:center;margin:2px 0 4px}
+.revsub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px}
+.chip-pos{color:var(--green)}.chip-neg{color:var(--red)}
+/* ---- leaderboard ---- */
+.lbrow{display:grid;grid-template-columns:26px 1fr auto auto;gap:8px;align-items:center;padding:11px 12px;border-bottom:1px solid var(--line);font-size:14px}
+.lbrow .rk{font-family:var(--mono);color:var(--muted);text-align:center}
+.lbrow.me{background:rgba(203,161,82,.08)}
+.lbrow .nm{font-weight:600}.lbrow .nm .acc{font-size:11px;color:var(--muted);margin-left:7px;font-family:var(--mono)}
+.lbrow .sc{font-family:var(--mono);color:var(--brass);font-weight:700;text-align:right;min-width:42px}
+.lbrow .ro{font-family:var(--mono);color:var(--muted);font-size:12px;text-align:right;min-width:30px}
+.lbhead{display:grid;grid-template-columns:26px 1fr auto auto;gap:8px;padding:6px 12px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.lbrow.ev5,.lbhead.ev5{grid-template-columns:20px 1fr 64px 64px 38px;gap:6px}
+.lbrow.ev5{font-size:13px;padding:11px 10px}.lbhead.ev5{padding:6px 10px}
+.lbhead.ev5 span:nth-child(n+3){text-align:right}
+.lbhead .evh{cursor:pointer}.lbhead .evh.on{color:var(--brass)}
+.lbrow .evc{font-family:var(--mono);text-align:right;font-size:13px}
+.evc.loss{color:var(--red)}.evc.ev.pos{color:var(--green)}.evc.ev.neg{color:var(--red)}
+.lbexp{padding:9px 12px;font-size:12px;color:var(--muted);line-height:1.6;border-bottom:1px solid var(--line);background:var(--surface)}
+.lbexp .g{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px}
+.lbexp .g span{font-family:var(--mono)}
+.sortbtns{display:flex;gap:8px;margin:4px 0 12px}
+.sortbtns button{flex:1;background:var(--surface);border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:8px;font-size:12px;font-weight:600}
+.sortbtns button.on{color:#1a1407;background:var(--brass);border-color:var(--brass)}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--line);border-top-color:var(--brass);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}@keyframes sp{to{transform:rotate(360deg)}}
+/* live practice hint */
+.hint{margin:0 14px 8px;padding:9px 12px;background:rgba(98,160,123,.1);border:1px solid rgba(98,160,123,.3);border-radius:10px;font-size:12.5px;color:var(--ink);line-height:1.5}
+.hint .lead{color:var(--green);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.08em}
+.hint .odds{font-family:var(--mono);color:var(--brass)}
+.card.bestplay{box-shadow:0 0 0 2px var(--green),0 0 12px rgba(98,160,123,.5)}
+.card.burysel{box-shadow:0 0 0 2px var(--brass),0 0 12px rgba(203,161,82,.55);transform:translateY(-8px)}
+
+
+/* ---- trick display in review ---- */
+.trickrow{display:flex;gap:5px;flex-wrap:wrap;margin:2px 0 9px}
+.snaprep{color:var(--brass);font-size:12px;margin-top:9px;cursor:pointer;user-select:none;display:inline-block}
+.snap{margin-top:9px;padding:10px 11px;background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:9px}
+.snaplbl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:2px 0 6px}
+.snaplbl b{color:var(--ink)}
+.snapnote{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:8px}
+.tcard{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:34px}
+.tcard .cm{font-family:var(--mono);font-weight:700;font-size:15px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;background:#0e1116;min-width:30px;text-align:center;color:var(--ink)}
+.tcard .cm.red{color:#e0786c}
+.tcard.me .cm{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
+.tcard.won .cm{background:rgba(98,160,123,.18);border-color:var(--green)}
+.tcard .tn{font-size:9.5px;color:var(--muted);max-width:44px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mark.forced{color:var(--muted);background:rgba(120,130,140,.13)}
+
+.sb-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 10px 16px;margin-bottom:12px}
+.sb-grid{display:grid;grid-template-columns:58px repeat(5,1fr);border-top:1px solid var(--line)}
+.sb-grid>div{padding:8px 1px;text-align:center;border-bottom:1px solid var(--line)}
+.sb-rl{text-align:left;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-left:3px;display:flex;align-items:center}
+.sb-grid .col-you{background:rgba(203,161,82,.06)}
+.sb-grid .head{padding-top:10px;padding-bottom:10px}
+.sb-av{font-size:22px;line-height:1}
+.sb-nm{font-size:10px;color:var(--ink);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-tag{display:inline-block;font-size:7px;font-weight:800;letter-spacing:.04em;border-radius:3px;padding:1px 3px;margin-top:3px}
+.sb-tag.pick{background:var(--brass);color:#1a1407}.sb-tag.part{background:var(--green);color:#0c1f14}
+.sb-tag.def{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.sb-n{font-family:var(--mono);font-size:15px;color:var(--ink)}
+.sb-n.big{font-size:16px;font-weight:600}
+.sb-n.pos{color:var(--green)}.sb-n.neg{color:var(--red)}.sb-n.zero{color:var(--muted)}
+.sb-bury{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px 0 2px}
+.sb-bury .lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sb-mini{width:36px;height:50px;background:#f3efe3;border-radius:6px;display:flex;flex-direction:column;justify-content:space-between;padding:3px 4px;color:#1a1d22;font-family:var(--serif);box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.sb-mini.red{color:#b23b34}.sb-mini .r{font-size:13px;font-weight:700;line-height:1}.sb-mini .s{font-size:14px;text-align:right;line-height:1}
+.sb-summary{text-align:center;font-family:var(--serif);font-size:14px;color:var(--ink);margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.sb-summary .brass{color:var(--brass);font-weight:700}
+.oddswhy{font-size:11.5px;color:var(--muted);font-style:italic;line-height:1.45}
+</style></head><body><div class="wrap">
+
+<section id="home" class="view on">
+  <div class="banner">The Old Man · Advanced</div>
+  <div class="pad home">
+    <div class="brand" style="margin-bottom:6px"><div class="crown">♣</div><div><h1>The Old Man</h1><div class="sub">Advanced · DuChateau</div></div></div>
+    <div class="hero" id="home-greet">Welcome.</div>
+    <div class="stat-grid">
+      <div class="stat"><div class="v" id="h-deals">0</div><div class="k">Ranked deals</div></div>
+      <div class="stat"><div class="v" id="h-acc">—</div><div class="k">Decision accuracy</div></div>
+      <div class="stat"><div class="v" id="h-score">—</div><div class="k">Skill score</div></div>
+      <div class="stat"><div class="v" id="h-chips">0</div><div class="k">Net chips</div></div>
+    </div>
+    <div class="menu">
+      <button class="btn" id="go-ranked">Ranked game →</button>
+      <button class="btn ghost" id="go-practice">Practice (live coaching)</button>
+      <button class="btn ghost" id="go-board">Leaderboard</button>
+      <button class="btn ghost" id="go-settings">Settings</button>
+    </div>
+    <div class="note"><b>Ranked</b> plays silent, then walks you through every decision with the right call and the odds — and syncs to the family board. <b>Practice</b> shows the best play live as you go, and doesn't count.</div>
+  </div>
+</section>
+
+<section id="setup" class="view">
+  <div class="banner" id="modebanner">Ranked</div>
+  <a class="backlink" id="setup-back" style="padding-left:16px">← Home</a>
+  <div class="pad">
+    <div class="brand" style="margin-bottom:18px"><div class="crown">♣</div><div><h1>The Old Man · Advanced</h1><div class="sub">Play 4 AI · set each skill</div></div></div>
+    <div class="lbl">Your opponents — match each real player's level</div>
+    <div id="seats"></div>
+    <div class="lbl">Your name</div>
+    <div class="seatrow"><div class="top"><div class="av">🐈</div><input class="nm" id="youname" placeholder="Your name"/></div></div>
+    <button class="btn" id="start">Deal in →</button>
+    <small style="display:block;text-align:center;color:var(--muted);font-size:11px;margin-top:14px;line-height:1.6">AIs pick by skill · picker is marked · each seat plays into its own box · tap a won trick to review it · the picker's bury sits face-down in the middle (tap to peek if it's yours).</small>
+  </div>
+</section>
+
+<section id="table" class="view">
+  <div class="topbar"><div class="deal">Deal <b id="dealno">1</b></div><div class="trump">Trump: Q♣Q♠Q♥Q♦·J♣J♠J♥J♦·♦<br><span id="needline">Need 61 to win the deal</span></div></div>
+  <div class="table" id="tableArea">
+    <div class="opp tl" id="seat-tl"></div><div class="opp tr" id="seat-tr"></div>
+    <div class="opp ml" id="seat-ml"></div><div class="opp mr" id="seat-mr"></div>
+    <div id="boxlayer"></div>
+    <div id="cardlayer"></div>
+    <div class="burypile" id="burypile" style="display:none"></div>
+    <div class="lasttrickbtn" id="lasttrickbtn">↺ Last trick</div>
+    <div class="turnmsg" id="turnmsg"></div>
+    <div class="peek" id="peek"></div>
+    <div class="overlay" id="overlay" style="display:none"></div>
+  </div>
+  <div class="youbar" id="youbar"><div class="av">🐈</div><div><div class="nm" id="you-nm">Wyatt</div><div class="role" id="you-role"></div></div><div class="score" id="you-score">0</div></div>
+  <div class="handzone"><div class="handlbl" id="handlbl"></div><div class="hand" id="hand"></div></div>
+  <div class="prompt" id="prompt"></div>
+</section>
+
+
+<section id="review" class="view">
+  <div class="banner" id="rev-banner">Deal review</div>
+  <div class="pad">
+    <div class="revsum" id="rev-title">Deal 1</div>
+    <div class="revsub" id="rev-sub"></div>
+    <div id="rev-list"></div>
+    <button class="btn" id="rev-next">Next deal →</button>
+    <button class="btn ghost" id="rev-home">End session</button>
+  </div>
+</section>
+
+<section id="board" class="view">
+  <div class="banner">Leaderboard · Advanced</div>
+  <div class="pad">
+    <div class="brand" style="margin-bottom:6px"><div class="crown">♣</div><div><h1 style="font-size:18px">The family board</h1><div class="sub">Advanced · ranked only</div></div></div>
+    <div id="b-status" style="font-family:var(--mono,monospace);font-size:11px;color:#CBA152;margin:0 0 10px;letter-spacing:.03em">build v4.9 · idle</div>
+    <div class="sortbtns"><button id="sort-skill">Skill score</button><button id="sort-evnet" class="on">EV / deal</button><button id="sort-chips">Net chips</button></div>
+    <div class="lbhead"><span>#</span><span>Player</span><span>Score</span><span>Deals</span></div>
+    <div id="b-rows"></div>
+    <div id="b-note"></div>
+    <a class="backlink" id="board-back" style="margin-top:14px">← Home</a>
+  </div>
+</section>
+
+<section id="settings" class="view">
+  <div class="banner">Settings</div>
+  <div class="pad">
+    <div class="field"><label>Your name (shown on the leaderboard)</label><input id="s-name" maxlength="18" placeholder="Wyatt"/></div>
+    <div class="note" id="s-sync"><b>Online sync is on.</b> Your ranked results post to the shared family board automatically.</div>
+    <button class="btn" id="s-save">Save</button>
+    <button class="btn ghost" id="s-reset">Reset my stats</button>
+    <a class="backlink" id="s-back" style="margin-top:6px">← Home</a>
+    <div style="text-align:center;color:var(--muted);font-size:11px;margin-top:18px" id="s-ver"></div>
+  </div>
+</section>
+
+</div>
+<script>
+
+// ===== DuChateau Sheepshead engine (JS port) =====
+const SUITS = "CSHD", RANKS = "ATKQJ987";
+const POINTS = {A:11,T:10,K:4,Q:3,J:2,'9':0,'8':0,'7':0};
+const DECK = []; for (const s of SUITS) for (const r of RANKS) DECK.push(r+s);
+const TRUMP_ORDER = ['QC','QS','QH','QD','JC','JS','JH','JD','AD','TD','KD','9D','8D','7D'];
+const TRUMP_SET = new Set(TRUMP_ORDER);
+const TRUMP_STR = {}; TRUMP_ORDER.forEach((c,i)=>TRUMP_STR[c]=TRUMP_ORDER.length-i);
+const FAIL_RANK_STR = {A:6,T:5,K:4,'9':3,'8':2,'7':1};
+const FAIL_SUITS = "CSH";
+const CHAIN = ['JD','JH','JS','JC','QD','QH','QS'];
+
+const isTrump = c => TRUMP_SET.has(c);
+const pts = c => POINTS[c[0]];
+const effSuit = c => isTrump(c) ? 'T' : c[1];
+const cardStrength = c => isTrump(c) ? 100+TRUMP_STR[c] : FAIL_RANK_STR[c[0]];
+
+function trickWinner(plays){ // plays: [[pidx,card],...]
+  const led = effSuit(plays[0][1]);
+  let best=null, bestv=-1, trumpInPlay=plays.some(p=>isTrump(p[1]));
+  for(const [pi,c] of plays){
+    let v;
+    if(trumpInPlay){ if(!isTrump(c)) continue; v=TRUMP_STR[c]+1000; }
+    else { if(effSuit(c)!==led) continue; v=FAIL_RANK_STR[c[0]]; }
+    if(v>bestv){bestv=v;best=pi;}
+  }
+  return best;
+}
+function legalMoves(hand, led){
+  if(led===null) return hand.slice();
+  const same = hand.filter(c=>effSuit(c)===led);
+  return same.length?same:hand.slice();
+}
+function shuffle(a, rng){ for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function mulberry32(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+// ---- bury ----
+function buryScore(hand8, pair){
+  const remaining = hand8.filter(c=>!pair.includes(c));
+  let voids=0;
+  for(const s of FAIL_SUITS){
+    const had = hand8.some(c=>!isTrump(c)&&c[1]===s);
+    const still = remaining.some(c=>!isTrump(c)&&c[1]===s);
+    if(had&&!still) voids++;
+  }
+  // burying trump is bad: heavy penalty
+  const trumpPen = pair.some(isTrump)?-100:0;
+  return pair.reduce((a,c)=>a+pts(c),0) + 8*voids + trumpPen;
+}
+function bestBury(hand8){
+  let best=null,bestsc=-1e9;
+  for(let i=0;i<hand8.length;i++)for(let j=i+1;j<hand8.length;j++){
+    const pair=[hand8[i],hand8[j]]; const sc=buryScore(hand8,pair);
+    if(sc>bestsc){bestsc=sc;best=pair;}
+  }
+  return {pair:best,score:bestsc};
+}
+function chooseBury(hand8){ return bestBury(hand8).pair; }
+function applyBury(hand8,pair){ const b=pair.slice(); const kept=[]; for(const c of hand8){const k=b.indexOf(c); if(k>=0)b.splice(k,1); else kept.push(c);} return kept; }
+
+// ---- partner / forced ----
+function partnerCard(kept6){ for(const c of CHAIN) if(!kept6.includes(c)) return c; return null; }
+function canGoAlone(kept6){ return kept6.includes('JD'); }
+function forcedPicker(hands, blind){
+  for(const q of ['QC','QS','QH']){ if(blind.includes(q)) continue; for(let p=0;p<5;p++) if(hands[p].includes(q)) return p; }
+  return 0;
+}
+
+// ---- normal play policy ----
+function beats(card, cur, led){
+  if(isTrump(card)&&isTrump(cur)) return TRUMP_STR[card]>TRUMP_STR[cur];
+  if(isTrump(card)&&!isTrump(cur)) return true;
+  if(!isTrump(card)&&isTrump(cur)) return false;
+  if(effSuit(card)===led&&effSuit(cur)===led) return FAIL_RANK_STR[card[0]]>FAIL_RANK_STR[cur[0]];
+  if(effSuit(card)===led) return true;
+  return false;
+}
+function winningCard(plays){ const w=trickWinner(plays); for(const [pi,c] of plays) if(pi===w) return c; }
+function keepscore(c){ return isTrump(c)?50+TRUMP_STR[c]:pts(c); }
+function choosePlay(pidx,hand,plays,led,teamOf){
+  const moves=legalMoves(hand,led);
+  if(moves.length===1) return moves[0];
+  const myTeam=teamOf[pidx];
+  if(plays.length===0){
+    const trumps=moves.filter(isTrump).sort((a,b)=>TRUMP_STR[b]-TRUMP_STR[a]);
+    const fails=moves.filter(c=>!isTrump(c));
+    const fa=fails.filter(c=>c[0]==='A');
+    if(myTeam===1&&trumps.length>=3) return trumps[0];
+    if(fa.length) return fa.reduce((x,y)=>pts(y)>pts(x)?y:x);
+    if(fails.length) return fails.reduce((x,y)=>(FAIL_RANK_STR[y[0]]<FAIL_RANK_STR[x[0]]||(FAIL_RANK_STR[y[0]]===FAIL_RANK_STR[x[0]]&&pts(y)<pts(x)))?y:x);
+    return trumps[trumps.length-1];
+  }
+  const cur=winningCard(plays), curW=trickWinner(plays);
+  const curPts=plays.reduce((a,[_,c])=>a+pts(c),0);
+  const sideWinning=teamOf[curW]===myTeam;
+  const winners=moves.filter(c=>beats(c,cur,led));
+  const losers=moves.filter(c=>!winners.includes(c));
+  if(sideWinning){ const pool=losers.length?losers:moves; return pool.reduce((x,y)=>pts(y)>pts(x)?y:x); }
+  const worth=curPts>=4||plays.some(([_,c])=>c[0]==='A'||c[0]==='T');
+  const last=plays.length===4;
+  if(winners.length&&(worth||last)) return winners.reduce((x,y)=>(cardStrength(y)<cardStrength(x)||(cardStrength(y)===cardStrength(x)&&pts(y)<pts(x)))?y:x);
+  return moves.reduce((x,y)=>{const kx=[isTrump(x)?1:0,keepscore(x)],ky=[isTrump(y)?1:0,keepscore(y)];return (ky[0]<kx[0]||(ky[0]===kx[0]&&ky[1]<kx[1]))?y:x;});
+}
+// ---- slam policies ----
+function slamPicker(hand,plays,led){const m=legalMoves(hand,led);if(m.length===1)return m[0];
+  if(plays.length===0){const tr=m.filter(isTrump);if(tr.length)return tr.reduce((x,y)=>TRUMP_STR[y]>TRUMP_STR[x]?y:x);return m.reduce((x,y)=>FAIL_RANK_STR[y[0]]>FAIL_RANK_STR[x[0]]?y:x);}
+  const cur=winningCard(plays);const w=m.filter(c=>beats(c,cur,led));
+  if(w.length)return w.reduce((x,y)=>cardStrength(y)<cardStrength(x)?y:x);
+  return m.reduce((x,y)=>cardStrength(y)<cardStrength(x)?y:x);}
+function slamDef(hand,plays,led){const m=legalMoves(hand,led);if(m.length===1)return m[0];
+  if(plays.length===0)return m.reduce((x,y)=>cardStrength(y)>cardStrength(x)?y:x);
+  const cur=winningCard(plays);const w=m.filter(c=>beats(c,cur,led));
+  if(w.length)return w.reduce((x,y)=>cardStrength(y)<cardStrength(x)?y:x);
+  return m.reduce((x,y)=>cardStrength(y)<cardStrength(x)?y:x);}
+
+// ---- chips ----
+function classifyChips(pp,pt,mode){
+  if(pt===6) return ['win_all', mode==='alone'?12:6];
+  if(pp>=91) return ['win_schneider', mode==='alone'?8:4];
+  if(pp>=61) return ['win_normal', mode==='alone'?4:2];
+  if(pt===0) return ['no_tricks', mode==='alone'?-12:-9];
+  if(pp<=29) return ['loss_schneider', mode==='alone'?-12:-6];
+  return ['loss_normal', mode==='alone'?-8:-4];
+}
+const _PART={win_normal:[2,1],win_schneider:[4,2],win_all:[6,3],loss_normal:[-4,-2],loss_schneider:[-6,-3],no_tricks:[-9,0]};
+const _ALONE={win_normal:4,win_schneider:8,win_all:12,loss_normal:-8,loss_schneider:-12,no_tricks:-12};
+const _DEF={win_normal:-1,win_schneider:-2,win_all:-3,loss_normal:2,loss_schneider:3,no_tricks:3};
+function roleChips(outcome,mode,isPicker,isPartner){ if(isPicker) return mode==='alone'?_ALONE[outcome]:_PART[outcome][0]; if(isPartner) return _PART[outcome][1]; return _DEF[outcome]; }
+
+// ---- playouts ----
+// 6-card kept hand already set; deal 24 unknowns to opponents; buried pts to team1.
+function playKept(kept6, buried2, opp, mode, leader){
+  const hands={0:kept6.slice()}; for(let p=1;p<5;p++) hands[p]=opp[p-1].slice();
+  const teamOf={0:1,1:0,2:0,3:0,4:0};
+  if(mode==='partner'){ const pc=partnerCard(kept6); if(pc) for(let p=1;p<5;p++) if(hands[p].includes(pc)){teamOf[p]=1;break;} }
+  let tp={0:0,1:0}, tk={0:0,1:0}; tp[1]+=buried2.reduce((a,c)=>a+pts(c),0);
+  let p0=0;
+  let lead=leader;
+  for(let t=0;t<6;t++){
+    const plays=[]; let led=null;
+    for(let i=0;i<5;i++){const pidx=(lead+i)%5; const card=choosePlay(pidx,hands[pidx],plays,led,teamOf); hands[pidx].splice(hands[pidx].indexOf(card),1); if(led===null)led=effSuit(card); plays.push([pidx,card]);}
+    const w=trickWinner(plays); tp[teamOf[w]]+=plays.reduce((a,[_,c])=>a+pts(c),0); tk[teamOf[w]]++; if(w===0)p0++; lead=w;
+  }
+  let [outcome,chips]=classifyChips(tp[1],tk[1],mode);
+  if(p0===0){ outcome="no_tricks"; chips=mode==='alone'?-12:-9; }   // picker must take a trick to win
+  return {pp:tp[1],pt:tk[1],outcome,chips,teamOf};
+}
+// full pick: hand6 + blind(2) -> internal bury -> play
+function playPick(hand6, blind2, opp, mode, leader){
+  const hand8=hand6.concat(blind2); const buried=chooseBury(hand8); const kept=applyBury(hand8,buried);
+  return playKept(kept,buried,opp,mode,leader);
+}
+function playSlam(kept6, buried2, opp, mode, leader){
+  const hands={0:kept6.slice()}; for(let p=1;p<5;p++) hands[p]=opp[p-1].slice();
+  const teamOf={0:1,1:0,2:0,3:0,4:0};
+  if(mode==='partner'){ const pc=partnerCard(kept6); if(pc) for(let p=1;p<5;p++) if(hands[p].includes(pc)){teamOf[p]=1;break;} }
+  let lead=leader;
+  for(let t=0;t<6;t++){
+    const plays=[]; let led=null;
+    for(let i=0;i<5;i++){const pidx=(lead+i)%5; const card=teamOf[pidx]===1?slamPicker(hands[pidx],plays,led):slamDef(hands[pidx],plays,led); hands[pidx].splice(hands[pidx].indexOf(card),1); if(led===null)led=effSuit(card); plays.push([pidx,card]);}
+    const w=trickWinner(plays); if(teamOf[w]===0) return false; lead=w;
+  }
+  return true;
+}
+
+// ---- dealing helpers (consistent hidden cards) ----
+function dealOpp(known, rng, nOpp=4, perOpp=6){ // known: cards NOT available; returns [opp hands]
+  const avail=DECK.filter(c=>!known.includes(c)); shuffle(avail,rng);
+  const opp=[]; let k=0; for(let p=0;p<nOpp;p++){opp.push(avail.slice(k,k+perOpp)); k+=perOpp;}
+  return {opp, extra:avail.slice(k)};
+}
+
+// ---- EV estimators ----
+function evPick(hand6, mode, COMP, rng){ // picks up a random blind each time, internal bury
+  let s=0;
+  for(let i=0;i<COMP;i++){
+    const avail=DECK.filter(c=>!hand6.includes(c)); shuffle(avail,rng);
+    const opp=[avail.slice(0,6),avail.slice(6,12),avail.slice(12,18),avail.slice(18,24)];
+    const blind=avail.slice(24,26);
+    const r=playPick(hand6,blind,opp,mode,Math.floor(rng()*5)); s+=r.chips;
+  }
+  return s/COMP;
+}
+function evPass(hand6, COMP, rng){
+  let s=0;
+  for(let i=0;i<COMP;i++){
+    const avail=DECK.filter(c=>!hand6.includes(c)); shuffle(avail,rng);
+    const hands={0:hand6.slice(),1:avail.slice(0,6),2:avail.slice(6,12),3:avail.slice(12,18),4:avail.slice(18,24)};
+    const blind=avail.slice(24,26);
+    let picker=null;
+    for(const sct of [1,2,3,4]){ const h=hands[sct]; const tc=h.filter(isTrump).length, hi=h.filter(c=>'QJ'.includes(c[0])).length; if(tc>=4||(tc===3&&(hi>=2||h.includes('QC')))){picker=sct;break;} }
+    if(picker===null) picker=forcedPicker(hands,blind);
+    // picker takes partner; play full
+    const opp=[]; for(let p=0;p<5;p++) if(p!==picker) opp.push(hands[p]);
+    // build a playPick where 'picker' is seat0-equivalent; simpler: rotate so picker plays its own hand
+    const h8=hands[picker].concat(blind); const buried=chooseBury(h8); const kept=applyBury(h8,buried);
+    // reconstruct full 5-hand table to know my (seat0) role
+    const fullHands={}; for(let p=0;p<5;p++) fullHands[p]= p===picker?kept:hands[p];
+    const teamOf={}; for(let p=0;p<5;p++) teamOf[p]=0; teamOf[picker]=1;
+    const pc=partnerCard(kept); let partner=null; if(pc) for(let p=0;p<5;p++) if(p!==picker&&fullHands[p].includes(pc)){partner=p;teamOf[p]=1;break;}
+    let tp={0:0,1:0},tk={0:0,1:0}; tp[1]+=buried.reduce((a,c)=>a+pts(c),0);
+    let pTr=0;
+    let lead=Math.floor(rng()*5);
+    for(let t=0;t<6;t++){const plays=[];let led=null;for(let i=0;i<5;i++){const pidx=(lead+i)%5;const card=choosePlay(pidx,fullHands[pidx],plays,led,teamOf);fullHands[pidx].splice(fullHands[pidx].indexOf(card),1);if(led===null)led=effSuit(card);plays.push([pidx,card]);}const w=trickWinner(plays);tp[teamOf[w]]+=plays.reduce((a,[_,c])=>a+pts(c),0);tk[teamOf[w]]++;if(w===picker)pTr++;lead=w;}
+    let [outcome]=classifyChips(tp[1],tk[1],'partner');
+    if(pTr===0) outcome="no_tricks";
+    s+=roleChips(outcome,'partner',picker===0,partner===0);
+  }
+  return s/COMP;
+}
+function evKept(kept6, buried2, mode, COMP, rng){
+  let s=0; const known=kept6.concat(buried2);
+  for(let i=0;i<COMP;i++){ const {opp}=dealOpp(known,rng); s+=playKept(kept6,buried2,opp,mode,Math.floor(rng()*5)).chips; }
+  return s/COMP;
+}
+function pSlam(kept6, buried2, mode, COMP, rng){
+  let m=0; const known=kept6.concat(buried2);
+  for(let i=0;i<COMP;i++){ const {opp}=dealOpp(known,rng); if(playSlam(kept6,buried2,opp,mode,Math.floor(rng()*5))) m++; }
+  return m/COMP;
+}
+function wilson(correct,total,z=1.5){ if(total===0) return 0; const p=correct/total,n=total; const d=1+z*z/n; const c=(p+z*z/(2*n))/d; const m=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d; return Math.max(0,c-m); }
+
+// expose for node test
+if(typeof module!=='undefined'){ module.exports={DECK,TRUMP_STR,isTrump,pts,trickWinner,legalMoves,partnerCard,canGoAlone,forcedPicker,chooseBury,bestBury,buryScore,applyBury,playKept,playPick,playSlam,evPick,evPass,evKept,pSlam,wilson,mulberry32,classifyChips,roleChips,dealOpp,shuffle}; }
+
+if(typeof window!=="undefined"){window.E={DECK,TRUMP_STR,isTrump,pts,trickWinner,legalMoves,partnerCard,canGoAlone,forcedPicker,chooseBury,bestBury,buryScore,applyBury,playKept,playPick,playSlam,evPick,evPass,evKept,pSlam,wilson,mulberry32,classifyChips,roleChips,dealOpp,shuffle};}
+
+if(typeof window!=="undefined"){Object.assign(window.E,{choosePlay,effSuit,cardStrength});}
+
+if(typeof module!=="undefined"){Object.assign(module.exports,{choosePlay,effSuit,cardStrength});}
+
+/* DuChateau grader — paired sampling (common random numbers) for low-variance EV deltas.
+   Depends on engine.js (E). Node + browser. */
+(function(root){
+const E = (typeof module!=='undefined') ? require('./engine.js') : root.E;
+const {DECK,isTrump,pts,effSuit,choosePlay,trickWinner,legalMoves,classifyChips,
+       roleChips,partnerCard,applyBury,bestBury,chooseBury,evKept,pSlam,
+       mulberry32,shuffle}=E;
+
+function hhash(arr){let h=2166136261>>>0;const s=arr.join('');for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+const COINFLIP=0.06; // |EV| gap under this chip value = effectively a tie
+
+/* ---------- PICK vs PASS (paired, high N) ----------
+   Both evPick & evPass begin with shuffle(remaining deck) => same seed = same
+   opponent layout (the dominant variance source). Fixes the documented bug. */
+function gradePickPass(hand6, N=2000){
+  const base=hhash(hand6);
+  let pk=0, ps=0;
+  for(let t=0;t<N;t++){
+    const seed=(base ^ Math.imul(t+1,2654435761))>>>0;
+    pk += E.evPick(hand6,'partner',1, mulberry32(seed));
+    ps += E.evPass(hand6,1, mulberry32(seed));
+  }
+  pk/=N; ps/=N;
+  const diff=pk-ps;
+  const best = Math.abs(diff)<COINFLIP ? 'tie' : (diff>0?'pick':'pass');
+  return {pickEV:pk, passEV:ps, diff, best, tie:Math.abs(diff)<COINFLIP};
+}
+
+/* ---------- BURY ---------- grade chosen 2-card bury vs optimal */
+function gradeBury(hand8, chosenPair, N=500){
+  const best=bestBury(hand8);                 // {pair, score}
+  const keptBest=applyBury(hand8,best.pair);
+  const keptChose=applyBury(hand8,chosenPair);
+  const buriedBest=best.pair, buriedChose=chosenPair;
+  // paired evKept on identical opponent deals
+  const known=hand8.slice();
+  let eb=0, ec=0;
+  for(let t=0;t<N;t++){
+    const seed=(hhash(hand8) ^ Math.imul(t+1,40503))>>>0;
+    eb += evKept(keptBest, buriedBest,'partner',1, mulberry32(seed));
+    ec += evKept(keptChose,buriedChose,'partner',1, mulberry32(seed));
+  }
+  eb/=N; ec/=N;
+  const gap=eb-ec;
+  const sameSet = chosenPair.slice().sort().join()===best.pair.slice().sort().join();
+  return {bestPair:best.pair, evBest:eb, evChosen:ec, gap, correct: sameSet||gap<COINFLIP, tie:gap<COINFLIP};
+}
+
+/* ---------- ALONE vs PARTNER ---------- only if picker holds JD */
+function gradeAlone(kept6, buried2, N=900){
+  const known=kept6.concat(buried2);
+  let ea=0, ep=0;
+  for(let t=0;t<N;t++){
+    const seed=(hhash(known) ^ Math.imul(t+1,2246822519))>>>0;
+    ea += evKept(kept6,buried2,'alone',1, mulberry32(seed));
+    ep += evKept(kept6,buried2,'partner',1, mulberry32(seed));
+  }
+  ea/=N; ep/=N;
+  const diff=ea-ep;
+  const best=Math.abs(diff)<COINFLIP?'tie':(diff>0?'alone':'partner');
+  return {evAlone:ea, evPartner:ep, diff, best, tie:Math.abs(diff)<COINFLIP};
+}
+
+/* ---------- CALL SHEEPSHEAD (slam) ---------- */
+function gradeSlam(kept6, buried2, mode, N=900){
+  const p=pSlam(kept6,buried2,mode,N, mulberry32(hhash(kept6.concat(buried2))));
+  // call payoff: partner +9/-18, alone +12/-24
+  const win=mode==='alone'?12:9, miss=mode==='alone'?-24:-18;
+  const evCall=p*win+(1-p)*miss;
+  // not calling: ordinary game EV
+  let eg=0; const known=kept6.concat(buried2);
+  for(let t=0;t<N;t++){const seed=(hhash(known)^Math.imul(t+1,374761393))>>>0; eg+=evKept(kept6,buried2,mode,1,mulberry32(seed));}
+  eg/=N;
+  const diff=evCall-eg;
+  const best=Math.abs(diff)<COINFLIP?'tie':(diff>0?'call':'no');
+  return {pSlam:p, evCall, evGame:eg, diff, best, tie:Math.abs(diff)<COINFLIP};
+}
+
+/* ---------- CARD PLAY ---------- per-move EV from mid-deal state, CRN across moves.
+   st = {hero,hand,plays,led,curLeader,teamOf,picker,partner,mode,
+         bankedTp:{0,1},bankedTk:{0,1},played:[...allPlayed],oppCounts:{seat:n},knownBuried:[]|null} */
+function gradeCard(st, N=120){
+  const moves=legalMoves(st.hand, st.led);
+  if(moves.length===1) return {moves:[{card:moves[0],ev:0}],best:moves[0],bestEV:0,gap:0,forced:true};
+  const oppSeats=[0,1,2,3,4].filter(s=>s!==st.hero);
+  const unseen=DECK.filter(c=> !st.hand.includes(c) && !st.played.includes(c) && !((st.knownBuried||[]).includes(c)));
+  const acc={}; moves.forEach(m=>acc[m]=0);
+  const baseSeed=hhash(st.hand.concat(st.played));
+  for(let i=0;i<N;i++){
+    const rng=mulberry32((baseSeed ^ Math.imul(i+1,2654435761))>>>0);
+    const pool=unseen.slice(); shuffle(pool,rng);
+    const oppHands={}; let k=0;
+    for(const s of oppSeats){oppHands[s]=pool.slice(k,k+st.oppCounts[s]); k+=st.oppCounts[s];}
+    for(const m of moves){ acc[m]+=playoutCard(st,m,oppHands); }   // same deal for all moves
+  }
+  const out=moves.map(m=>({card:m,ev:acc[m]/N})).sort((a,b)=>b.ev-a.ev);
+  // standard-player (frozen field) card = what choosePlay would do; its EV anchors the card-play edge
+  let heurEV=out[out.length-1].ev;
+  try{const hc=choosePlay(st.hero,st.hand,st.plays,st.led,st.teamOf);const hm=out.find(m=>m.card===hc);if(hm)heurEV=hm.ev;}catch(_e){}
+  return {moves:out, best:out[0].card, bestEV:out[0].ev, heurEV, gap:out[0].ev-out[out.length-1].ev, forced:false};
+}
+
+function playoutCard(st, heroMove, oppHands){
+  const hands={}; hands[st.hero]=st.hand.filter(c=>c!==heroMove);
+  for(const s in oppHands) hands[s]=oppHands[s].slice();
+  fixPcard(st,hands);
+  const teamOf=sampleTeams(st,hands);
+  let tp={0:st.bankedTp[0],1:st.bankedTp[1]}, tk={0:st.bankedTk[0],1:st.bankedTk[1]};
+  // finish current trick
+  let plays=st.plays.slice(); let led=st.led;
+  const order=[0,1,2,3,4].map(i=>(st.curLeader+i)%5);
+  const acted=new Set(plays.map(p=>p[0]));
+  for(const seat of order){
+    if(acted.has(seat)) continue;
+    let card;
+    if(seat===st.hero){ card=heroMove; }
+    else { card=choosePlay(seat,hands[seat],plays,led,teamOf); }
+    if(seat!==st.hero){ hands[seat].splice(hands[seat].indexOf(card),1); }
+    if(led===null) led=effSuit(card);
+    plays.push([seat,card]);
+  }
+  let w=trickWinner(plays); tp[teamOf[w]]+=plays.reduce((a,[_,c])=>a+pts(c),0); tk[teamOf[w]]++;
+  let lead=w;
+  // remaining tricks
+  const done = tk[0]+tk[1];
+  for(let t=done;t<6;t++){
+    const pl=[]; let l=null;
+    for(let i=0;i<5;i++){const pidx=(lead+i)%5; const card=choosePlay(pidx,hands[pidx],pl,l,teamOf); hands[pidx].splice(hands[pidx].indexOf(card),1); if(l===null)l=effSuit(card); pl.push([pidx,card]);}
+    const ww=trickWinner(pl); tp[teamOf[ww]]+=pl.reduce((a,[_,c])=>a+pts(c),0); tk[teamOf[ww]]++; lead=ww;
+  }
+  const [outcome]=classifyChips(tp[1],tk[1],st.mode);
+  return roleChips(outcome, st.mode, st.hero===st.picker, st.hero===st.partner);
+}
+
+/* ---- team knowledge from the HERO's seat (partner is hidden until its card is played) ---- */
+function knownTeam(st,s){
+  if(st.partnerRevealed||st.hero===st.partner) return st.teamOf[s]; // partner & revealed cases: full knowledge
+  if(s===st.hero) return st.teamOf[s];
+  if(s===st.picker) return 1;
+  return null; // could be the hidden partner — uncertain
+}
+function sampleTeams(st,hands){
+  if(st.partnerRevealed||st.hero===st.partner) return st.teamOf;
+  const teamOf={0:0,1:0,2:0,3:0,4:0}; teamOf[st.picker]=1;
+  const pc=st.pcard;
+  if(pc){ if((st.hand||[]).includes(pc)) teamOf[st.hero]=1;
+    else { for(const k in hands){ if(+k!==st.hero && (hands[k]||[]).includes(pc)){ teamOf[+k]=1; break; } } } }
+  return teamOf;
+}
+function fixPcard(st,hands){ // the picker can never hold the called partner card -> relocate it off the picker
+  const pc=st.pcard; if(!pc||st.partnerRevealed||st.hero===st.partner) return;
+  const pk=st.picker;
+  if(pk!==st.hero && hands[pk] && hands[pk].includes(pc)){
+    const cands=Object.keys(hands).map(Number).filter(x=>x!==pk && x!==st.hero && hands[x] && hands[x].length);
+    if(cands.length){ const tgt=cands[(pc.charCodeAt(0)+pc.charCodeAt(1))%cands.length];
+      hands[pk][hands[pk].indexOf(pc)]=hands[tgt][0]; hands[tgt][0]=pc; } }
+}
+/* ---------- immediate-trick odds: exact only when the winner's TEAM is known to the hero ---------- */
+function trickOdds(st, heroMove, N=300){
+  const plays=st.plays.concat([[st.hero,heroMove]]);
+  const led = st.led===null? effSuit(heroMove): st.led;
+  const heroTeam=st.teamOf[st.hero];
+  const yetToAct = [0,1,2,3,4].map(i=>(st.curLeader+i)%5).filter(s=> !plays.some(p=>p[0]===s));
+  const unk=[0,1,2,3,4].filter(s=>knownTeam(st,s)===null).length;
+  const unseen=DECK.filter(c=> !st.hand.includes(c) && !st.played.includes(c) && !((st.knownBuried||[]).includes(c)) && !plays.some(p=>p[1]===c));
+  const curWin = winningCardOf(plays, led);
+  const canBeat=unseen.filter(c=> beatsCard(c, curWin, led));
+  const winnerFixed = (yetToAct.length===0)||(canBeat.length===0);
+  if(winnerFixed){
+    const W=trickWinner(plays); const kt=knownTeam(st,W);
+    if(kt!==null) return {p: kt===heroTeam?1:0, exact:true, yet:yetToAct.length, unk};
+    // winner is set, but whether they're YOUR team hinges on the hidden partner -> estimate below
+  }
+  const oppSeats=[0,1,2,3,4].filter(s=>s!==st.hero);
+  let winc=0; const baseSeed=hhash(st.hand.concat(st.played))^77;
+  for(let i=0;i<N;i++){
+    const rng=mulberry32((baseSeed^Math.imul(i+1,2654435761))>>>0);
+    const pool=unseen.slice(); shuffle(pool,rng);
+    const oh={}; let k=0; for(const s of oppSeats){oh[s]=pool.slice(k,k+st.oppCounts[s]); k+=st.oppCounts[s];}
+    const hands={}; hands[st.hero]=st.hand.filter(c=>c!==heroMove); for(const s in oh)hands[s]=oh[s];
+    fixPcard(st,hands);
+    const teamOf=sampleTeams(st,hands);
+    let pl=plays.slice(), l=led;
+    for(const seat of [0,1,2,3,4].map(i=>(st.curLeader+i)%5)){
+      if(pl.some(p=>p[0]===seat))continue;
+      const card=choosePlay(seat,hands[seat],pl,l,teamOf); hands[seat].splice(hands[seat].indexOf(card),1); if(l===null)l=effSuit(card); pl.push([seat,card]);
+    }
+    if(teamOf[trickWinner(pl)]===heroTeam)winc++;
+  }
+  return {p:winc/N, exact:false, yet:yetToAct.length, unk};
+}
+function winningCardOf(plays, led){ const w=trickWinner(plays); for(const [pi,c] of plays) if(pi===w) return c; }
+function beatsCard(card, cur, led){
+  const ct=isTrump(card), wt=isTrump(cur);
+  if(ct&&!wt) return true; if(!ct&&wt) return false;
+  if(ct&&wt) return E.cardStrength(card)>E.cardStrength(cur);
+  // both fail: must follow led to win
+  if(card[1]!==led) return false; if(cur[1]!==led) return true;
+  return E.cardStrength(card)>E.cardStrength(cur);
+}
+
+const API={gradePickPass,gradeBury,gradeAlone,gradeSlam,gradeCard,trickOdds,COINFLIP};
+if(typeof module!=='undefined') module.exports=API;
+if(typeof window!=='undefined') window.GR=API;
+})(typeof window!=='undefined'?window:this);
+
+/* ===== The Old Man · Advanced — full app ===== */
+const SYM={C:"♣",S:"♠",H:"♥",D:"♦"};
+const rt=r=>r==="T"?"10":r;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const SKILL_LBL=v=>v<70?"Casual":v<90?"Club":"Shark";
+const SLOT={1:"ml",2:"tl",3:"tr",4:"mr"};
+const BOX={0:[50,83],1:[34,60],2:[40,36],3:[60,36],4:[66,60]};
+const lbl=c=>rt(c[0])+SYM[c[1]];
+const f=x=>(x>=0?"+":"")+(+x).toFixed(2);
+function esc(s){return(s+"").replace(/[<>&]/g,m=>({"<":"&lt;",">":"&gt;","&":"&amp;"}[m]));}
+function showView(id){document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));document.getElementById(id).classList.add("on");}
+function $(id){return document.getElementById(id);}
+
+/* ---------- storage + stats ---------- */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return (this._m&&this._m[k])??d;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){(this._m=this._m||{})[k]=v;}},_m:{}};
+const COLS=['deals','pick_c','pick_t','overpick','overpass','bury_c','bury_t','alone_c','alone_t','slam_c','slam_t',
+  'play_c','play_t','picker_play_c','picker_play_t','partner_play_c','partner_play_t','def_play_c','def_play_t',
+  'chips','picks','pick_wins','defends','def_wins','ev_lost','ev_gained','blunders'];
+const S0={name:""}; COLS.forEach(c=>S0[c]=0);
+let S=Object.assign({},S0,store.get("duch_adv",{}));
+function save(){store.set("duch_adv",S);}
+if(!store.get("duch_evreset_chips",0)){S.ev_gained=0;S.ev_lost=0;store.set("duch_evreset_chips",1);save();}
+
+/* baked family leaderboard */
+const CFG={url:"https://xiyqgxsmyhewipzhgjjc.supabase.co",
+  key:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpeXFneHNteWhld2lwemhnampjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1Nzc0NjksImV4cCI6MjA5NzE1MzQ2OX0.sC8lipqMvd6_M7YFfLJbfAhA6OrK8QEh1EcKfE5reuE"};
+const TABLE="leaderboard_adv";
+function hdr(){return {"apikey":CFG.key,"Authorization":"Bearer "+CFG.key,"Content-Type":"application/json"};}
+function tfetch(url,opts,ms){return Promise.race([fetch(url,opts),new Promise((_,rej)=>setTimeout(()=>rej(new Error("timed out — no response in 6s")),ms||6000))]);}
+async function fetchBoard(){const res=await tfetch(`${CFG.url}/rest/v1/${TABLE}?select=*&apikey=${CFG.key}`,{headers:hdr()},6000);if(!res.ok)throw new Error("HTTP "+res.status);return res.json();}
+async function syncUp(){if(!S.name)return;const payload={name:S.name,updated_at:new Date().toISOString()};COLS.forEach(c=>payload[c]=S[c]);
+  try{const res=await tfetch(`${CFG.url}/rest/v1/${TABLE}`,{method:"POST",headers:{...hdr(),"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(payload)},6000);
+    if(res&&!res.ok){const p2={...payload};delete p2.ev_gained;await tfetch(`${CFG.url}/rest/v1/${TABLE}`,{method:"POST",headers:{...hdr(),"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(p2)},6000);}
+  }catch(e){}}
+let RECOK=false;
+async function reconcile(){
+  if(!CFG.url||!CFG.key||!S.name){RECOK=true;return;}
+  try{
+    const board=await fetchBoard();
+    const mine=board.find(r=>r.name===S.name);
+    if(mine && (mine.deals||0)>(S.deals||0)){
+      COLS.forEach(c=>{ if(mine[c]!=null) S[c]=mine[c]; });
+      save(); refreshHome();
+    }
+  }catch(e){}
+  RECOK=true;
+}
+
+function totals(p){const c=(p.pick_c||0)+(p.bury_c||0)+(p.alone_c||0)+(p.slam_c||0)+(p.play_c||0);
+  const t=(p.pick_t||0)+(p.bury_t||0)+(p.alone_t||0)+(p.slam_t||0)+(p.play_t||0);return{c,t};}
+function accPct(p){const {c,t}=totals(p);return t?Math.round(100*c/t):0;}
+function skillScore(p){const {c,t}=totals(p);return Math.round(100*E.wilson(c,t));}
+function pctc(c,t){return t?Math.round(100*c/t):0;}
+
+let MODE="ranked";
+
+/* ---------- home ---------- */
+function refreshHome(){
+  $("home-greet").textContent=S.name?("Welcome back, "+S.name+"."):"Welcome.";
+  $("h-deals").textContent=S.deals;
+  const {t}=totals(S);
+  $("h-acc").textContent=t?accPct(S)+"%":"—";
+  $("h-score").textContent=(S.deals>=1&&t)?skillScore(S):"—";
+  $("h-chips").textContent=(S.chips>=0?"+":"")+S.chips;
+}
+$("go-ranked").onclick=()=>startSession("ranked");
+$("go-practice").onclick=()=>startSession("practice");
+$("go-board").onclick=()=>openBoard();
+$("go-settings").onclick=()=>openSettings();
+function startSession(mode){MODE=mode;$("modebanner").textContent=mode==="ranked"?"Ranked":"Practice · live coaching";
+  $("youname").value=S.name||"";showView("setup");}
+
+/* ---------- settings ---------- */
+function openSettings(){$("s-name").value=S.name||"";$("s-ver").textContent="The Old Man · Advanced v4.9 · online sync on";showView("settings");}
+$("s-save").onclick=async ()=>{const n=$("s-name").value.trim().slice(0,18);if(n){S.name=n;save();await reconcile();syncUp();}refreshHome();showView("home");};
+$("s-reset").onclick=()=>{if(confirm("Reset all your Advanced stats? (name stays)")){const nm=S.name;S=Object.assign({},S0,{name:nm});save();refreshHome();}};
+$("s-back").onclick=()=>{refreshHome();showView("home");};
+$("setup-back").onclick=()=>{refreshHome();showView("home");};
+$("board-back").onclick=()=>{refreshHome();showView("home");};
+
+/* ---------- leaderboard ---------- */
+let boardSort="evchips";
+$("sort-skill").onclick=()=>setSort("skill");
+$("sort-evnet").onclick=()=>setSort("evchips");
+$("sort-chips").onclick=()=>setSort("chips");
+function setSort(s){boardSort=s;const btn=(s==="skill")?"skill":(s==="chips")?"chips":"evnet";["skill","evnet","chips"].forEach(k=>$("sort-"+k).classList.toggle("on",k===btn));try{drawBoard(window._board||[]);}catch(e){}}
+async function openBoard(){
+  showView("board");
+  const rows=$("b-rows");rows.innerHTML='<div class="lbexp"><span class="spin"></span>Loading…</div>';
+  try{$("b-status").textContent="build v4.9 · contacting board…";}catch(e){}
+  let data=null,why="";try{data=await fetchBoard();}catch(e){data=null;why=(e&&e.name==="AbortError")?"timed out — no response in 6s":(e&&e.message)?e.message:"network error";}
+  if(!data){window._board=[meRow()];try{drawBoard(window._board);}catch(e){}
+    try{$("b-status").textContent="build v4.9 · FAILED ["+why+"]";}catch(e){}
+    $("b-note").innerHTML='<div class="note">Couldn\'t reach the online board ['+esc(why)+'] — showing your local stats. It\'ll sync next ranked deal.</div>';return;}
+  if(S.deals>0&&!data.find(d=>d.name===S.name))data.push(meRow());
+  try{$("b-status").textContent="build v4.9 · loaded "+data.length+" players ✓";}catch(e){}
+  window._board=data;try{drawBoard(data);}catch(e){try{$("b-status").textContent="build v4.9 · render err: "+(e&&e.message||e);}catch(_){}try{window._board=[meRow()];drawBoard(window._board);}catch(_2){}}
+  $("b-note").innerHTML='<div class="note"><b>Skill score</b> = Wilson-adjusted decision accuracy. <b>EV / deal</b> is your poker-style win-rate in chips — pick/pass, bury <i>and</i> card play all folded in, measured vs a fixed standard player. <span style="color:var(--green)">+</span> = a winning player, <span style="color:var(--red)">−</span> = a losing one (luck averaged out). <b>Leak</b> is what you still leave on the table vs perfect play — lower is better. Tap EV or Leak to sort. Min 5 deals to rank.</div>';
+}
+function meRow(){return Object.assign({},S,{name:S.name||"You"});}
+function drawBoard(list){
+  const MINR=5;
+  const r=list.map(p=>({p,deals:p.deals||0,acc:accPct(p),skill:skillScore(p),ev:(p.deals?p.ev_lost/p.deals:0),evw:(p.deals?(p.ev_gained||0)/p.deals:0),chips:p.chips||0}));
+  const evMode=(boardSort==="evchips"||boardSort==="leak");
+  r.sort((a,b)=>{const ar=a.deals>=MINR,br=b.deals>=MINR;if(ar!==br)return (br?1:0)-(ar?1:0);
+    if(boardSort==="skill")return b.skill-a.skill;if(boardSort==="chips")return b.chips-a.chips;
+    if(boardSort==="leak")return a.ev-b.ev;return b.evw-a.evw;});
+  const head=$("lbhead");
+  try{
+    if(evMode){head.className="lbhead ev5";
+      head.innerHTML=`<span>#</span><span>Player</span><span class="evh${boardSort==="evchips"?" on":""}" data-s="evchips">EV</span><span class="evh${boardSort==="leak"?" on":""}" data-s="leak">Leak</span><span>Deals</span>`;
+      var evhs=head.querySelectorAll(".evh");for(var hi=0;hi<evhs.length;hi++){(function(h){h.onclick=function(){setSort(h.getAttribute("data-s"));};})(evhs[hi]);}
+    } else {head.className="lbhead";head.innerHTML=`<span>#</span><span>Player</span><span>Score</span><span>Deals</span>`;}
+  }catch(_e){}
+  const rows=$("b-rows");rows.innerHTML="";
+  if(!r.length){rows.innerHTML='<div class="lbexp">No ranked deals yet — play a ranked game.</div>';return;}
+  r.forEach((x,i)=>{
+    const me=x.p.name===(S.name||"You");const ranked=x.deals>=MINR;
+    const row=document.createElement("div");
+    if(evMode){row.className="lbrow ev5"+(me?" me":"");
+      row.innerHTML=`<span class="rk">${ranked?(i+1):"–"}</span><span class="nm">${esc(x.p.name)}</span><span class="evc ev ${x.evw>=0?"pos":"neg"}">${ranked?((x.evw>=0?"+":"")+x.evw.toFixed(2)):"—"}</span><span class="evc loss">${ranked?"−"+x.ev.toFixed(2):"—"}</span><span class="ro">${x.deals}</span>`;
+    } else {const sc=boardSort==="chips"?((x.chips>=0?"+":"")+x.chips):(ranked?x.skill:"—");
+      row.className="lbrow"+(me?" me":"");
+      row.innerHTML=`<span class="rk">${ranked?(i+1):"–"}</span><span class="nm">${esc(x.p.name)}<span class="acc">${x.acc}%</span></span><span class="sc">${sc}</span><span class="ro">${x.deals}</span>`;
+    }
+    const p=x.p;const exp=document.createElement("div");exp.className="lbexp";exp.style.display="none";
+    exp.innerHTML=`<div class="g">
+      <span>Pick/Pass ${pctc(p.pick_c,p.pick_t)}% (${p.pick_t||0})</span><span>Card play ${pctc(p.play_c,p.play_t)}% (${p.play_t||0})</span>
+      <span>Bury ${pctc(p.bury_c,p.bury_t)}%</span><span>Call slam ${pctc(p.slam_c,p.slam_t)}%</span>
+      <span>Alone calls ${pctc(p.alone_c,p.alone_t)}%</span><span>EV/deal <b style="color:${x.evw>=0?'var(--green)':'var(--red)'}">${x.evw>=0?'+':''}${x.evw.toFixed(2)}</b> · Leak <b style="color:var(--red)">${x.ev.toFixed(2)}</b></span>
+      <span>As picker ${pctc(p.picker_play_c,p.picker_play_t)}%</span><span>On defense ${pctc(p.def_play_c,p.def_play_t)}%</span>
+      <span>Pick win ${pctc(p.pick_wins,p.picks)}%</span><span>Def win ${pctc(p.def_wins,p.defends)}%</span>
+      <span>Net chips ${(p.chips>=0?"+":"")+(p.chips||0)}</span><span>Blunders ${p.blunders||0}</span></div>`;
+    row.onclick=()=>{exp.style.display=exp.style.display==="none"?"block":"none";};
+    rows.appendChild(row);rows.appendChild(exp);
+  });
+}
+
+/* ---------- seat setup ---------- */
+const defs=[["🐐","Trent",92],["🐏","Payton",80],["🐑","Grandpa",75],["🐐","Cory",60]];
+const seatsEl=$("seats");
+defs.forEach((s,i)=>{const d=document.createElement("div");d.className="seatrow";
+  d.innerHTML=`<div class="top"><div class="av">${s[0]}</div><input class="nm" id="nm${i}" value="${s[1]}"/><div class="skillbadge" id="sb${i}">${s[2]}% · ${SKILL_LBL(s[2])}</div></div><input type="range" id="sk${i}" min="40" max="99" value="${s[2]}"/>`;
+  seatsEl.appendChild(d);
+  d.querySelector(`#sk${i}`).addEventListener("input",e=>{$(`sb${i}`).textContent=e.target.value+"% · "+SKILL_LBL(+e.target.value);});
+});
+let G=null;
+$("start").onclick=()=>{
+  const yn=($("youname").value.trim())||S.name;
+  if(!yn){ alert("Enter your name so you show up on the family leaderboard."); $("youname").focus&&$("youname").focus(); return; }
+  if(yn!==S.name){S.name=yn;save();reconcile();}
+  const names=[yn];const skill=[1];const ava=["🐈"];
+  for(let i=0;i<4;i++){names.push($("nm"+i).value.trim()||("Player"+(i+2)));skill.push((+$("sk"+i).value)/100);ava.push(defs[i][0]);}
+  G={names,skill,ava,scores:[0,0,0,0,0],dealNo:0,dealer:Math.floor(Math.random()*5)};
+  $("you-nm").textContent=names[0];
+  buildBoxes();showView("table");newDeal();
+};
+
+/* ---------- table rendering ---------- */
+function cardNode(code,cls=""){const red=code[1]==="H"||code[1]==="D";const d=document.createElement("div");
+  d.className="card"+(red?" red":"")+(E.isTrump(code)?" trump":"")+(cls?" "+cls:"");
+  d.innerHTML=`<div class="r">${rt(code[0])}</div><div class="s">${SYM[code[1]]}</div>`;d.dataset.code=code;return d;}
+function sortHand(h){return h.slice().sort((a,b)=>{const ta=E.isTrump(a),tb=E.isTrump(b);if(ta&&tb)return E.TRUMP_STR[b]-E.TRUMP_STR[a];if(ta!==tb)return ta?-1:1;if(a[1]!==b[1])return a[1]<b[1]?-1:1;return E.pts(b)-E.pts(a);});}
+function setTurn(seat){document.querySelectorAll(".opp").forEach(o=>o.classList.remove("active"));$("youbar").classList.toggle("active",seat===0);
+  if(seat>0){const el=$("seat-"+SLOT[seat]);if(el)el.classList.add("active");}}
+function msg(t){$("turnmsg").textContent=t||"";}
+function buildBoxes(){const bl=$("boxlayer");bl.innerHTML="";
+  for(let s=0;s<5;s++){const b=document.createElement("div");b.className="playbox";b.id="box"+s;b.style.left=BOX[s][0]+"%";b.style.top=BOX[s][1]+"%";
+    b.innerHTML=`<div class="seatdot" id="dot${s}"></div>`;bl.appendChild(b);}}
+function labelBoxes(){for(let s=0;s<5;s++){const d=$("dot"+s);if(d)d.textContent=(s===0?"You":G.names[s]).slice(0,8);}}
+function renderOpps(){
+  for(let s=1;s<=4;s++){const el=$("seat-"+SLOT[s]);const right=(SLOT[s]==="tr"||SLOT[s]==="mr");
+    const backs='<div class="backs">'+Array(G.hands[s].length).fill('<div class="cardback"></div>').join("")+'</div>';
+    const meta=`<div class="meta"${right?' style="text-align:right"':""}><span class="nm">${esc(G.names[s])}</span><span class="sk">${SKILL_LBL(G.skill[s]*100)} · ${Math.round(G.skill[s]*100)}%</span></div>`;
+    const av=`<div class="av">${G.ava[s]}</div>`;
+    const won=G.won?`<div class="wonpile">${G.won[s]?"🂠 "+G.won[s]:""}</div>`:"";
+    el.innerHTML=`<div class="row">${right?meta+av:av+meta}</div><div class="score">${G.scores[s]>=0?"+":""}${G.scores[s]}</div>${G.picker===s?'<div class="pickerbadge">PICKER'+((G.alone&&G.aloneRevealed)?' · ALONE':'')+'</div>':""}${(G.partnerRevealed&&G.partner===s)?'<div class="partnerbadge">PARTNER</div>':""}${won}${backs}`;}
+  $("you-score").textContent=(G.scores[0]>=0?"+":"")+G.scores[0];updateScoreLine();}
+function updateScoreLine(){const el=$("needline");if(!el)return;el.textContent="Need 61 to win the deal";}
+function placeCard(seat,card){const cl=$("cardlayer");const n=cardNode(card,"pcard");n.id="pc"+seat;n.style.position="absolute";n.style.left=BOX[seat][0]+"%";n.style.top=BOX[seat][1]+"%";cl.appendChild(n);}
+function rakeIn(winner){$("box"+winner).classList.add("win");document.querySelectorAll("#cardlayer .pcard").forEach(n=>{n.style.left=BOX[winner][0]+"%";n.style.top=BOX[winner][1]+"%";n.style.opacity="0";});}
+function clearTrickCards(){$("cardlayer").innerHTML="";document.querySelectorAll(".playbox").forEach(b=>b.classList.remove("win"));}
+function youRole(){if(G.picker===0)return G.alone?"Picker (alone)":"Picker";if(G.partner===0)return "Partner";return "Defender";}
+function showBury(){const bp=$("burypile");bp.style.display="flex";G.buryRevealed=false;drawBury();
+  bp.onclick=()=>{if(G.picker!==0){msg("That's "+G.names[G.picker]+"'s hidden bury");return;}G.buryRevealed=!G.buryRevealed;drawBury();};}
+function drawBury(){const bp=$("burypile");
+  if(G.buryRevealed&&G.picker===0){bp.innerHTML='<div class="stack fan">'+G.buried.map(c=>{const red=c[1]==="H"||c[1]==="D";return `<div class="bcard face${red?" red":""}"><div class="br">${rt(c[0])}</div><div class="bs">${SYM[c[1]]}</div></div>`;}).join("")+'</div><div class="burylbl">your bury</div>';}
+  else{bp.innerHTML='<div class="stack"><div class="bcard"></div><div class="bcard"></div></div><div class="burylbl">'+(G.picker===0?"bury · tap":"bury")+'</div>';}}
+function enableLastTrick(){const b=$("lasttrickbtn");b.style.display="block";b.onclick=()=>showPeek();}
+function showPeek(){if(!G.lastTrick)return;const pk=$("peek");
+  const cards=G.lastTrick.plays.map(([seat,card])=>`<div class="peekcard${seat===G.lastTrick.winner?" winner":""}"><div>${cardHTML(card)}</div><div class="nm">${seat===0?"You":esc(G.names[seat])}</div></div>`).join("");
+  pk.innerHTML=`<h3>Last trick — won by ${G.lastTrick.winner===0?"you":esc(G.names[G.lastTrick.winner])}</h3><div class="peekcards">${cards}</div><div class="close">tap to close</div>`;
+  pk.classList.add("on");pk.onclick=()=>pk.classList.remove("on");}
+function cardHTML(code){const red=code[1]==="H"||code[1]==="D";return `<div class="card${red?" red":""}${E.isTrump(code)?" trump":""}"><div class="r">${rt(code[0])}</div><div class="s">${SYM[code[1]]}</div></div>`;}
+
+/* ---------- per-deal tally ---------- */
+function freshTally(){const t={};COLS.forEach(c=>t[c]=0);return t;}
+function bump(key,correct,evLost){G.tally[key+"_t"]++;if(correct)G.tally[key+"_c"]++;
+  if(evLost>0){G.tally.ev_lost+=evLost;if(evLost>1)G.tally.blunders++;}}
+
+/* ---------- deal flow ---------- */
+async function newDeal(){
+  G.dealNo++;
+  showView("table");
+  $("dealno").textContent=G.dealNo;
+  ["overlay","burypile"].forEach(id=>$(id).style.display="none");
+  $("lasttrickbtn").style.display="none";$("peek").classList.remove("on");
+  G.lastTrick=null;G.won=[0,0,0,0,0];G.seatPts=[0,0,0,0,0];G.review=[];G.tally=freshTally();G.playedAll=[];
+  const rng=E.mulberry32((Date.now()^Math.random()*1e9)|0);
+  const d=E.DECK.slice();E.shuffle(d,rng);
+  G.hands=[d.slice(0,6),d.slice(6,12),d.slice(12,18),d.slice(18,24),d.slice(24,30)];
+  G.blind=d.slice(30,32);G.picker=null;G.partner=null;G.teamOf=null;G.tpts={0:0,1:0};G.ttrk={0:0,1:0};G.pcard=null;G.partnerRevealed=false;G.aloneRevealed=false;
+  G.alone=false;G.called=false;G.mode="partner";
+  G.dealer=(G.dealer+1)%5;G.leader=(G.dealer+1)%5;
+  clearTrickCards();labelBoxes();renderOpps();$("you-role").textContent="";$("prompt").innerHTML="";
+  await pickPhase();
+}
+async function pickPhase(){
+  $("handlbl").textContent="Your hand";renderHandStatic();
+  const order=[];for(let i=0;i<5;i++)order.push((G.leader+i)%5);
+  for(const seat of order){
+    setTurn(seat);
+    if(seat===0){
+      const pg=GR.gradePickPass(G.hands[0],MODE==="ranked"?2000:1400);
+      const want=await askYouPick(MODE==="practice"?pg:null);
+      recordPick(pg,want);
+      if(want){G.picker=0;break;}else{msg(G.names[0]+" passes");await sleep(380);}
+    } else {
+      msg(G.names[seat]+" is deciding…");await sleep(480);
+      if(aiPick(seat)){G.picker=seat;msg(G.names[seat]+" picks");await sleep(420);break;}
+      else{msg(G.names[seat]+" passes");await sleep(360);}
+    }
+  }
+  if(G.picker===null){G.picker=E.forcedPicker({0:G.hands[0],1:G.hands[1],2:G.hands[2],3:G.hands[3],4:G.hands[4]},G.blind);msg(G.names[G.picker]+" is forced (Q♣)");await sleep(700);}
+  if(G.picker===0) await setupPickerHuman(); else setupPickerAI();
+  renderOpps();showBury();
+  $("you-role").textContent=youRole();
+  if(G.picker===0&&!G.alone&&G.partner!=null)msg("Partner card: "+lbl(E.partnerCard(G.hands[0])||"JD"));
+  else if(G.alone)msg("You're going alone");
+  await sleep(380);msg("");setTurn(-1);
+  await announcePartner();
+  await playDeal();
+}
+function aiPick(seat){
+  const hand=G.hands[seat];
+  const ev=E.evPick(hand,"partner",120,E.mulberry32(Math.random()*1e9|0));
+  const correct=ev>0;
+  let pick=Math.random()<G.skill[seat]?correct:!correct;
+  // merit fail-safe: even on a "mistake" roll, a bot never picks a hand with no merit
+  // (deeply -EV, or fewer than two trump). Marginal over-picks are still allowed.
+  const trump=hand.filter(c=>E.isTrump(c)).length;
+  if(ev < -1.5 || trump < 2) pick=false;
+  return pick;
+}
+
+async function setupPickerHuman(){
+  const h8=G.hands[0].concat(G.blind);
+  const bestPair=E.bestBury(h8).pair;
+  const chosen=await askYouBury(h8,bestPair);
+  const bg=GR.gradeBury(h8,chosen,500);recordBury(bg,chosen);
+  G.buried=chosen;G.hands[0]=E.applyBury(h8,chosen);
+  G.teamOf={0:0,1:0,2:0,3:0,4:0};G.teamOf[0]=1;G.tpts[1]+=chosen.reduce((a,c)=>a+E.pts(c),0);
+  G.alone=false;
+  if(E.canGoAlone(G.hands[0])){
+    const ag=GR.gradeAlone(G.hands[0],G.buried,900);
+    const ca=await askYouAlone(G.hands[0],G.buried,ag);
+    recordAlone(ag,ca);G.alone=ca;
+  }
+  if(G.alone){G.partner=null;G.pcard="JD";}
+  else{const pc=E.partnerCard(G.hands[0]);G.pcard=pc;G.partner=null;if(pc)for(let p=1;p<5;p++)if(G.hands[p].includes(pc)){G.partner=p;G.teamOf[p]=1;break;}}
+  G.mode=G.alone?"alone":"partner";
+  const sg=GR.gradeSlam(G.hands[0],G.buried,G.mode,900);
+  const cs=await askYouSlam(G.hands[0],G.buried,G.mode,sg);
+  recordSlam(sg,cs);G.called=cs;
+}
+function setupPickerAI(){
+  const h8=G.hands[G.picker].concat(G.blind);const buried=E.chooseBury(h8);G.buried=buried;G.hands[G.picker]=E.applyBury(h8,buried);
+  G.teamOf={0:0,1:0,2:0,3:0,4:0};G.teamOf[G.picker]=1;
+  const pc=E.partnerCard(G.hands[G.picker]);G.pcard=pc;G.partner=null;
+  if(pc)for(let p=0;p<5;p++)if(p!==G.picker&&G.hands[p].includes(pc)){G.partner=p;G.teamOf[p]=1;break;}
+  G.tpts[1]+=buried.reduce((a,c)=>a+E.pts(c),0);
+  G.alone=false;G.called=false;G.mode="partner";
+}
+function renderHandStatic(){const el=$("hand");el.innerHTML="";sortHand(G.hands[0]).forEach(c=>el.appendChild(cardNode(c)));}
+
+/* ---- human decision prompts ---- */
+function askYouPick(pg){return new Promise(res=>{
+  const tc=G.hands[0].filter(E.isTrump).length;const p=$("prompt");
+  let hint="";
+  if(pg){const t=pg.tie?`Basically even — slight lean ${pg.diff>0?"PICK":"PASS"}`:("Best: "+pg.best.toUpperCase());
+    hint=`<div class="hint"><span class="lead">Coach</span> ${t} · pick ${f(pg.pickEV)} vs pass ${f(pg.passEV)} chips.</div>`;}
+  p.innerHTML=hint+`<div class="q">Your hand — ${tc} trump. Pick or pass?</div>`;
+  const row=document.createElement("div");row.className="btnrow";
+  const a=document.createElement("button");a.className="btn";a.textContent="Pick";
+  const b=document.createElement("button");b.className="btn ghost";b.textContent="Pass";
+  a.onclick=()=>{p.innerHTML="";res(true);};b.onclick=()=>{p.innerHTML="";res(false);};
+  row.append(a,b);p.appendChild(row);});}
+function askYouBury(h8,bestPair){return new Promise(res=>{
+  const p=$("prompt");const el=$("hand");const sel=new Set();
+  $("handlbl").textContent="Tap 2 to bury — their points still score for you";
+  let btn;
+  const draw=()=>{el.innerHTML="";sortHand(h8).forEach(c=>{const n=cardNode(c,sel.has(c)?"burysel":"legal");
+    n.onclick=()=>{if(sel.has(c))sel.delete(c);else{if(sel.size>=2)return;sel.add(c);}draw();};el.appendChild(n);});
+    if(btn){btn.disabled=sel.size!==2;btn.style.opacity=sel.size===2?"1":".5";}};
+  let hint="";
+  if(MODE==="practice")hint=`<div class="hint"><span class="lead">Coach</span> Best bury: <b>${bestPair.map(lbl).join(" + ")}</b>. Keep trump and aces; dump off-suit losers (their points still count for your team).</div>`;
+  p.innerHTML=hint+`<div class="q">You picked up the blind — bury 2 cards</div>`;
+  btn=document.createElement("button");btn.className="btn";btn.textContent="Bury these";
+  btn.onclick=()=>{if(sel.size!==2)return;p.innerHTML="";res([...sel]);};
+  p.appendChild(btn);draw();});}
+function askYouAlone(kept,buried,ag){return new Promise(res=>{
+  const pc=E.partnerCard(kept);const p=$("prompt");
+  let hint="";if(MODE==="practice")hint=`<div class="hint"><span class="lead">Coach</span> ${ag.tie?"Toss-up":(ag.best==="alone"?"Edge to <b>alone</b>":"Take the <b>partner</b>")} · alone ${f(ag.evAlone)} vs partner ${f(ag.evPartner)}.</div>`;
+  p.innerHTML=hint+`<div class="q">You hold the J♦ — you can go alone.<br>Partner would be <b>${lbl(pc)}</b>.</div>`;
+  const row=document.createElement("div");row.className="btnrow";
+  const a=document.createElement("button");a.className="btn";a.textContent="Go alone";
+  const b=document.createElement("button");b.className="btn ghost";b.textContent="Take partner";
+  a.onclick=()=>{p.innerHTML="";res(true);};b.onclick=()=>{p.innerHTML="";res(false);};
+  row.append(a,b);p.appendChild(row);});}
+function askYouSlam(kept,buried,mode,sg){return new Promise(res=>{
+  const p=$("prompt");
+  let hint="";if(MODE==="practice")hint=`<div class="hint"><span class="lead">Coach</span> ${sg.best==="call"?"Call it":"Don't call"} · slam chance ~${Math.round(sg.pSlam*100)}% (you need ~67% to make it pay).</div>`;
+  p.innerHTML=hint+`<div class="q">Call sheepshead? Announce an all-tricks slam — big bonus if you sweep, big penalty if you miss.</div>`;
+  const row=document.createElement("div");row.className="btnrow";
+  const a=document.createElement("button");a.className="btn";a.textContent="Call it";
+  const b=document.createElement("button");b.className="btn ghost";b.textContent="Play normal";
+  a.onclick=()=>{p.innerHTML="";res(true);};b.onclick=()=>{p.innerHTML="";res(false);};
+  row.append(a,b);p.appendChild(row);});}
+
+/* ---- play loop ---- */
+function buildCardState(plays,led,lead){
+  const oppCounts={};for(let s=0;s<5;s++)if(s!==0)oppCounts[s]=G.hands[s].length;
+  return {hero:0,hand:G.hands[0].slice(),plays:plays.slice(),led,curLeader:lead,teamOf:G.teamOf,
+    picker:G.picker,partner:G.partner,mode:G.mode,bankedTp:{0:G.tpts[0],1:G.tpts[1]},bankedTk:{0:G.ttrk[0],1:G.ttrk[1]},
+    played:G.playedAll.slice(),oppCounts,knownBuried:G.picker===0?G.buried:null,pcard:G.pcard,partnerRevealed:G.partnerRevealed};
+}
+function cardHintText(cg,od){
+  if(cg.forced)return `<div class="hint"><span class="lead">Coach</span> Only one legal card — forced.</div>`;
+  const odds=od.exact?(Math.round(od.p*100)+"% to win this trick (locked)"):("~"+Math.round(od.p*100)+"% to win this trick");
+  return `<div class="hint"><span class="lead">Coach</span> Best play: <b>${lbl(cg.best)}</b> · <span class="odds">${odds}</span></div>`;
+}
+function announcePartner(){return new Promise(res=>{
+  if(!G.pcard){res();return;}
+  const ov=$("overlay");const pc=G.pcard;const red=pc[1]==="H"||pc[1]==="D";
+  ov.style.display="flex";
+  ov.innerHTML=`<div class="announce">`+
+    `<div class="ann-txt"><b>${G.picker===0?"You are":esc(G.names[G.picker])+" is"}</b> calling the partner</div>`+
+    `<div class="ann-realcard${red?" red":""}"><span class="arc-r">${rt(pc[0])}</span><span class="arc-s">${SYM[pc[1]]}</span></div>`+
+    `<div class="ann-sub">tap to continue</div></div>`;
+  let done=false;const go=()=>{if(done)return;done=true;ov.style.display="none";ov.innerHTML="";ov.onclick=null;res();};
+  ov.onclick=go;setTimeout(go,2600);
+});}
+async function playDeal(){
+  let lead=G.leader;
+  for(let t=0;t<6;t++){
+    clearTrickCards();const plays=[];let led=null;let heroGrade=null;
+    for(let i=0;i<5;i++){
+      const seat=(lead+i)%5;setTurn(seat);let card;
+      if(seat===0){
+        const st=buildCardState(plays,led,lead);
+        const cg=GR.gradeCard(st,120);
+        let hint=null,best=null;
+        if(MODE==="practice"){const od=GR.trickOdds(st,cg.best,250);hint=cardHintText(cg,od);best=cg.forced?null:cg.best;}
+        card=await askYouPlay(led,hint,best);
+        const od2=GR.trickOdds(st,card,250);
+        heroGrade=gradeHeroCard(st,cg,card,od2);
+        heroGrade.snap={hand:st.hand.slice(),before:st.plays.slice(),led:st.led,me:card};
+      } else {msg(G.names[seat]+" is thinking…");await sleep(720);card=aiPlay(seat,led,plays);}
+      G.hands[seat].splice(G.hands[seat].indexOf(card),1);
+      if(led===null)led=E.effSuit(card);
+      plays.push([seat,card]);G.playedAll.push(card);if(G.pcard&&card===G.pcard){if(G.alone)G.aloneRevealed=true;else G.partnerRevealed=true;}placeCard(seat,card);renderOpps();if(seat===0)renderHandStatic();
+      await sleep(seat===0?260:350);
+    }
+    const w=E.trickWinner(plays);const tpoints=plays.reduce((a,[_,c])=>a+E.pts(c),0);
+    G.tpts[G.teamOf[w]]+=tpoints;G.ttrk[G.teamOf[w]]++;G.won[w]++;G.seatPts[w]=(G.seatPts[w]||0)+tpoints;
+    G.lastTrick={plays:plays.slice(),winner:w};enableLastTrick();
+    recordTrick(t+1,plays,w,heroGrade);
+    msg((w===0?"You win":G.names[w]+" wins")+" the trick");
+    await sleep(950);rakeIn(w);await sleep(780);
+    renderOpps();lead=w;
+  }
+  endDeal();
+}
+function perceivedTeam(seat){
+  // Hidden-info honesty: the picker and defenders do NOT know who the partner is until the called
+  // card is played. Only the partner themselves knows (they hold it). After reveal, everyone knows.
+  if(G.partner==null||G.partnerRevealed||seat===G.partner) return G.teamOf;
+  const t=Object.assign({},G.teamOf); t[G.partner]=0; return t;
+}
+function aiPlay(seat,led,plays){
+  const legal=E.legalMoves(G.hands[seat],led);
+  if(legal.length===1)return legal[0];
+  const pt=perceivedTeam(seat);
+  const smart=E.choosePlay(seat,G.hands[seat],plays,led,pt);
+  // schmearing points onto your own side's winning trick is a reflex; even weak players do it
+  const sideWinning=plays.length>0 && pt[E.trickWinner(plays)]===pt[seat];
+  if(sideWinning) return smart;
+  if(Math.random()<G.skill[seat]) return smart;
+  // skill miss: a plausible human error, but never hand a 10/ace to whoever is currently winning
+  let pool=legal.filter(c=>!(E.pts(c)>=10 && plays.length>0 && E.trickWinner(plays.concat([[seat,c]]))!==seat));
+  if(!pool.length) pool=legal;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function askYouPlay(led,hint,best){return new Promise(res=>{
+  const legal=new Set(E.legalMoves(G.hands[0],led));
+  $("handlbl").textContent=led===null?"Your lead — tap a card":"Your turn — follow if you can";
+  const el=$("hand");el.innerHTML="";
+  sortHand(G.hands[0]).forEach(c=>{const cls=[legal.has(c)?"legal":"illegal"];if(best&&c===best)cls.push("bestplay");
+    const n=cardNode(c,cls.join(" "));if(legal.has(c))n.onclick=()=>{$("prompt").innerHTML="";$("handlbl").textContent="Your hand";res(c);};el.appendChild(n);});
+  $("prompt").innerHTML=hint||"";
+  msg("Your turn");});}
+
+/* ---- recording / grading ---- */
+function recordPick(pg,chosePick){
+  const your=chosePick?"pick":"pass";
+  const correct=pg.tie||your===pg.best;
+  const evYour=chosePick?pg.pickEV:pg.passEV, evBest=Math.max(pg.pickEV,pg.passEV);
+  G.tally.ev_gained=evYour;            // poker-style EV chips for this deal (signed)
+  const evLost=correct?0:Math.max(0,evBest-evYour);
+  if(!pg.tie){if(pg.best==="pass"&&chosePick)G.tally.overpick++;if(pg.best==="pick"&&!chosePick)G.tally.overpass++;}
+  bump("pick",correct,evLost);
+  // plain-language reason, read off the hero's starting hand (still the original 6 at decision time)
+  const h=(G.hands&&G.hands[0])?G.hands[0]:[];
+  const tr=h.filter(c=>E.isTrump(c)), q=tr.filter(c=>c[0]==="Q").length, j=tr.filter(c=>c[0]==="J").length,
+        fa=h.filter(c=>c[0]==="A"&&!E.isTrump(c)).length;
+  const parts=[`${tr.length} trump`];
+  if(q)parts.push(`${q} queen${q>1?"s":""}`); else if(j)parts.push(`${j} jack${j>1?"s":""}`);
+  if(fa)parts.push(`${fa} fail ace${fa>1?"s":""}`);
+  const hd=parts.join(", ");
+  const evs=`${f(pg.pickEV)} pick vs ${f(pg.passEV)} pass`;
+  let note;
+  if(pg.tie) note=`Borderline hand — ${hd}. Pick and pass run about even (${evs}).`;
+  else if(pg.best==="pick") note=`${hd} — enough strength to take the blind and steer tricks, so picking wins out (${evs}).`;
+  else note=`Only ${hd}${q?"":", no queens"} — too thin to pick, so passing is safer (${evs}).`;
+  G.review.push({type:"Pick / Pass",your:your.toUpperCase(),best:pg.tie?"either (coin-flip)":pg.best.toUpperCase(),
+    correct,tie:pg.tie,evLost,note,odds:""});
+}
+function recordBury(bg,chosen){
+  const evLost=bg.correct?0:Math.max(0,bg.gap);
+  G.tally.ev_gained=(G.tally.ev_gained||0)+(bg.evChosen-bg.evBest); // bury edge vs field (≤0; field buries optimally)
+  bump("bury",bg.correct,evLost);
+  G.review.push({type:"Bury",your:chosen.map(lbl).join(" + "),best:bg.bestPair.map(lbl).join(" + "),
+    correct:bg.correct,tie:bg.tie,evLost,note:`Best bury keeps ${f(bg.evBest)} chips of value; yours ${f(bg.evChosen)}.`,odds:""});
+}
+function recordAlone(ag,choseAlone){
+  const your=choseAlone?"alone":"partner";const correct=ag.tie||your===ag.best;
+  const evLost=correct?0:Math.abs(ag.diff);
+  bump("alone",correct,evLost);
+  G.review.push({type:"Alone vs partner",your:your,best:ag.tie?"either":ag.best,correct,tie:ag.tie,evLost,
+    note:`Alone ${f(ag.evAlone)} vs partner ${f(ag.evPartner)} chips.`,odds:""});
+}
+function recordSlam(sg,choseCall){
+  const your=choseCall?"call":"no call";const best=sg.tie?"either":(sg.best==="call"?"call":"no call");
+  const correct=sg.tie||(choseCall===(sg.best==="call"));
+  const evLost=correct?0:Math.abs(sg.diff);
+  bump("slam",correct,evLost);
+  G.review.push({type:"Call sheepshead",your:your,best,correct,tie:sg.tie,evLost,
+    note:`Slam chance ${Math.round(sg.pSlam*100)}% · call EV ${f(sg.evCall)} vs play EV ${f(sg.evGame)}.`,
+    odds:`~${Math.round(sg.pSlam*100)}% slam`});
+}
+function gradeHeroCard(st,cg,chosen,od){
+  const odds=od.exact?(Math.round(od.p*100)+"% this trick (locked)"):("~"+Math.round(od.p*100)+"% this trick");
+  if(cg.forced){ return {forced:true,rating:"forced",your:lbl(chosen),best:"—",correct:true,tie:false,evLost:0,evGain:0,why:"",odds,note:""}; }
+  const mv=cg.moves.find(m=>m.card===chosen);const evChosen=mv?mv.ev:cg.bestEV;
+  const evHeur=(typeof cg.heurEV==="number")?cg.heurEV:evChosen;
+  const evLost=Math.max(0,cg.bestEV-evChosen);
+  const avgEV=cg.moves.reduce((a,m)=>a+m.ev,0)/cg.moves.length;
+  const evGain=Math.max(0,evChosen-avgEV);
+  const heroWins=c=>{try{return E.trickWinner(st.plays.concat([[st.hero,c]]))===st.hero;}catch(_e){return false;}};
+  const playedWins= (st.plays&&st.plays.length>0) ? heroWins(chosen) : true; // leading = in control, not a discard
+  // ----- DISCARD: you are not taking this trick yourself -> grade by schmear principle, not the noisy playout -----
+  // Applies whenever you played a non-winning card. Among discards the playout is unreliable (it invents
+  // differences between equal-value junk), so we rank discards by points-to-the-winning-side + keep-trump only.
+  let discard=null;
+  if(st.plays&&st.plays.length>0 && !playedWins){
+    const sideWins=od.p;                                   // chance YOUR side takes this trick
+    const val=c=> E.pts(c)*(2*sideWins-1) - 0.01*(E.isTrump(c)?1:0);   // +points if winning side is yours; keep trump on ties
+    const pool=cg.moves.filter(m=>!heroWins(m.card)); const opts=pool.length?pool:cg.moves;
+    let bestC=opts[0].card,bestV=val(opts[0].card);
+    for(const m of opts){const v=val(m.card); if(v>bestV){bestV=v;bestC=m.card;}}
+    discard={best:bestC, lossPts:Math.max(0,bestV-val(chosen)), sideWins};
+  }
+  // ----- SECURED: you DID take a trick the playout's "best" would have conceded -----
+  let securedTrick=false;
+  if(!discard && (cg.gap||0)>=GR.COINFLIP && evLost>=GR.COINFLIP && cg.best!==chosen && od.p>=0.66){
+    // Only override the playout when its "best" hands the trick to a (near-)certain ENEMY -- that is genuine
+    // playout miscounting. A real hidden-info gamble (conceding to a possibly-friendly unknown) is left to grade.
+    try{ const odB=GR.trickOdds(st,cg.best,160); if(odB.p<=0.30) securedTrick=true; }catch(_e){}
+  }
+  // edge vs the frozen standard player; never penalise a correct take, stay neutral on discards
+  let edge=evChosen-evHeur; if(securedTrick&&edge<0)edge=0; if(discard)edge=0;
+  G.tally.ev_gained=(G.tally.ev_gained||0)+edge;
+  let why="";
+  if(od.exact) why=od.p>=0.5?"Locked — your side already has this trick.":"Locked — the picker's side has this one.";
+  else if(od.yet===0) why=`Hinges on whether this trick's winner is on your side · ${od.unk} of unknown team.`;
+  else why=`Your side wins if the top card lands with you or a teammate · ${od.yet} still to play${od.unk>0?`, ${od.unk} of unknown team`:""}.`;
+  let rating,correct,evLostCounted=0,best,note;
+  const wash=(cg.gap||0)<GR.COINFLIP;
+  if(discard){
+    const gaveUp=discard.lossPts>=6;                       // dumped real points the wrong way (e.g. fed a 10 to the other side)
+    rating=gaveUp?"no":"ok"; correct=!gaveUp;
+    evLostCounted=gaveUp?Math.min(0.25,discard.lossPts*0.025):0;
+    best=lbl(discard.lossPts<1.5?chosen:discard.best);   // essentially-equal discards read as fine, not a "miss"
+    note=discard.sideWins>=0.5
+      ? "Your side is taking this trick — throw your most points and keep your trump."
+      : "The other side has this trick — throw your cheapest card and keep your trump.";
+  } else if(securedTrick){
+    rating="ok"; correct=true; best="take it";
+    note="You took this trick for your side — winning it was the right call.";
+  } else {
+    const wrong=!wash && evLost>=GR.COINFLIP;
+    rating=wash?"tie":(wrong?"no":"ok"); correct=rating!=="no"; evLostCounted=wrong?evLost:0;
+    best=wash?"any (even)":lbl(cg.best);
+    note=wash?"Any legal card was about even here.":`Best ${lbl(cg.best)} (${f(cg.bestEV)}); you played ${f(evChosen)}.`;
+  }
+  G.tally.play_t++;if(correct)G.tally.play_c++;
+  const role=(0===G.picker)?"picker":(0===G.partner)?"partner":"def";
+  G.tally[role+"_play_t"]++;if(correct)G.tally[role+"_play_c"]++;
+  if(evLostCounted>0){G.tally.ev_lost+=evLostCounted;if(evLostCounted>1)G.tally.blunders++;}
+  return {forced:false,rating,your:lbl(chosen),best,correct,tie:(rating==="tie"),evLost:evLostCounted,evGain:+evGain.toFixed(2),why,odds,note};
+}
+function recordTrick(trickNo,plays,winner,hg){
+  const cards=plays.map(([seat,card])=>({name:seat===0?"You":G.names[seat],card,hero:seat===0,win:seat===winner}));
+  const wrole=winner===G.picker?"picker":(winner===G.partner?"partner":"defender");
+  const e={type:"Trick "+trickNo,trick:cards,winnerName:winner===0?"You":G.names[winner],winnerRole:wrole};
+  if(hg)Object.assign(e,hg); else {e.forced=true;e.your="—";e.note="";}
+  G.review.push(e);
+}
+
+/* ---- slam scoring ---- */
+function slamChips(made,mode,seat){
+  const picker=made?(mode==="alone"?12:9):(mode==="alone"?-24:-18);
+  const ndef=mode==="alone"?4:3;const perDef=-picker/ndef;
+  if(seat===G.picker)return picker;if(seat===G.partner)return 0;return perDef;
+}
+
+/* ---- end of deal ---- */
+function commitStats(){
+  S.deals++;
+  for(const k of COLS){if(k==="ev_lost"||k==="ev_gained"||k==="deals")continue;S[k]=(S[k]||0)+(G.tally[k]||0);}
+  S.ev_lost=+( (S.ev_lost||0)+(G.tally.ev_lost||0) ).toFixed(3);
+  S.ev_gained=+( (S.ev_gained||0)+(G.tally.ev_gained||0) ).toFixed(3);
+  save();if(RECOK)syncUp();
+}
+function endDeal(){
+  const pp=G.tpts[1],pt=G.ttrk[1];let outcome,delta=[];
+  if(G.called){const made=(pt===6);outcome=made?"slam_made":"slam_miss";for(let s=0;s<5;s++)delta.push(slamChips(made,G.mode,s));}
+  else{[outcome]=E.classifyChips(pp,pt,G.mode);
+    if((G.won[G.picker]||0)===0)outcome="no_tricks";   // house rule: picker must take a trick to win
+    for(let s=0;s<5;s++)delta.push(E.roleChips(outcome,G.mode,s===G.picker,s===G.partner));}
+  for(let s=0;s<5;s++)G.scores[s]+=delta[s];renderOpps();
+  const pickerWon=G.called?(pt===6):outcome.startsWith("win");
+  G.tally.chips=delta[0];
+  if(0===G.picker){G.tally.picks=1;if(pickerWon)G.tally.pick_wins=1;}
+  else if(G.teamOf[0]===0){G.tally.defends=1;if(!pickerWon)G.tally.def_wins=1;}
+  if(MODE==="ranked")commitStats();
+  showReview(outcome,delta);
+}
+function outcomeLabel(o){return {win_normal:"Picker wins",win_schneider:"Schneider!",win_all:"All tricks!",
+  loss_normal:"Picker loses",loss_schneider:"Picker schneidered",no_tricks:"No tricks!",
+  slam_made:"Sheepshead made!",slam_miss:"Sheepshead missed"}[o]||o;}
+function buildScoreboard(delta){
+  const role=s=> s===G.picker?'<span class="sb-tag pick">'+(G.alone?"ALONE":"PICKER")+'</span>':(s===G.partner?'<span class="sb-tag part">PARTNER</span>':'<span class="sb-tag def">DEF</span>');
+  const cl=v=> v>0?"pos":(v<0?"neg":"zero"); const sgn=v=> (v>0?"+":"")+v; const yo=s=> s===0?" col-you":"";
+  let head='<div class="sb-rl head">Team</div>',tr='<div class="sb-rl">Tricks</div>',pt='<div class="sb-rl">Points</div>',dl='<div class="sb-rl">This deal</div>',sc='<div class="sb-rl">Score</div>';
+  for(let s=0;s<5;s++){
+    head+=`<div class="head${yo(s)}"><div class="sb-av">${G.ava[s]}</div><div class="sb-nm">${s===0?"You":esc(G.names[s])}</div>${role(s)}</div>`;
+    tr+=`<div class="sb-n${yo(s)}">${G.won[s]||0}</div>`;
+    pt+=`<div class="sb-n${yo(s)}">${(G.seatPts&&G.seatPts[s])||0}</div>`;
+    dl+=`<div class="sb-n ${cl(delta[s])}${yo(s)}">${sgn(delta[s])}</div>`;
+    sc+=`<div class="sb-n big ${cl(G.scores[s])}${yo(s)}">${sgn(G.scores[s])}</div>`;
+  }
+  const cz=c=>{const red=c[1]==="H"||c[1]==="D";return `<div class="sb-mini${red?" red":""}"><div class="r">${rt(c[0])}</div><div class="s">${SYM[c[1]]}</div></div>`;};
+  const bury=(G.buried&&G.buried.length===2)?`<div class="sb-bury"><span class="lbl">Bury</span>${cz(G.buried[0])}${cz(G.buried[1])}</div>`:"";
+  const summary=`<div class="sb-summary">The picker ${G.alone?"went alone — ":""}took <span class="brass">${G.ttrk[1]} trick${G.ttrk[1]===1?"":"s"}</span> and <span class="brass">${G.tpts[1]} points</span></div>`;
+  return `<div class="sb-card"><div class="sb-grid">${head}${tr}${pt}${dl}${sc}</div>${bury}${summary}</div>`;
+}
+function showReview(outcome,delta){
+  $("rev-banner").textContent=MODE==="ranked"?"Deal review · ranked":"Deal review · practice";
+  $("rev-home").style.display="block";
+  $("rev-title").textContent="Deal "+G.dealNo+" — "+outcomeLabel(outcome);
+  const yc=delta[0];const dealEv=G.tally.ev_lost||0;const dealGain=G.tally.ev_gained||0;
+  $("rev-sub").innerHTML=`You were the <b>${youRole().toLowerCase()}</b> · <span class="${yc>=0?"chip-pos":"chip-neg"}">${yc>=0?"+":""}${yc} chips</span>`+
+    ` · <span class="${dealGain>=0?"chip-pos":"chip-neg"}">${dealGain>=0?"+":""}${dealGain.toFixed(2)} EV chips</span>`+
+    (dealEv>0.05?` · <span class="chip-neg">−${dealEv.toFixed(2)} leak</span>`:"")+
+    (MODE==="practice"?" · not counted":"");
+  const list=$("rev-list");list.innerHTML="";
+  if(!G.review.length){list.innerHTML='<div class="rev"><div class="b">No graded decisions this deal — you were dealt out of the action.</div></div>';}
+  G.review.forEach(r=>{
+    const forced=r.forced;
+    const rk=r.rating||(forced?"forced":(r.tie?"tie":(r.correct?"ok":"no")));
+    const mark=rk;
+    const mtxt={forced:"—",tie:"≈",ok:"✓",no:"✗"}[rk];
+    const row=document.createElement("div");row.className="rev";
+    if(r.trick){
+      const cards=r.trick.map(c=>{const red=c.card[1]==="H"||c.card[1]==="D";return `<div class="tcard${c.hero?" me":""}${c.win?" won":""}"><div class="cm${red?" red":""}">${rt(c.card[0])}${SYM[c.card[1]]}</div><div class="tn">${c.hero?"You":esc(c.name)}</div></div>`;}).join("");
+      const line= forced ? `Forced — your only legal card was <b>${r.your}</b>.`
+        : `You: <b>${r.your}</b> · Best: <b>${r.best}</b>${r.odds?` · <span class="odds">${r.odds}</span>`:""}${r.why?`<br><span class="oddswhy">${r.why}</span>`:""}<br>${r.note}${r.evLost>0.05?` <span class="chip-neg">−${r.evLost.toFixed(2)} chips</span>`:""}`;
+      let snapHTML="";
+      if(r.snap){const sn=r.snap;
+        const tc=(code,extra)=>{const red=code[1]==="H"||code[1]==="D";return `<div class="tcard${extra||""}"><div class="cm${red?" red":""}">${rt(code[0])}${SYM[code[1]]}</div></div>`;};
+        const before=sn.before&&sn.before.length
+          ? `<div class="trickrow">`+sn.before.map(([seat,c])=>`<div class="tcard"><div class="cm${(c[1]==="H"||c[1]==="D")?" red":""}">${rt(c[0])}${SYM[c[1]]}</div><div class="tn">${seat===0?"You":esc(G.names[seat])}</div></div>`).join("")+`</div>`
+          : `<div class="snapnote">You led this trick — nothing on the table yet.</div>`;
+        const handHTML=`<div class="trickrow">`+sortHand(sn.hand).map(c=>tc(c,c===sn.me?" me":"")).join("")+`</div>`;
+        snapHTML=`<div class="snaprep">▸ replay this moment</div><div class="snap" style="display:none"><div class="snaplbl">On the table when it was your turn:</div>${before}<div class="snaplbl">Your hand — you played <b>${lbl(sn.me)}</b> (outlined):</div>${handHTML}</div>`;}
+      row.innerHTML=`<div class="h"><div class="t">${r.type} <span style="color:var(--muted);font-weight:400;font-size:12px">· won by ${esc(r.winnerName)}${r.winnerRole?" ("+r.winnerRole+")":""}</span></div><div class="mark ${mark}">${mtxt}</div></div><div class="b"><div class="trickrow">${cards}</div>${line}${snapHTML}</div>`;
+    } else {
+      row.innerHTML=`<div class="h"><div class="t">${r.type}</div><div class="mark ${mark}">${mtxt}</div></div>
+      <div class="b">You: <b>${r.your}</b> · Best: <b>${r.best}</b>${r.odds?` · <span class="odds">${r.odds}</span>`:""}<br>${r.note}${r.evLost>0.05?` <span class="chip-neg">−${r.evLost.toFixed(2)} chips</span>`:""}</div>`;
+    }
+    list.appendChild(row);
+    if(r.snap){const rep=row.querySelector(".snaprep"),pan=row.querySelector(".snap");
+      if(rep&&pan)rep.onclick=()=>{const open=pan.style.display!=="none";pan.style.display=open?"none":"block";rep.textContent=(open?"▸":"▾")+" replay this moment";};}
+  });
+  if(delta&&G.seatPts){list.insertAdjacentHTML("afterbegin",buildScoreboard(delta));}
+  const nb=$("rev-next");nb.textContent="Next deal →";
+  nb.onclick=()=>newDeal();
+  showView("review");
+}
+function sessionEnd(){
+  $("rev-banner").textContent="Session complete";
+  $("rev-title").textContent=G.dealNo+" deals played";
+  const ranking=G.names.map((n,i)=>({n,s:G.scores[i],you:i===0})).sort((a,b)=>b.s-a.s);
+  $("rev-sub").innerHTML=MODE==="ranked"?"Your results are on the family board.":"Practice session — not counted.";
+  const list=$("rev-list");list.innerHTML=ranking.map((r,i)=>`<div class="rev"><div class="h"><div class="t">${i+1}. ${esc(r.n)}${r.you?" (you)":""}</div><div class="mark ${r.s>=0?"ok":"no"}">${r.s>=0?"+":""}${r.s}</div></div></div>`).join("");
+  const nb=$("rev-next");nb.textContent="Home";nb.onclick=()=>{refreshHome();showView("home");};
+  $("rev-home").style.display="none";
+  refreshHome();showView("review");
+}
+$("rev-home").onclick=()=>sessionEnd();
+
+/* ---------- boot ---------- */
+refreshHome();
+reconcile();
+</script></body></html>
