@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<title>Solverline Table</title>
+<meta name="theme-color" content="#0B0E11">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="SL Table">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0E11;--panel:#12161B;--panel2:#171C22;--line:#222A31;--line2:#2C353D;--text:#E7ECF0;--muted:#8593A0;--muted2:#5A6671;
+--blue:#6E8BE8;--fine:#34D399;--mix:#C9A227;--leak:#E0853D;--blunder:#E25563;--gold:#E6B93F;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100dvh;overflow-x:hidden}
+.wrap{max-width:560px;margin:0 auto;padding:0 14px}
+header{max-width:560px;margin:0 auto;padding:13px 14px 5px;display:flex;align-items:center;gap:9px}
+.brand{font-family:'Archivo';font-weight:800;font-size:18px;letter-spacing:-.02em}.brand .l{color:var(--blue)}
+.stamp{margin-left:auto;font-family:'JetBrains Mono';font-size:9px;color:var(--muted2);text-align:right;line-height:1.4}
+.view{display:none}.view.on{display:block;animation:f .2s}@keyframes f{from{opacity:0}to{opacity:1}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:15px;margin-bottom:12px}
+h2.t{font-family:'Archivo';font-weight:700;font-size:14px;margin:14px 0 3px}
+.sub{font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.eyebrow{font-family:'JetBrains Mono';font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.btn{display:block;width:100%;border:none;border-radius:11px;padding:14px;font-size:14.5px;font-weight:600;font-family:'Inter';cursor:pointer}
+.btn-p{background:var(--blue);color:#0a0d14}.btn-g{background:transparent;border:1px solid var(--line2);color:var(--muted)}
+.btn:active{transform:scale(.985)}
+
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:38px;background:var(--panel2);border:1px solid var(--line2);color:var(--muted);border-radius:9px;padding:9px 4px;font-family:'JetBrains Mono';font-weight:700;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--blue);color:#0a0d14;border-color:var(--blue)}
+
+/* per-bot sliders */
+.botrow{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid var(--line)}
+.botrow:last-child{border-bottom:none}
+.botrow .bn{font-family:'JetBrains Mono';font-size:11px;width:30px;color:var(--muted)}
+.botrow input[type=range]{flex:1;-webkit-appearance:none;height:5px;border-radius:3px;background:linear-gradient(90deg,#2a3a30,#3a4a78);outline:none}
+.botrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--blue);border:2px solid #0a0d14;cursor:pointer}
+.botrow input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--blue);border:2px solid #0a0d14;cursor:pointer}
+.botrow .lvl{font-family:'JetBrains Mono';font-size:11px;font-weight:700;width:62px;text-align:right}
+.lvl.l1{color:var(--fine)}.lvl.l2{color:var(--mix)}.lvl.l3{color:var(--leak)}.lvl.l4{color:var(--blunder)}
+
+/* stakes */
+.stakes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.stk{background:var(--panel2);border:1px solid var(--line2);color:var(--text);border-radius:9px;padding:9px 3px;cursor:pointer;text-align:center}
+.stk.on{border-color:var(--blue);background:rgba(110,139,232,.1)}
+.stk .v{font-family:'JetBrains Mono';font-weight:700;font-size:12.5px}
+.stk .t{font-size:8.5px;color:var(--muted);margin-top:1px}
+.custom-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:9px}
+
+.field label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono';text-transform:uppercase;display:block;margin-bottom:5px}
+.field input{width:100%;background:#101814;border:1px solid var(--line2);color:var(--text);border-radius:9px;padding:10px 11px;font-size:16px;font-family:'JetBrains Mono'}
+.field input:focus{outline:none;border-color:var(--blue)}
+.stepper{display:flex}.stepper button{width:40px;background:#101814;border:1px solid var(--line2);color:var(--text);font-size:19px;cursor:pointer}
+.stepper button:first-child{border-radius:9px 0 0 9px}.stepper button:last-child{border-radius:0 9px 9px 0}
+.stepper .val{flex:1;display:flex;align-items:center;justify-content:center;background:#0c1410;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);font-family:'JetBrains Mono';font-weight:700;font-size:15px;min-width:42px}
+.bi-note{font-family:'JetBrains Mono';font-size:10px;color:var(--muted2);margin-top:7px}
+
+/* bankroll strip */
+.brstrip{display:flex;gap:7px;margin-bottom:8px}
+.brbox{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:7px 6px;text-align:center}
+.brbox .k{font-family:'JetBrains Mono';font-size:8px;text-transform:uppercase;color:var(--muted)}
+.brbox .v{font-family:'JetBrains Mono';font-weight:700;font-size:14px;margin-top:1px}
+.v.pos{color:var(--fine)}.v.neg{color:var(--blunder)}
+
+/* street tracker */
+.streets{display:flex;gap:5px;margin-bottom:7px}
+.stp{flex:1;text-align:center;padding:6px 2px;border-radius:7px;background:var(--panel);border:1px solid var(--line);font-family:'JetBrains Mono';font-size:10px;font-weight:700;color:var(--muted2);position:relative}
+.stp.done{color:var(--muted)}
+.stp.now{background:var(--blue);color:#0a0d14;border-color:var(--blue)}
+
+/* TABLE */
+.tablewrap{position:relative;width:100%;aspect-ratio:1/1.16;margin:2px 0 4px}
+.felt{position:absolute;inset:8% 4%;border-radius:46%/40%;background:radial-gradient(120% 100% at 50% 38%,#244a39,#16301f 70%,#11271a);border:2px solid #0c1c14;box-shadow:inset 0 0 40px rgba(0,0,0,.5)}
+.center{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);text-align:center;width:80%}
+.pot{font-family:'JetBrains Mono';font-size:12px;color:var(--gold);margin-bottom:7px}
+.board{display:flex;gap:5px;justify-content:center;min-height:54px;align-items:center}
+.bc{width:34px;height:48px;border-radius:6px;background:#F1E9DA;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:700;font-size:16px;line-height:1;box-shadow:0 2px 0 rgba(0,0,0,.3)}.bc .su{font-size:14px}
+.s-s{color:#11151A}.s-h{color:#C8453A}.s-d{color:#2E6FB0}.s-c{color:#2E8B57}
+.seat{position:absolute;transform:translate(-50%,-50%);width:84px;text-align:center}
+.seat .av{background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:5px 4px;transition:border-color .2s}
+.seat.act .av{border-color:var(--gold);box-shadow:0 0 12px rgba(230,185,63,.4)}
+.seat.folded{opacity:.32}
+.seat .nm{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .st{font-family:'JetBrains Mono';font-size:9.5px;color:var(--gold)}
+.seat .cards{display:flex;gap:2px;justify-content:center;margin:3px 0 1px}
+.mc{width:19px;height:27px;border-radius:4px;background:#F1E9DA;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:700;font-size:11px;line-height:1}
+.mc.back{background:repeating-linear-gradient(45deg,#2b3a6b,#2b3a6b 3px,#22305a 3px,#22305a 6px);border:1px solid #1a2546}.mc .su{font-size:9px}
+.seat .la{font-family:'JetBrains Mono';font-size:8.5px;color:var(--muted);text-transform:uppercase;min-height:11px}
+.seat .cm{font-family:'JetBrains Mono';font-size:9px;color:var(--gold);min-height:11px}
+.dealer{position:absolute;width:16px;height:16px;border-radius:50%;background:#E7ECF0;color:#11151A;font-family:'Archivo';font-weight:800;font-size:9px;display:flex;align-items:center;justify-content:center;border:1px solid #999}
+
+.coach{background:rgba(110,139,232,.08);border:1px solid rgba(110,139,232,.3);border-radius:11px;padding:11px 13px;margin-bottom:10px}
+.coach .eq{display:flex;justify-content:space-between;align-items:baseline}
+.coach .eq .big{font-family:'Archivo';font-weight:800;font-size:22px}
+.coach .eq .lbl{font-family:'JetBrains Mono';font-size:9.5px;color:var(--muted);text-transform:uppercase}
+.coach .rec{font-size:12.5px;margin-top:6px;line-height:1.45}.coach .rec b{color:var(--blue)}
+.coach .tagm{font-family:'JetBrains Mono';font-size:8.5px;color:var(--mix);margin-top:5px}
+.controls{margin-top:8px}
+.crow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.cbtn{border:1px solid var(--line2);background:var(--panel2);color:var(--text);border-radius:11px;padding:14px 6px;font-size:14px;font-weight:600;cursor:pointer}
+.cbtn.fold{border-color:#4a3a3f}.cbtn.cc{border-color:#3a444f}.cbtn.br{border-color:#3a4a3f}.cbtn:active{transform:scale(.97)}.cbtn:disabled{opacity:.4}
+.sizes{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}
+.szb{border:1px solid var(--line2);background:var(--panel2);color:var(--text);border-radius:9px;padding:11px 4px;font-family:'JetBrains Mono';font-size:12px;font-weight:700;cursor:pointer}.szb .a{display:block;font-size:9px;color:var(--muted);font-weight:400}
+.result{text-align:center;padding:6px 0}.result .big{font-family:'Archivo';font-weight:800;font-size:20px}.result .net{font-family:'JetBrains Mono';font-size:14px;margin-top:3px}
+.net.pos{color:var(--fine)}.net.neg{color:var(--blunder)}
+.rev{margin-top:10px}.revrow{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:7px}
+.revrow .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.rchip{font-family:'JetBrains Mono';font-size:10px;font-weight:700;padding:3px 8px;border-radius:14px}
+.rchip.fine{background:rgba(52,211,153,.13);color:var(--fine)}.rchip.mix{background:rgba(201,162,39,.14);color:var(--mix)}
+.rchip.leak{background:rgba(224,133,61,.14);color:var(--leak)}.rchip.blunder{background:rgba(226,85,99,.14);color:var(--blunder)}
+.revrow .st{font-family:'JetBrains Mono';font-size:10px;color:var(--muted)}
+.revrow .tx{font-size:12px;color:var(--muted);line-height:1.45;margin-top:2px}.revrow .tx b{color:var(--text)}
+
+/* fast card selector */
+.slots{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap}
+.slotgrp .lab{font-size:9.5px;color:var(--muted);font-family:'JetBrains Mono';text-transform:uppercase;margin-bottom:5px}
+.slotcards{display:flex;gap:5px}
+.pcard{width:34px;height:48px;border-radius:7px;background:#F1E9DA;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:700;font-size:15px;line-height:1;box-shadow:0 2px 0 rgba(0,0,0,.3)}.pcard .su{font-size:13px}
+.pcard.empty{background:#101814;color:var(--muted2);box-shadow:inset 0 0 0 1.5px var(--line);font-size:17px}.pcard.empty .su{display:none}
+.filltog{display:flex;gap:6px;margin-bottom:10px}
+.fillbtn{flex:1;background:var(--panel2);border:1px solid var(--line2);color:var(--muted);border-radius:9px;padding:8px 4px;font-family:'JetBrains Mono';font-size:11px;font-weight:700;cursor:pointer}
+.fillbtn.on{background:var(--blue);color:#0a0d14;border-color:var(--blue)}
+.cgrid{display:flex;flex-direction:column;gap:4px}
+.crow2{display:grid;grid-template-columns:repeat(13,1fr);gap:3px}
+.cg{aspect-ratio:1/1.3;border-radius:5px;background:#F1E9DA;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono';font-weight:700;font-size:11px;cursor:pointer;position:relative;transition:transform .08s}
+.cg:active{transform:scale(.9)}
+.cg.sel{outline:2px solid var(--gold);outline-offset:1px}
+.cg.sel::after{content:'';position:absolute;inset:0;background:rgba(230,185,63,.25);border-radius:5px}
+.cg.dim{opacity:.32}
+
+.bigeq{font-family:'Archivo';font-weight:800;font-size:36px;line-height:1}.bigeq small{font-size:15px;color:var(--muted);font-weight:600;font-family:'JetBrains Mono'}
+.statline{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:12px}
+.stat{background:#101814;border:1px solid var(--line);border-radius:9px;padding:9px;text-align:center}
+.stat .k{font-family:'JetBrains Mono';font-size:9px;color:var(--muted);text-transform:uppercase}.stat .v{font-family:'JetBrains Mono';font-weight:700;font-size:15px;margin-top:3px}
+.verdict{margin-top:13px;padding:12px 14px;border-radius:11px;font-size:14px;font-weight:600}
+.verdict.take{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35);color:var(--fine)}
+.verdict.fold{background:rgba(226,85,99,.1);border:1px solid rgba(226,85,99,.32);color:var(--blunder)}
+.verdict.thin{background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.32);color:var(--mix)}
+.note{font-size:11px;color:var(--muted2);margin-top:10px;line-height:1.5}
+.modepill{display:inline-flex;border:1px solid var(--line2);border-radius:9px;overflow:hidden;margin-left:auto}
+.modepill button{background:var(--panel2);border:none;color:var(--muted);padding:6px 12px;font-family:'JetBrains Mono';font-size:11px;font-weight:700;cursor:pointer}.modepill button.on{background:var(--blue);color:#0a0d14}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(11,14,17,.95);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:none;color:var(--muted2);padding:9px 0 11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'JetBrains Mono';font-size:9.5px}
+nav button svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7}nav button.on{color:var(--blue)}
+.bodypad{padding-bottom:74px}
+.hint{font-family:'JetBrains Mono';font-size:9.5px;color:var(--muted2);text-align:center;line-height:1.6;margin-top:12px}
+
+/* v0.4 additions */
+.bubble{position:absolute;top:-15px;left:50%;transform:translateX(-50%);background:#0a0d14;border:1px solid var(--gold);color:var(--gold);font-family:'JetBrains Mono';font-size:9px;font-weight:700;padding:3px 7px;border-radius:11px;white-space:nowrap;z-index:6;box-shadow:0 2px 6px rgba(0,0,0,.55)}
+.bubble.think{border-color:var(--blue);color:var(--blue);letter-spacing:1px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.seat{width:74px}
+.tablewrap{aspect-ratio:1/1.02}
+.speedrow{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.speedrow .lab{font-family:'JetBrains Mono';font-size:9px;color:var(--muted2);text-transform:uppercase;margin-right:2px}
+.spbtn{flex:1;background:var(--panel2);border:1px solid var(--line2);color:var(--muted);border-radius:8px;padding:7px 4px;font-family:'JetBrains Mono';font-size:10.5px;font-weight:700;cursor:pointer}
+.spbtn.on{background:var(--blue);color:#0a0d14;border-color:var(--blue)}
+.radar-wrap{display:flex;justify-content:center;margin:2px 0}
+.stylebadge{text-align:center;margin-top:6px}
+.stylebadge .nm{font-family:'Archivo';font-weight:800;font-size:26px}
+.stylebadge .d{font-size:12px;color:var(--muted);margin-top:3px}
+.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px}
+.sg{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center}
+.sg .k{font-family:'JetBrains Mono';font-size:8.5px;color:var(--muted);text-transform:uppercase}
+.sg .v{font-family:'Archivo';font-weight:800;font-size:18px;margin-top:2px}
+
+/* v0.5 */
+.streets{display:flex!important;align-items:flex-start;gap:0;margin-bottom:11px;padding:0 8px;position:relative;background:none!important;border:none!important}
+.streets::after{content:'';position:absolute;top:4px;left:13%;right:13%;height:2px;background:#1b222a;z-index:0}
+.stp{flex:1;text-align:center;font-family:'JetBrains Mono';font-size:9px;font-weight:600;color:var(--muted2);background:none!important;border:none!important;border-radius:0!important;padding:0!important;position:relative;z-index:1}
+.stp::before{content:'';display:block;width:9px;height:9px;border-radius:50%;background:#2a333b;margin:0 auto 5px;border:2px solid var(--bg)}
+.stp.done{color:var(--muted)}.stp.done::before{background:var(--muted2)}
+.stp.now{color:var(--blue)}.stp.now::before{background:var(--blue);box-shadow:0 0 7px var(--blue)}
+.sizehdr{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);margin:2px 0 8px}
+.sizes4{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.customrow{margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+.customrow input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;background:linear-gradient(90deg,#2a3a30,var(--blue));outline:none}
+.customrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--blue);border:2px solid #0a0d14}
+.customrow input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--blue);border:2px solid #0a0d14}
+.customline{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.customline .cl{font-family:'JetBrains Mono';font-size:13px;color:var(--text)}.customline .cl b{color:var(--gold)}
+.szb.confirm{width:auto;padding:10px 20px;background:var(--blue);color:#0a0d14;border-color:var(--blue)}
+.myedge{text-align:center;font-size:13px;color:var(--muted);margin:0 0 13px}
+.myedge b{font-family:'JetBrains Mono'}.myedge .pos{color:var(--fine)}.myedge .neg{color:var(--blunder)}
+.lrow{display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;margin-bottom:6px}
+.lrow.me{border-color:var(--blue)}
+.lrow .rk{font-family:'Archivo';font-weight:800;font-size:15px;width:20px;color:var(--muted)}
+.lrow .who{flex:1}.lrow .lname{font-weight:600;font-size:13.5px}.lrow .larch{font-family:'JetBrains Mono';font-size:10px;color:var(--muted)}
+.lrow .lev{font-family:'JetBrains Mono';font-weight:700;font-size:15px;text-align:right}
+.lrow .lev small{display:block;font-size:8px;color:var(--muted2);font-weight:400}
+.lev.pos{color:var(--fine)}.lev.neg{color:var(--blunder)}
+
+/* v0.6 */
+.hbar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.hmoney{font-family:'JetBrains Mono';font-size:11px;color:var(--muted);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hmoney b{color:var(--text)}.hmoney .pos{color:var(--fine)}.hmoney .neg{color:var(--blunder)}
+.hblind{font-family:'JetBrains Mono';font-size:9.5px;color:var(--muted2);white-space:nowrap}
+.gear{background:var(--panel2);border:1px solid var(--line2);color:var(--muted);width:32px;height:30px;border-radius:8px;font-size:15px;cursor:pointer;flex-shrink:0;line-height:1}
+.settings{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px;margin-bottom:7px}
+.setrow{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.setrow .sk{font-family:'JetBrains Mono';font-size:10px;color:var(--muted);width:62px;text-transform:uppercase}
+.seg3{display:flex;gap:5px;flex:1}.seg3 .spbtn{flex:1}
+.tablewrap{aspect-ratio:1/0.92;margin:2px 0 2px}
+#flyLayer{position:absolute;inset:0;pointer-events:none;z-index:7}
+.flychip{position:absolute;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 40% 33%,#ffd76a,#d99a2a);border:2px dashed rgba(255,255,255,.6);transform:translate(-50%,-50%);transition:left .5s cubic-bezier(.3,.7,.3,1),top .5s cubic-bezier(.3,.7,.3,1);box-shadow:0 1px 3px #000;z-index:8}
+.potchips{display:flex;justify-content:center;align-items:flex-end;height:15px;margin-bottom:6px;padding-left:6px}
+.potchips .pchip{width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 40% 33%,#ffd76a,#d99a2a);border:1.5px solid rgba(0,0,0,.35);margin-left:-6px;box-shadow:0 1px 2px #000}
+.handcat{text-align:center;font-family:'JetBrains Mono';font-size:12px;color:var(--muted);margin:3px 0 7px}
+.handcat b{color:var(--gold);font-weight:700}
+.coach{padding:10px 12px}
+.crow .cbtn{padding:13px 6px}
+.foldverdict{font-size:12.5px;line-height:1.5;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.foldverdict.fine{border-color:rgba(52,211,153,.3)}.foldverdict.leak{border-color:rgba(224,133,61,.3)}.foldverdict.blunder{border-color:rgba(226,85,99,.3)}
+.foldverdict .rchip{margin-right:6px}
+#radar circle{transition:cx .55s cubic-bezier(.3,.7,.3,1),cy .55s cubic-bezier(.3,.7,.3,1)}
+.namebox{display:flex;gap:8px;margin-bottom:11px}
+.namebox input{flex:1;background:#101814;border:1px solid var(--line2);color:var(--text);border-radius:9px;padding:9px 11px;font-size:15px;font-family:'Inter'}
+.namebox input:focus{outline:none;border-color:var(--blue)}
+.cloudnote{font-family:'JetBrains Mono';font-size:10px;color:var(--muted2);line-height:1.5;margin-top:8px;padding:9px 11px;background:rgba(110,139,232,.06);border:1px solid rgba(110,139,232,.18);border-radius:9px}
+</style>
+</head>
+<body>
+<div class="bodypad">
+<header><div class="brand">Solver<span class="l">line</span> · Table</div><div class="stamp">build v0.3<br>play engine</div></header>
+
+<!-- PLAY -->
+<section id="play" class="view on">
+ <div class="wrap">
+  <div id="setup">
+    <h2 class="t">Table setup</h2>
+    <p class="sub">Full hands vs bots, preflop through river. Win probability is exact; multiway postflop coaching is an equity model, clearly flagged — not a solve.</p>
+    <div class="panel">
+      <div class="eyebrow">Players (you + bots)</div>
+      <div class="seg" id="seg-players"></div>
+      <div class="eyebrow" style="margin-top:15px">Each opponent's skill</div>
+      <div id="botsliders"></div>
+    </div>
+    <div class="panel">
+      <div class="eyebrow">Blinds / stake</div>
+      <div class="stakes" id="stakes"></div>
+      <div class="custom-row">
+        <div class="field"><label>Small blind</label><input id="csb" inputmode="decimal" value="1"></div>
+        <div class="field"><label>Big blind</label><input id="cbb" inputmode="decimal" value="2"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="eyebrow">Bankroll & buy-in</div>
+      <div class="custom-row" style="margin-top:0">
+        <div class="field"><label>Bankroll ($)</label><input id="bankin" inputmode="decimal" value="2000"></div>
+        <div class="field"><label>Buy-in (big blinds)</label><div class="stepper"><button onclick="biBump(-1)">−</button><div class="val" id="bival">100</div><button onclick="biBump(1)">+</button></div></div>
+      </div>
+      <div class="bi-note" id="binote">Buy-in: $200 (100bb) · standard max</div>
+    </div>
+    <div class="panel">
+      <div class="eyebrow">Mode</div>
+      <div class="seg" id="seg-mode"><button data-m="practice" class="on">Practice · live coach</button><button data-m="ranked">Ranked · review after</button></div>
+    </div>
+    <button class="btn btn-p" onclick="startSession()">Deal me in →</button>
+    <p class="hint">bots: Station · Splashy · TAG · Shark — set each one</p>
+  </div>
+
+  <div id="tableUI" style="display:none">
+    <div class="hbar"><div class="hmoney" id="hmoney">—</div><div class="hblind" id="t-blindlabel"></div><button class="gear" id="gearBtn" onclick="toggleSettings()">&#9881;</button></div>
+    <div class="settings" id="settingsPanel" style="display:none">
+      <div class="setrow"><span class="sk">Pace</span><div class="seg3"><button class="spbtn" id="sp-slow" onclick="setSpeed('slow')">Slow</button><button class="spbtn on" id="sp-normal" onclick="setSpeed('normal')">Normal</button><button class="spbtn" id="sp-fast" onclick="setSpeed('fast')">Fast</button></div></div>
+      <div class="setrow"><span class="sk">On fold</span><div class="seg3"><button class="spbtn on" id="fm-stop" onclick="setFoldMode('stop')">Stop</button><button class="spbtn" id="fm-play" onclick="setFoldMode('play')">Play thru</button></div></div>
+      <div class="setrow"><span class="sk">Coaching</span><div class="seg3"><button class="spbtn on" id="mp-pr" onclick="switchMode('practice')">Practice</button><button class="spbtn" id="mp-rk" onclick="switchMode('ranked')">Ranked</button></div></div>
+      <button class="btn btn-g" style="margin-top:6px;padding:9px" onclick="leaveTable()">Leave table</button>
+    </div>
+    <div class="streets" id="streets"></div>
+    <div class="tablewrap"><div class="felt"></div><div id="flyLayer"></div><div id="seats"></div><div class="center"><div class="pot" id="t-pot">Pot 0</div><div class="potchips" id="potchips"></div><div class="board" id="t-board"></div></div><div id="dealerBtn" class="dealer" style="display:none">D</div></div>
+    <div id="handcat" class="handcat"></div>
+    <div id="coachBox"></div><div id="controlsBox" class="controls"></div><div id="resultBox"></div>
+  
+  </div>
+ </div>
+</section>
+
+<!-- ANALYZER -->
+<section id="analyzer" class="view">
+ <div class="wrap">
+  <h2 class="t">Analyzer</h2>
+  <p class="sub">Tap cards straight off the grid — no pop-ups. Fills your hand first, then the board. Exact win probability, EV, and an honest call, live as you tap.</p>
+  <div class="panel">
+    <div class="slots">
+      <div class="slotgrp"><div class="lab">Your hand</div><div class="slotcards" id="an-hero"></div></div>
+      <div class="slotgrp"><div class="lab">Board</div><div class="slotcards" id="an-board"></div></div>
+    </div>
+    <div class="filltog"><button class="fillbtn on" id="an-fh" onclick="setFill(anState,'hero',renderAn)">Filling: Hand</button><button class="fillbtn" id="an-fb" onclick="setFill(anState,'board',renderAn)">Filling: Board</button><button class="fillbtn" onclick="clearSel(anState,renderAn)">Clear</button></div>
+    <div class="cgrid" id="an-grid"></div>
+    <div class="custom-row" style="grid-template-columns:1fr 1fr 1fr;margin-top:13px">
+      <div class="field"><label>Opponents</label><div class="stepper"><button onclick="anBump(-1)">−</button><div class="val" id="an-opp">2</div><button onclick="anBump(1)">+</button></div></div>
+      <div class="field"><label>Pot</label><input id="an-pot" inputmode="decimal" value="100" oninput="runAnalyze()"></div>
+      <div class="field"><label>To call</label><input id="an-call" inputmode="decimal" value="30" oninput="runAnalyze()"></div>
+    </div>
+    <div id="an-out" style="display:none;margin-top:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="bigeq" id="an-eq">—<small>%</small></span><span class="lab" style="font-family:'JetBrains Mono';font-size:10px;color:var(--muted)" id="an-vs">vs 2</span></div>
+      <div class="statline"><div class="stat"><div class="k">Win / Tie</div><div class="v" id="an-wt">—</div></div><div class="stat"><div class="k">Pot odds</div><div class="v" id="an-po">—</div></div><div class="stat"><div class="k">EV call</div><div class="v" id="an-ev">—</div></div></div>
+      <div class="verdict" id="an-verdict">—</div><div class="note" id="an-note"></div>
+    </div>
+  </div>
+ </div>
+</section>
+
+<!-- QUICK -->
+<section id="quick" class="view">
+ <div class="wrap">
+  <h2 class="t">Quick</h2>
+  <p class="sub">For the live table. Tap your two cards, add the board as it comes, set how many are still in. Equity updates on every tap.</p>
+  <div class="panel">
+    <div class="slots">
+      <div class="slotgrp"><div class="lab">Your hand</div><div class="slotcards" id="q-hero"></div></div>
+      <div class="slotgrp"><div class="lab">Board</div><div class="slotcards" id="q-board"></div></div>
+    </div>
+    <div class="filltog"><button class="fillbtn on" id="q-fh" onclick="setFill(qState,'hero',renderQ)">Filling: Hand</button><button class="fillbtn" id="q-fb" onclick="setFill(qState,'board',renderQ)">Filling: Board</button><button class="fillbtn" onclick="clearSel(qState,renderQ)">Clear</button></div>
+    <div class="cgrid" id="q-grid"></div>
+    <div class="field" style="margin-top:13px"><label>Players still in (incl. you)</label><div class="stepper"><button onclick="qBump(-1)">−</button><div class="val" id="q-in">3</div><button onclick="qBump(1)">+</button></div></div>
+    <div id="q-out" style="display:none;margin-top:14px;text-align:center"><span class="bigeq" id="q-eq">—<small>%</small></span><div class="verdict" id="q-verdict" style="text-align:left">—</div></div>
+  </div>
+ </div>
+</section>
+</div>
+
+<!-- STATS -->
+<section id="stats" class="view">
+ <div class="wrap">
+  <h2 class="t">Your style</h2>
+  <p class="sub">Every hand you play maps you on two axes — how many hands you play (tight↔loose) and how often you bet/raise vs call (passive↔aggressive). One point, your fingerprint.</p>
+  <div class="panel">
+    <div class="radar-wrap" id="radar"></div>
+    <div class="stylebadge" id="styleBadge"></div>
+  </div>
+  <div class="panel">
+    <div class="statgrid">
+      <div class="sg"><div class="k">VPIP</div><div class="v" id="st-vpip">—</div></div>
+      <div class="sg"><div class="k">PFR</div><div class="v" id="st-pfr">—</div></div>
+      <div class="sg"><div class="k">Agg freq</div><div class="v" id="st-agg">—</div></div>
+      <div class="sg"><div class="k">Hands</div><div class="v" id="st-hands">0</div></div>
+    </div>
+    <p class="hint" style="text-align:left;margin-top:10px">VPIP = % of hands you voluntarily put money in preflop · PFR = % you raised · Agg freq = bets+raises / (bets+raises+calls) postflop</p>
+  </div>
+  <div class="myedge" id="myEdge"></div>
+  <h2 class="t">Leaderboard</h2>
+  <p class="sub">Avg EV per hand (bb/100) — are you beating the game? Yours unlocks at 20 hands. Global board ranks everyone who plays.</p>
+  <div id="leaderboard"></div>
+  <button class="btn btn-g" onclick="resetStyle()" style="margin-top:10px">Reset style stats</button>
+ </div>
+</section>
+
+<nav>
+  <button class="on" data-v="play" onclick="go('play')"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="9" ry="6"/><circle cx="12" cy="12" r="1.5"/></svg>Play</button>
+  <button data-v="analyzer" onclick="go('analyzer')"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-6"/></svg>Analyzer</button>
+  <button data-v="quick" onclick="go('quick')"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>Quick</button>
+  <button data-v="stats" onclick="go('stats')"><svg viewBox="0 0 24 24"><path d="M12 3l9 9-9 9-9-9 9-9z"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>Style</button>
+</nav>
+
+<script>
+/* ===== ENGINE ===== */
+const RANKS="23456789TJQKA",SUITS="shdc",SYM={s:'♠',h:'♥',d:'♦',c:'♣'};
+function eval7(cards){const rc=new Array(13).fill(0),sc=new Array(4).fill(0),srm=[0,0,0,0];let rm=0;
+ for(const c of cards){const r=c%13,s=(c/13)|0;rc[r]++;sc[s]++;srm[s]|=(1<<r);rm|=(1<<r);}
+ let fs=-1;for(let s=0;s<4;s++)if(sc[s]>=5){fs=s;break;}
+ if(fs>=0){const h=sH(srm[fs]);if(h>=0)return cat(8,[h]);}
+ let q=[],t=[],p=[];for(let r=12;r>=0;r--){if(rc[r]===4)q.push(r);else if(rc[r]===3)t.push(r);else if(rc[r]===2)p.push(r);}
+ if(q.length)return cat(7,[q[0],hiEx(rm,[q[0]])]);
+ if(t.length>=1&&(t.length>=2||p.length>=1))return cat(6,[t[0],t.length>=2?t[1]:p[0]]);
+ if(fs>=0)return cat(5,tN(srm[fs],5));const sh=sH(rm);if(sh>=0)return cat(4,[sh]);
+ if(t.length)return cat(3,[t[0],...tNE(rm,[t[0]],2)]);
+ if(p.length>=2)return cat(2,[p[0],p[1],hiEx(rm,[p[0],p[1]])]);
+ if(p.length===1)return cat(1,[p[0],...tNE(rm,[p[0]],3)]);return cat(0,tN(rm,5));}
+function cat(c,k){let v=c;for(let i=0;i<5;i++)v=v*16+((k[i]!==undefined&&k[i]>=0)?k[i]+1:0);return v;}
+function sH(m){for(let h=12;h>=4;h--){let ok=1;for(let k=0;k<5;k++)if(!((m>>(h-k))&1)){ok=0;break;}if(ok)return h;}if((m>>12&1)&&(m&1)&&(m&2)&&(m&4)&&(m&8))return 3;return -1;}
+function tN(m,n){const o=[];for(let r=12;r>=0&&o.length<n;r--)if((m>>r)&1)o.push(r);while(o.length<n)o.push(-1);return o;}
+function tNE(m,e,n){const o=[];for(let r=12;r>=0&&o.length<n;r--)if(((m>>r)&1)&&!e.includes(r))o.push(r);while(o.length<n)o.push(-1);return o;}
+function hiEx(m,e){for(let r=12;r>=0;r--)if(((m>>r)&1)&&!e.includes(r))return r;return -1;}
+function catOf(cards){return (eval7(cards)/Math.pow(16,5))|0;}
+const CATNAME=["high card","a pair","two pair","trips","a straight","a flush","a full house","quads","a straight flush"];
+function equityFull(hero,known,nRand,board,iters){
+ const dead=new Set([...hero,...board]);known.forEach(o=>o.forEach(c=>dead.add(c)));
+ const fd=[];for(let c=0;c<52;c++)if(!dead.has(c))fd.push(c);let win=0,tie=0,lose=0;
+ for(let it=0;it<iters;it++){const deck=fd.slice();const need=(5-board.length)+nRand*2;
+  for(let i=0;i<need;i++){const j=i+((Math.random()*(deck.length-i))|0);const x=deck[i];deck[i]=deck[j];deck[j]=x;}
+  let idx=0;const fb=board.slice();while(fb.length<5)fb.push(deck[idx++]);
+  const hs=eval7([...hero,...fb]);let best=-1;
+  for(const o of known){const s=eval7([...o,...fb]);if(s>best)best=s;}
+  for(let o=0;o<nRand;o++){const s=eval7([deck[idx++],deck[idx++],...fb]);if(s>best)best=s;}
+  if(hs>best)win++;else if(hs===best)tie++;else lose++;}
+ const n=win+tie+lose;return{win:win/n,tie:tie/n,lose:lose/n,equity:(win+tie/2)/n};}
+function strength(hole,board,nOpp,iters){return equityFull(hole,[],Math.max(1,nOpp),board,iters||250).equity;}
+
+const ARCH={1:{name:"Station",pfr:.05,cbet:.25,callTh:.30,raiseTh:.80,bluff:.05},
+ 2:{name:"Splashy",pfr:.30,cbet:.65,callTh:.38,raiseTh:.62,bluff:.30},
+ 3:{name:"TAG",pfr:.18,cbet:.55,callTh:.50,raiseTh:.72,bluff:.12},
+ 4:{name:"Shark",pfr:.20,cbet:.60,callTh:.46,raiseTh:.68,bluff:.20}};
+function botDecide(bot,ctx){const a=ARCH[bot.diff];const eq=strength(bot.hole,ctx.board,Math.max(1,ctx.activeCount-1),220);
+ const toCall=ctx.toCall,pot=ctx.pot,pre=ctx.board.length===0;
+ if(toCall<=0){const wantBet=pre?(eq>0.55||Math.random()<a.pfr):(eq>a.callTh+0.12||Math.random()<(eq>0.4?a.cbet:a.bluff));
+  if(wantBet)return{action:'bet',amount:Math.max(ctx.bb,Math.round(pot*(0.5+Math.random()*0.35)))};return{action:'check'};}
+ const price=toCall/(pot+toCall);
+ if(eq>a.raiseTh&&Math.random()<0.6)return{action:'raise',amount:Math.round((pot+toCall)*(0.7+Math.random()*0.4))};
+ if(eq>=price+(a.callTh-0.4))return{action:'call'};
+ if(Math.random()<a.bluff*0.35&&bot.stack>toCall*3)return{action:'raise',amount:Math.round((pot+toCall)*0.8)};
+ if(eq>price*0.85&&Math.random()<0.4)return{action:'call'};return{action:'fold'};}
+function settle(players,board){const live=players.filter(p=>p.committed>0);const pay={};players.forEach(p=>pay[p.id]=0);
+ let levels=[...new Set(live.map(p=>p.committed))].sort((a,b)=>a-b);let prev=0;
+ for(const lvl of levels){const layer=lvl-prev;const contribs=players.filter(p=>p.committed>=lvl);const potSize=layer*contribs.length;
+  const elig=contribs.filter(p=>!p.folded);if(elig.length){let best=-1,w=[];for(const p of elig){const s=eval7([...p.hole,...board]);if(s>best){best=s;w=[p];}else if(s===best)w.push(p);}const sh=potSize/w.length;w.forEach(x=>pay[x.id]+=sh);}else contribs.forEach(p=>pay[p.id]+=layer);prev=lvl;}
+ return pay;}
+
+/* ===== CONTROLLER ===== */
+function freshDeck(){const d=[];for(let c=0;c<52;c++)d.push(c);for(let i=51;i>0;i--){const j=(Math.random()*(i+1))|0;[d[i],d[j]]=[d[j],d[i]];}return d;}
+function makeTable(o){const n=o.numPlayers,seats=[];for(let i=0;i<n;i++)seats.push({id:i,isHero:i===0,name:i===0?'You':('P'+i),diff:o.diffs[i],stack:o.startStack,hole:[],folded:false,allIn:false,streetCommitted:0,totalCommitted:0,acted:false,lastAction:''});
+ return{seats,n,button:(Math.random()*n|0),sb:o.sb,bb:o.bb,board:[],deck:[],street:0,currentBet:0,minRaise:o.bb,handOver:false,result:null,toAct:-1,lastAggressor:-1};}
+function nextActive(t,f){let i=f;for(let k=0;k<t.n;k++){i=(i+1)%t.n;if(!t.seats[i].folded)return i;}return f;}
+function needsAction(t,s){return !s.folded&&!s.allIn&&(!s.acted||s.streetCommitted<t.currentBet);}
+function nextToAct(t,f){let i=f;for(let k=0;k<t.n;k++){i=(i+1)%t.n;if(needsAction(t,t.seats[i]))return i;}return -1;}
+function notFolded(t){return t.seats.filter(s=>!s.folded);}
+function activeNAI(t){return t.seats.filter(s=>!s.folded&&!s.allIn);}
+function potTotal(t){return t.seats.reduce((a,s)=>a+s.totalCommitted,0);}
+function startHand(t){t.deck=freshDeck();t.board=[];t.street=0;t.currentBet=0;t.handOver=false;t.result=null;t.lastAggressor=-1;
+ t.seats.forEach(s=>{s.hole=[];s.folded=s.stack<=0;s.allIn=false;s.streetCommitted=0;s.totalCommitted=0;s.acted=false;s.lastAction='';});
+ for(let r=0;r<2;r++)for(const s of t.seats)if(!s.folded)s.hole.push(t.deck.pop());
+ const sb=nextActive(t,t.button),bb=nextActive(t,sb);postBlind(t,sb,t.sb);postBlind(t,bb,t.bb);
+ t.currentBet=t.bb;t.minRaise=t.bb;t.lastAggressor=bb;t.toAct=nextActive(t,bb);return t;}
+function postBlind(t,i,a){const s=t.seats[i];const d=Math.min(a,s.stack);s.stack-=d;s.streetCommitted=d;s.totalCommitted+=d;if(s.stack===0)s.allIn=true;}
+function options(t,i){const s=t.seats[i];const toCall=t.currentBet-s.streetCommitted;const opts=[{a:'fold'}];
+ if(toCall<=0)opts.push({a:'check'});else opts.push({a:'call',amount:Math.min(toCall,s.stack)});
+ if(s.stack>toCall)opts.push({a:toCall<=0?'bet':'raise',min:Math.min(s.stack,Math.max(t.bb,toCall+t.minRaise)),max:s.stack});
+ return{toCall:Math.max(0,toCall),opts,pot:potTotal(t),stack:s.stack};}
+function applyAction(t,i,action,amount){const s=t.seats[i];const toCall=t.currentBet-s.streetCommitted;
+ if(action==='fold'){s.folded=true;s.lastAction='Fold';}
+ else if(action==='check'){s.lastAction='Check';}
+ else if(action==='call'){const d=Math.min(toCall,s.stack);s.stack-=d;s.streetCommitted+=d;s.totalCommitted+=d;if(s.stack===0)s.allIn=true;s.lastAction=d>0?'Call '+d:'Check';}
+ else{let target=Math.min(amount,s.streetCommitted+s.stack);const d=target-s.streetCommitted;s.stack-=d;s.streetCommitted=target;s.totalCommitted+=d;
+  const rs=target-t.currentBet;if(rs>=t.minRaise)t.minRaise=rs;t.currentBet=Math.max(t.currentBet,target);if(s.stack===0)s.allIn=true;t.lastAggressor=i;s.lastAction=(action==='bet'?'Bet ':'Raise ')+target;}
+ s.acted=true;
+ if(notFolded(t).length===1){endHand(t);return;}
+ t.toAct=nextToAct(t,i);if(t.toAct===-1)endStreet(t);}
+function endStreet(t){t.seats.forEach(s=>{s.streetCommitted=0;s.acted=false;s.lastAction='';});t.currentBet=0;t.minRaise=t.bb;
+ if(t.street>=3){showdown(t);return;}
+ if(t.street===0){t.deck.pop();t.board.push(t.deck.pop(),t.deck.pop(),t.deck.pop());}else{t.deck.pop();t.board.push(t.deck.pop());}
+ t.street++;
+ if(activeNAI(t).length<=1&&notFolded(t).length>=2){endStreet(t);return;}
+ t.toAct=nextActive(t,t.button);if(!needsAction(t,t.seats[t.toAct]))t.toAct=nextToAct(t,t.toAct);if(t.toAct===-1)endStreet(t);}
+function endHand(t){while(t.board.length<5)t.board.push(t.deck.pop());showdown(t);}
+function showdown(t){const players=t.seats.map(s=>({id:s.id,committed:s.totalCommitted,folded:s.folded,hole:s.hole}));const pay=settle(players,t.board);
+ t.seats.forEach(s=>{s.stack+=pay[s.id]||0;});t.result={payouts:pay,net:{}};t.seats.forEach(s=>{t.result.net[s.id]=(pay[s.id]||0)-s.totalCommitted;});t.handOver=true;t.toAct=-1;}
+function stepBots(t){let g=0;while(!t.handOver&&t.toAct!==-1&&g++<400){const s=t.seats[t.toAct];if(s.isHero)return{needHero:true,idx:t.toAct};
+  const o=options(t,t.toAct);const ctx={board:t.board,pot:o.pot,toCall:o.toCall,activeCount:notFolded(t).length,bb:t.bb};const d=botDecide(s,ctx);
+  let action=d.action,amount;
+  if(action==='bet'||action==='raise'){amount=Math.max(t.currentBet+t.minRaise,s.streetCommitted+d.amount);amount=Math.min(amount,s.streetCommitted+s.stack);if(amount<=t.currentBet)action=o.toCall>0?'call':'check';}
+  if(action==='check'&&o.toCall>0)action='call';applyAction(t,t.toAct,action,amount);}
+ if(t.handOver)return{handOver:true};if(t.toAct!==-1&&t.seats[t.toAct].isHero)return{needHero:true,idx:t.toAct};return{handOver:t.handOver};}
+
+
+/* ===== UI STATE ===== */
+let numPlayers=6, botDiffs=[3,3,3,3,3], mode='practice', table=null, decisionLog=[];
+let stake={sb:1,bb:2}, buyInBB=100, bankroll=2000, startNet=2000, buyIn=200;
+let speed='normal', thinkingSeat=-1, lastActor=-1, lastActorText='', foldMode='stop';
+let heroFoldVerdict=null, myName='';
+const SPEEDS={slow:{think:950,pause:1000},normal:{think:600,pause:680},fast:{think:260,pause:320}};
+const STREETNAME=['Preflop','Flop','Turn','River'];
+const STAKES=[{sb:0.1,bb:0.25,t:'home'},{sb:0.25,bb:0.5,t:'home'},{sb:0.5,bb:1,t:'100NL'},{sb:1,bb:2,t:'live'},{sb:1,bb:3,t:'live'},{sb:2,bb:5,t:'live'},{sb:5,bb:10,t:'live'},{sb:0,bb:0,t:'custom'}];
+const ARCHN=['','Station','Splashy','TAG','Shark'];
+let heroVpip=false,heroPfr=false,heroAggr=0,heroCalls=0;
+let pstats=loadPStats();
+function loadPStats(){try{const s=JSON.parse(localStorage.getItem('sl_pstats'));if(s&&typeof s.hands==='number'){if(typeof s.evHands!=='number'){s.evHands=0;s.evNet=0;}delete s.netbb;return s;}}catch(e){}return{hands:0,vpip:0,pfr:0,aggr:0,calls:0,evHands:0,evNet:0};}
+function savePStats(){try{localStorage.setItem('sl_pstats',JSON.stringify(pstats));}catch(e){}}
+try{myName=localStorage.getItem('sl_name')||'';}catch(e){}
+
+/* ===== ONLINE LEADERBOARD (Supabase-ready) ===== */
+const SUPABASE_URL="", SUPABASE_KEY="";   // ← paste your project URL + anon key to turn on the global board
+let cloudRows=null;
+async function cloudFetch(){if(!SUPABASE_URL||!SUPABASE_KEY)return null;
+ try{const p=fetch(SUPABASE_URL+'/rest/v1/leaderboard_poker?select=name,arch,ev,hands&order=ev.desc&limit=25',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});
+  const res=await Promise.race([p,new Promise((_,r)=>setTimeout(()=>r('t'),4000))]);return await res.json();}catch(e){return null;}}
+async function cloudPush(){if(!SUPABASE_URL||!SUPABASE_KEY)return;if(pstats.evHands<20)return;
+ const st=heroStyle();const[nm]=styleName(st.x,st.y);const ev=pstats.evNet/pstats.evHands*100;
+ try{const p=fetch(SUPABASE_URL+'/rest/v1/leaderboard_poker',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},body:JSON.stringify({name:myName||'anon',arch:nm,ev:Math.round(ev*10)/10,hands:pstats.evHands,updated_at:new Date().toISOString()})});
+  await Promise.race([p,new Promise((_,r)=>setTimeout(()=>r('t'),4000))]);}catch(e){}}
+
+function go(v){document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id===v));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));window.scrollTo(0,0);if(v==='stats'){renderStats();cloudFetch().then(r=>{if(r&&r.length){cloudRows=r;renderStats();}});cloudPush();}}
+function money(x){return stake.bb<1?('$'+(Math.round(x*100)/100).toFixed(2)):('$'+Math.round(x));}
+
+/* ---- setup ---- */
+function buildSetup(){const sp=document.getElementById('seg-players');sp.innerHTML='';
+ for(let n=2;n<=8;n++){const b=document.createElement('button');b.textContent=n;if(n===numPlayers)b.classList.add('on');b.onclick=()=>{numPlayers=n;syncBotDiffs();buildSetup();};sp.appendChild(b);}
+ buildBotSliders();buildStakes();updateBuyinNote();}
+function syncBotDiffs(){const need=numPlayers-1;while(botDiffs.length<need)botDiffs.push(3);botDiffs.length=need;}
+function buildBotSliders(){syncBotDiffs();const c=document.getElementById('botsliders');c.innerHTML='';
+ for(let i=0;i<numPlayers-1;i++){const row=document.createElement('div');row.className='botrow';const lv=botDiffs[i];
+  row.innerHTML=`<span class="bn">P${i+1}</span><input type="range" min="1" max="4" step="1" value="${lv}" oninput="setBot(${i},this.value)"><span class="lvl l${lv}" id="botlvl${i}">${ARCHN[lv]}</span>`;c.appendChild(row);}}
+function setBot(i,v){v=+v;botDiffs[i]=v;const el=document.getElementById('botlvl'+i);el.textContent=ARCHN[v];el.className='lvl l'+v;}
+function buildStakes(){const c=document.getElementById('stakes');c.innerHTML='';
+ STAKES.forEach((s)=>{const isCustom=s.t==='custom';const on=isCustom?!STAKES.some(x=>x.t!=='custom'&&x.bb===stake.bb&&x.sb===stake.sb):(s.bb===stake.bb&&s.sb===stake.sb);
+  const b=document.createElement('div');b.className='stk'+(on?' on':'');
+  b.innerHTML=isCustom?`<div class="v">Custom</div><div class="t">set ↓</div>`:`<div class="v">$${s.sb}/$${s.bb}</div><div class="t">${s.t}</div>`;
+  b.onclick=()=>{if(isCustom){document.getElementById('csb').focus();}else{stake={sb:s.sb,bb:s.bb};document.getElementById('csb').value=s.sb;document.getElementById('cbb').value=s.bb;buildStakes();updateBuyinNote();}};c.appendChild(b);});}
+document.addEventListener('input',e=>{if(e.target.id==='csb'||e.target.id==='cbb'){stake={sb:parseFloat(document.getElementById('csb').value)||0.5,bb:parseFloat(document.getElementById('cbb').value)||1};buildStakes();updateBuyinNote();}});
+function biBump(d){buyInBB=Math.max(20,Math.min(300,buyInBB+d*10));document.getElementById('bival').textContent=buyInBB;updateBuyinNote();}
+function updateBuyinNote(){const bi=buyInBB*stake.bb;const tag=buyInBB>=300?'deep':buyInBB<=40?'short':'standard';document.getElementById('binote').textContent=`Buy-in: ${money(bi)} (${buyInBB}bb) · ${tag}`;}
+document.querySelectorAll('#seg-mode button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;document.querySelectorAll('#seg-mode button').forEach(x=>x.classList.toggle('on',x===b));});
+
+/* ---- session / bankroll ---- */
+function startSession(){
+ bankroll=parseFloat(document.getElementById('bankin').value)||2000;
+ stake={sb:parseFloat(document.getElementById('csb').value)||1,bb:parseFloat(document.getElementById('cbb').value)||2};
+ buyIn=Math.round(buyInBB*stake.bb*100)/100;startNet=bankroll;
+ const diffs=[3];for(let i=0;i<numPlayers-1;i++)diffs.push(botDiffs[i]);
+ table=makeTable({numPlayers,diffs,startStack:buyIn,sb:stake.sb,bb:stake.bb});bankroll-=buyIn;
+ document.getElementById('setup').style.display='none';document.getElementById('tableUI').style.display='block';
+ document.getElementById('t-blindlabel').textContent=`$${stake.sb}/$${stake.bb} · ${numPlayers}-max`;
+ syncModePill();syncSpeed();syncFoldMode();newHand();}
+function leaveTable(){bankroll+=table.seats[0].stack;cloudPush();table=null;document.getElementById('settingsPanel').style.display='none';document.getElementById('tableUI').style.display='none';document.getElementById('setup').style.display='block';}
+function toggleSettings(){const p=document.getElementById('settingsPanel');p.style.display=p.style.display==='none'?'block':'none';}
+function switchMode(m){mode=m;syncModePill();}
+function syncModePill(){const a=document.getElementById('mp-pr'),b=document.getElementById('mp-rk');if(a)a.classList.toggle('on',mode==='practice');if(b)b.classList.toggle('on',mode==='ranked');}
+function setSpeed(s){speed=s;syncSpeed();}
+function syncSpeed(){['slow','normal','fast'].forEach(s=>{const el=document.getElementById('sp-'+s);if(el)el.classList.toggle('on',speed===s);});}
+function setFoldMode(m){foldMode=m;syncFoldMode();}
+function syncFoldMode(){const a=document.getElementById('fm-stop'),b=document.getElementById('fm-play');if(a)a.classList.toggle('on',foldMode==='stop');if(b)b.classList.toggle('on',foldMode==='play');}
+function updateBankStrip(){const stack=table.seats[0].stack;const net=bankroll+stack;const sesh=net-startNet;
+ document.getElementById('hmoney').innerHTML=`Bank <b>${money(bankroll)}</b> · Stack <b>${money(stack)}</b> · <span class="${sesh>=0?'pos':'neg'}">${sesh>=0?'+':'-'}${money(Math.abs(sesh))}</span>`;}
+
+function newHand(){
+ table.seats.forEach((s,i)=>{if(i===0){if(s.stack<table.bb){const need=Math.min(buyIn,bankroll+s.stack);bankroll-=(need-s.stack);s.stack=need;}}else{s.stack=buyIn;}});
+ startHand(table);table._counted=false;decisionLog=[];lastActor=-1;lastActorText='';thinkingSeat=-1;heroFoldVerdict=null;
+ heroVpip=false;heroPfr=false;heroAggr=0;heroCalls=0;
+ const fly=document.getElementById('flyLayer');if(fly)fly.innerHTML='';
+ document.getElementById('resultBox').innerHTML='';
+ // animate blinds into the pot
+ table.seats.forEach((s,i)=>{if(s.streetCommitted>0)animateChip(i);});
+ proceed();}
+
+/* ---- pacing ---- */
+function proceed(){
+ renderTable();
+ if(table.handOver){renderResult();return;}
+ const i=table.toAct;if(i===-1)return;
+ if(table.seats[i].isHero){thinkingSeat=-1;renderTable();renderControls();return;}
+ thinkingSeat=i;renderTable();
+ setTimeout(()=>{thinkingSeat=-1;botStep(table);renderTable();setTimeout(proceed,SPEEDS[speed].pause);},SPEEDS[speed].think);}
+function bubbleText(action,amount,callAmt,allin){
+ if(action==='fold')return'Folds';if(action==='check')return'Checks';
+ if(action==='call')return callAmt>0?('Calls '+money(callAmt)):'Checks';
+ if(allin)return'All-in '+money(amount);
+ if(action==='bet')return'Bets '+money(amount);return'Raises to '+money(amount);}
+function botStep(t){const i=t.toAct,s=t.seats[i];const o=options(t,i);
+ const ctx={board:t.board,pot:o.pot,toCall:o.toCall,activeCount:notFolded(t).length,bb:t.bb};const d=botDecide(s,ctx);
+ let action=d.action,amount;if(action==='bet'||action==='raise'){amount=Math.max(t.currentBet+t.minRaise,s.streetCommitted+d.amount);amount=Math.min(amount,s.streetCommitted+s.stack);if(amount<=t.currentBet)action=o.toCall>0?'call':'check';}
+ if(action==='check'&&o.toCall>0)action='call';
+ const callAmt=Math.min(o.toCall,s.stack);const allin=(action!=='fold'&&action!=='check')&&(amount>=s.streetCommitted+s.stack||callAmt>=s.stack);
+ lastActor=i;lastActorText=bubbleText(action,amount,callAmt,allin);
+ if(action==='bet'||action==='raise'||action==='call')animateChip(i);
+ applyAction(t,i,action,amount);}
+
+/* ---- chip animation ---- */
+function animateChip(seatIdx){const layer=document.getElementById('flyLayer');if(!layer)return;
+ const p=seatPos(seatIdx,table.n);const chip=document.createElement('div');chip.className='flychip';chip.style.left=p.x+'%';chip.style.top=p.y+'%';layer.appendChild(chip);
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{chip.style.left='50%';chip.style.top='40%';}));
+ setTimeout(()=>chip.remove(),Math.max(420,SPEEDS[speed].pause*0.85));}
+function renderPotChips(pot){const el=document.getElementById('potchips');if(!el)return;const n=pot<=0?0:Math.max(1,Math.min(16,Math.round(pot/(stake.bb*2))));let h='';for(let i=0;i<n;i++)h+='<span class="pchip"></span>';el.innerHTML=h;}
+
+/* ---- street tracker ---- */
+function renderStreets(){const c=document.getElementById('streets');c.innerHTML='';
+ STREETNAME.forEach((nm,i)=>{const cls=table.handOver?(i<=table.street?'done':''):(i<table.street?'done':i===table.street?'now':'');c.innerHTML+=`<div class="stp ${cls}">${nm}</div>`;});}
+
+/* ---- render table ---- */
+function seatPos(k,n){const ang=(90+k*360/n)*Math.PI/180;let x=50+41*Math.cos(ang),y=50+36*Math.sin(ang);return{x:Math.max(13,Math.min(87,x)),y:Math.max(11,Math.min(86,y))};}
+function miniCard(c,hidden){if(hidden)return`<div class="mc back"></div>`;const r=RANKS[c%13],s=SUITS[(c/13)|0];return`<div class="mc"><span class="s-${s}">${r}</span><span class="su s-${s}">${SYM[s]}</span></div>`;}
+function boardCard(c){const r=RANKS[c%13],s=SUITS[(c/13)|0];return`<div class="bc"><span class="s-${s}">${r}</span><span class="su s-${s}">${SYM[s]}</span></div>`;}
+function handNote(hole){const a=hole[0],b=hole[1];const ra=RANKS[a%13],rb=RANKS[b%13],sa=(a/13)|0,sb=(b/13)|0;
+ if(ra===rb)return`pocket ${ra}${rb}`;return`${ra}${SYM[SUITS[sa]]} ${rb}${SYM[SUITS[sb]]} ${sa===sb?'suited':'offsuit'}`;}
+function renderHandCat(){const t=table,h=t.seats[0];const el=document.getElementById('handcat');if(!el)return;
+ if(!h.hole.length||h.folded){el.innerHTML='';return;}
+ if(t.board.length>=3){el.innerHTML=`<span>You have</span> <b>${CATNAME[catOf([...h.hole,...t.board])]}</b>`;}
+ else{el.innerHTML=`<span>Your hand</span> <b>${handNote(h.hole)}</b>`;}}
+function renderTable(){const t=table;renderStreets();updateBankStrip();
+ document.getElementById('t-pot').textContent='Pot '+money(potTotal(t));renderPotChips(potTotal(t));
+ document.getElementById('t-board').innerHTML=t.board.map(boardCard).join('')||'<span style="color:#3a4a40;font-family:JetBrains Mono;font-size:11px">— preflop —</span>';
+ const seats=document.getElementById('seats');seats.innerHTML='';
+ for(let k=0;k<t.n;k++){const s=t.seats[k];const p=seatPos(k,t.n);const reveal=s.isHero||(t.handOver&&!s.folded);
+  const cards=s.hole.length?`<div class="cards">${s.hole.map(c=>miniCard(c,!reveal)).join('')}</div>`:'';
+  const bub=(k===thinkingSeat)?'<div class="bubble think">• • •</div>':((k===lastActor&&lastActorText&&!t.handOver)?`<div class="bubble">${lastActorText}</div>`:'');
+  const el=document.createElement('div');el.className='seat'+(s.folded?' folded':'')+(t.toAct===k&&!t.handOver?' act':'');el.style.left=p.x+'%';el.style.top=p.y+'%';
+  el.innerHTML=`${bub}<div class="av"><div class="nm">${s.isHero?'You':ARCHN[s.diff]+' '+s.id}</div>${cards}<div class="st">${money(s.stack)}</div></div><div class="cm">${s.streetCommitted>0?'▮ '+money(s.streetCommitted):''}</div>`;
+  seats.appendChild(el);}
+ const bp=seatPos(t.button,t.n);const db=document.getElementById('dealerBtn');db.style.display='flex';db.style.left=(bp.x+(bp.x>50?-9:9))+'%';db.style.top=(bp.y-8)+'%';
+ renderHandCat();}
+
+/* ---- hero controls + coach ---- */
+function renderControls(){
+ const t=table,i=t.toAct,s=t.seats[i];const o=options(t,i);const coach=document.getElementById('coachBox');coach.innerHTML='';
+ if(mode==='practice'){const oppIn=notFolded(t).length-1;const eq=equityFull(s.hole,[],Math.max(1,oppIn),t.board,4000);const pot=o.pot,toCall=o.toCall;
+  const be=toCall>0?toCall/(pot+toCall):0;let rec;
+  if(toCall>0){if(eq.equity>be+0.08)rec=`<b>Call/raise.</b> ${(eq.equity*100).toFixed(0)}% clears the ${(be*100).toFixed(0)}% you need.`;
+   else if(eq.equity>=be)rec=`<b>Thin.</b> Just above the ${(be*100).toFixed(0)}% price — reads & position decide.`;
+   else rec=`<b>Fold-lean.</b> ${(eq.equity*100).toFixed(0)}% is under the ${(be*100).toFixed(0)}% price.`;}
+  else{if(eq.equity>0.62)rec=`<b>Bet for value.</b> Well ahead — size up.`;else if(eq.equity>0.45)rec=`<b>Bet/check mix.</b> Decent equity either way.`;else rec=`<b>Check.</b> Not enough to value bet.`;}
+  coach.innerHTML=`<div class="coach"><div class="eq"><span class="big">${(eq.equity*100).toFixed(1)}%</span><span class="lbl">vs ${oppIn} in${t.board.length?'':' (random)'}</span></div><div class="rec">${rec}</div>${(t.board.length&&oppIn>=2)?'<div class="tagm">multiway model — random ranges, not a solve</div>':''}</div>`;
+ } else { decisionLog.push({street:t.street,oppIn:notFolded(t).length-1,eq:equityFull(s.hole,[],Math.max(1,notFolded(t).length-1),t.board,3500).equity,toCall:o.toCall,pot:o.pot,action:null}); }
+ const cb=document.getElementById('controlsBox');const callOpt=o.opts.find(x=>x.a==='call');const checkOpt=o.opts.find(x=>x.a==='check');const brOpt=o.opts.find(x=>x.a==='bet'||x.a==='raise');
+ const ccLabel=checkOpt?'Check':('Call '+money(callOpt?callOpt.amount:0));
+ cb.innerHTML=`<div class="crow"><button class="cbtn fold" onclick="heroAct('fold')">Fold</button><button class="cbtn cc" onclick="heroAct('${checkOpt?'check':'call'}')">${ccLabel}</button><button class="cbtn br" id="brBtn" onclick="toggleSizes()">${brOpt?(checkOpt?'Bet':'Raise'):'—'}</button></div><div class="sizes" id="sizes" style="display:none" data-open="0"></div>`;
+ if(!brOpt)document.getElementById('brBtn').disabled=true;}
+function toggleSizes(){
+ const t=table,i=t.toAct,s=t.seats[i];const o=options(t,i);const sz=document.getElementById('sizes');
+ if(sz.dataset.open==='1'){sz.style.display='none';sz.dataset.open='0';return;}
+ const pot=o.pot,toCall=o.toCall,base=s.streetCommitted,maxT=Math.round((base+s.stack)*100)/100;const minT=Math.min(maxT,t.currentBet+t.minRaise);
+ function target(f){let tg=(toCall<=0)?(base+f*pot):(t.currentBet+f*pot);tg=Math.max(tg,minT);return Math.min(Math.round(tg*100)/100,maxT);}
+ const half=target(.5),tq=target(.75),full=target(1);const verb=toCall<=0?'bet':'raise';
+ sz.innerHTML=`<div class="sizehdr">${toCall<=0?'Bet':'Raise'} — % of the ${money(pot)} pot · min ${money(minT)}</div>
+  <div class="sizes4">
+   <button class="szb" onclick="heroAct('${verb}',${half})">½ pot<span class="a">${money(half)}</span></button>
+   <button class="szb" onclick="heroAct('${verb}',${tq})">¾ pot<span class="a">${money(tq)}</span></button>
+   <button class="szb" onclick="heroAct('${verb}',${full})">Pot<span class="a">${money(full)}</span></button>
+   <button class="szb" onclick="heroAct('${verb}',${maxT})">All-in<span class="a">${money(maxT)}</span></button></div>
+  <div class="customrow"><input type="range" id="raiseSlider" min="${minT}" max="${maxT}" step="${stake.bb<1?0.25:1}" value="${full}" oninput="document.getElementById('raiseVal').textContent=money(+this.value)">
+   <div class="customline"><span class="cl">${toCall<=0?'Bet to':'Raise to'} <b id="raiseVal">${money(full)}</b></span><button class="szb confirm" onclick="heroAct('${verb}',+document.getElementById('raiseSlider').value)">Confirm</button></div></div>`;
+ sz.style.display='block';sz.dataset.open='1';}
+function assessFold(eq,be,toCall){
+ if(toCall<=0)return{cls:'leak',chip:'✗ Odd',txt:`You folded with a free check — gave up a costless look (${(eq*100).toFixed(0)}% equity).`};
+ if(eq>be+0.12)return{cls:'blunder',chip:'✗ Bad fold',txt:`You had ${(eq*100).toFixed(0)}% and only needed ${(be*100).toFixed(0)}% — that was a call. Over-fold.`};
+ if(eq>be)return{cls:'leak',chip:'✗ Tight',txt:`Slightly tight — ${(eq*100).toFixed(0)}% vs the ${(be*100).toFixed(0)}% price. Marginal fold.`};
+ return{cls:'fine',chip:'✓ Good fold',txt:`Good fold — ${(eq*100).toFixed(0)}% was below the ${(be*100).toFixed(0)}% price.`};}
+function renderFoldedStop(){const t=table;const loss=t.seats[0].totalCommitted;commitStats(-loss);
+ renderTable();document.getElementById('coachBox').innerHTML='';document.getElementById('controlsBox').innerHTML='';
+ const fv=heroFoldVerdict;
+ document.getElementById('resultBox').innerHTML=`<div class="panel"><div class="result"><div class="big" style="color:var(--muted)">You folded</div><div class="net neg">-${money(loss)}</div></div>${fv?`<div class="foldverdict ${fv.cls}"><span class="rchip ${fv.cls}">${fv.chip}</span> ${fv.txt}</div>`:''}<button class="btn btn-p" style="margin-top:12px" onclick="newHand()">Next hand →</button></div>`;
+ document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'nearest'});}
+function heroAct(action,amount){
+ const t=table,i=t.toAct,s=t.seats[i];const o=options(t,i);const callAmt=Math.min(o.toCall,s.stack);
+ if(action==='fold'){const oppIn=notFolded(t).length-1;const eq=equityFull(s.hole,[],Math.max(1,oppIn),t.board,3000).equity;const be=o.toCall>0?o.toCall/(o.pot+o.toCall):0;heroFoldVerdict=assessFold(eq,be,o.toCall);}
+ if(t.street===0){if((action==='call'&&o.toCall>0)||action==='raise'||action==='bet')heroVpip=true;if(action==='raise'||action==='bet')heroPfr=true;}
+ else{if(action==='raise'||action==='bet')heroAggr++;else if(action==='call'&&o.toCall>0)heroCalls++;}
+ if(mode==='ranked'&&decisionLog.length){decisionLog[decisionLog.length-1].action=(action==='check'?'check':action==='call'?'call':action==='fold'?'fold':(amount>=s.streetCommitted+s.stack?'allin':'raise'));}
+ const allin=(action!=='fold'&&action!=='check')&&(amount>=s.streetCommitted+s.stack);
+ lastActor=i;lastActorText=bubbleText(action,amount,callAmt,allin);
+ if(action==='bet'||action==='raise'||(action==='call'&&callAmt>0))animateChip(i);
+ document.getElementById('coachBox').innerHTML='';document.getElementById('controlsBox').innerHTML='';
+ applyAction(t,i,action,amount);
+ if(action==='fold'&&foldMode==='stop'&&!t.handOver){renderFoldedStop();return;}
+ setTimeout(proceed,SPEEDS[speed].pause);}
+
+/* ---- result + review ---- */
+function commitStats(netChips){if(table._counted)return;table._counted=true;pstats.hands++;if(heroVpip)pstats.vpip++;if(heroPfr)pstats.pfr++;pstats.aggr+=heroAggr;pstats.calls+=heroCalls;pstats.evHands++;pstats.evNet+=netChips/stake.bb;savePStats();}
+function renderResult(){
+ renderTable();const t=table;commitStats(t.result.net[0]);const heroNet=t.result.net[0];const winners=Object.keys(t.result.payouts).filter(id=>t.result.payouts[id]>0).map(id=>+id);const sd=notFolded(t).length>1;
+ let head=heroNet>0?'You win':heroNet<0?'You lose':'Chop';if(!sd&&winners.includes(0))head='You take it';
+ let html=`<div class="panel"><div class="result"><div class="big">${head}</div><div class="net ${heroNet>=0?'pos':'neg'}">${heroNet>=0?'+':'-'}${money(Math.abs(heroNet))}</div></div>`;
+ if(t.seats[0].hole.length&&t.board.length===5&&!t.seats[0].folded){html+=`<div style="text-align:center;font-family:JetBrains Mono;font-size:11px;color:var(--muted);margin-top:4px">You had ${CATNAME[catOf([...t.seats[0].hole,...t.board])]}</div>`;}
+ if(heroFoldVerdict){html+=`<div class="foldverdict ${heroFoldVerdict.cls}" style="margin-top:8px"><span class="rchip ${heroFoldVerdict.cls}">${heroFoldVerdict.chip}</span> ${heroFoldVerdict.txt}</div>`;}
+ if(mode==='ranked'&&decisionLog.some(d=>d.action)){html+='<div class="rev"><div class="eyebrow" style="margin-top:10px">Decision review</div>';
+  decisionLog.forEach(d=>{if(!d.action)return;const a=assess(d);html+=`<div class="revrow"><div class="top"><span class="rchip ${a.rating}">${a.chip}</span><span class="st">${STREETNAME[d.street]} · ${(d.eq*100).toFixed(0)}% vs ${d.oppIn}</span></div><div class="tx">${a.why}</div></div>`;});html+='</div>';}
+ html+=`<button class="btn btn-p" style="margin-top:12px" onclick="newHand()">Next hand →</button></div>`;
+ document.getElementById('resultBox').innerHTML=html;document.getElementById('resultBox').scrollIntoView({behavior:'smooth',block:'nearest'});updateBankStrip();}
+function assess(d){const be=d.toCall>0?d.toCall/(d.pot+d.toCall):0;const eq=d.eq;let rating,chip,why;
+ if(d.action==='fold'){if(d.toCall<=0){rating='leak';chip='✗ Odd';why=`Folded with a free check available (${(eq*100).toFixed(0)}% equity).`;}
+  else if(eq>be+0.12){rating='blunder';chip='✗ Blunder';why=`Folded ${(eq*100).toFixed(0)}% needing only ${(be*100).toFixed(0)}% — clear call. <b>Over-fold.</b>`;}
+  else if(eq>be){rating='leak';chip='✗ Leak';why=`Folded just above the price (${(eq*100).toFixed(0)}% vs ${(be*100).toFixed(0)}%). Slightly tight.`;}
+  else{rating='fine';chip='✓ Fine';why=`Good fold — ${(eq*100).toFixed(0)}% is below the ${(be*100).toFixed(0)}% price.`;}}
+ else if(d.action==='call'){if(eq>=be-0.03){rating='fine';chip='✓ Fine';why=`Call justified — ${(eq*100).toFixed(0)}% covers the ${(be*100).toFixed(0)}% price.`;}else{rating='leak';chip='✗ Loose';why=`Called the ${(be*100).toFixed(0)}% price with ${(eq*100).toFixed(0)}% — a touch loose.`;}}
+ else if(d.action==='check'){rating='fine';chip='✓ Fine';why=`Check is fine at ${(eq*100).toFixed(0)}% — controls the pot.`;}
+ else{if(eq>0.55){rating='fine';chip='✓ Value';why=`Aggression at ${(eq*100).toFixed(0)}% is a value bet/raise — good.`;}else if(eq>0.40){rating='mix';chip='≈ Mixed';why=`Semi-bluff at ${(eq*100).toFixed(0)}% — fine as a mix.`;}else{rating='leak';chip='✗ Spew';why=`Jammed/raised at ${(eq*100).toFixed(0)}% — light. <b>Spew risk.</b>`;}}
+ return{rating,chip,why};}
+
+/* ===== STYLE + LEADERBOARD ===== */
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function styleName(x,y){const loose=x>0.18,tight=x<-0.18,agg=y>0.18,pass=y<-0.18;
+ if(tight&&agg)return['TAG','Tight-aggressive — solid and value-driven'];
+ if(loose&&agg)return['LAG','Loose-aggressive — piling on pressure'];
+ if(tight&&pass)return['ROCK','Tight-passive — nitty, waits for it'];
+ if(loose&&pass)return['FISH','Loose-passive — calling too much'];
+ return['BALANCED','Right in the mix — hard to read'];}
+function heroStyle(){const h=pstats.hands;const vpip=h?pstats.vpip/h*100:0;const den=pstats.aggr+pstats.calls;const aggF=den?pstats.aggr/den:0.5;
+ const x=clamp((vpip-25)/18,-1,1),y=clamp((aggF-0.4)/0.28,-1,1);return{x,y,vpip,pfr:h?pstats.pfr/h*100:0,aggF,h};}
+function renderStats(){
+ const st=heroStyle();const gated=st.h<12;const cx=140,cy=140,R=104;
+ const dia=s=>`${cx},${cy-R*s} ${cx+R*s},${cy} ${cx},${cy+R*s} ${cx-R*s},${cy}`;
+ const px=cx+st.x*R,py=cy-st.y*R;
+ let svg=`<svg viewBox="0 0 280 280" width="100%" style="max-width:300px">
+  <polygon points="${dia(1)}" fill="none" stroke="#222A31"/><polygon points="${dia(0.66)}" fill="none" stroke="#1b222a"/><polygon points="${dia(0.33)}" fill="none" stroke="#1b222a"/>
+  <line x1="${cx}" y1="${cy-R}" x2="${cx}" y2="${cy+R}" stroke="#1b222a"/><line x1="${cx-R}" y1="${cy}" x2="${cx+R}" y2="${cy}" stroke="#1b222a"/>
+  <text x="${cx}" y="22" fill="#D75A4A" font-family="Archivo" font-weight="700" font-size="13" text-anchor="middle">Aggressive</text>
+  <text x="${cx}" y="272" fill="#6E8BE8" font-family="Archivo" font-weight="700" font-size="13" text-anchor="middle">Passive</text>
+  <text x="6" y="144" fill="#B07BD6" font-family="Archivo" font-weight="700" font-size="13">Tight</text>
+  <text x="232" y="144" fill="#E6B93F" font-family="Archivo" font-weight="700" font-size="13">Loose</text>
+  <text x="54" y="62" fill="#5A6671" font-family="JetBrains Mono" font-size="11">TAG</text><text x="198" y="62" fill="#5A6671" font-family="JetBrains Mono" font-size="11">LAG</text>
+  <text x="50" y="230" fill="#5A6671" font-family="JetBrains Mono" font-size="11">ROCK</text><text x="196" y="230" fill="#5A6671" font-family="JetBrains Mono" font-size="11">FISH</text>`;
+ svg+=gated?`<circle cx="${cx}" cy="${cy}" r="5" fill="#2C353D"/>`:`<circle cx="${px}" cy="${py}" r="13" fill="#6E8BE8" opacity="0.25"/><circle cx="${px}" cy="${py}" r="6.5" fill="#6E8BE8" stroke="#0B0E11" stroke-width="2"/>`;
+ svg+=`</svg>`;document.getElementById('radar').innerHTML=svg;
+ const [nm,desc]=styleName(st.x,st.y);
+ document.getElementById('styleBadge').innerHTML=gated?`<div class="nm" style="color:var(--muted2)">—</div><div class="d">Play ${12-st.h} more hand${12-st.h===1?'':'s'} to map your style</div>`:`<div class="nm">${nm}</div><div class="d">${desc}</div>`;
+ document.getElementById('st-vpip').textContent=st.h?st.vpip.toFixed(0)+'%':'—';
+ document.getElementById('st-pfr').textContent=st.h?st.pfr.toFixed(0)+'%':'—';
+ document.getElementById('st-agg').textContent=(st.h&&(pstats.aggr+pstats.calls))?st.aggF.toFixed(2):'—';
+ document.getElementById('st-hands').textContent=st.h;
+ const evReady=pstats.evHands>=20;const avg=pstats.evHands?pstats.evNet/pstats.evHands*100:0;
+ document.getElementById('myEdge').innerHTML=evReady?`Your avg EV: <b class="${avg>=0?'pos':'neg'}">${avg>=0?'+':''}${avg.toFixed(1)} bb/100</b> over ${pstats.evHands} hands`:`Your avg EV: <b style="color:var(--muted2)">needs ${20-pstats.evHands} more hands</b> (fresh this version)`;
+ // leaderboard
+ const cloudOn=!!(SUPABASE_URL&&SUPABASE_KEY);
+ const me={n:myName||'You',arch:gated?'—':nm,ev:evReady?avg:null,me:true,hands:pstats.evHands};
+ let rows=[];
+ if(cloudRows&&cloudRows.length){rows=cloudRows.map(r=>({n:r.name,arch:r.arch,ev:r.ev,hands:r.hands,me:(r.name===(myName||'You'))}));if(!rows.some(r=>r.me)&&evReady)rows.push(me);}
+ else{rows=evReady?[me]:[];}
+ rows.sort((a,b)=>(b.ev??-1e9)-(a.ev??-1e9));
+ let lb='';
+ lb+=`<div class="namebox"><input id="lbName" placeholder="Your name for the board" value="${(myName||'').replace(/"/g,'')}" maxlength="16"><button class="szb confirm" onclick="saveLbName()">Save</button></div>`;
+ if(rows.length){rows.forEach((r,i)=>{lb+=`<div class="lrow ${r.me?'me':''}"><div class="rk">${i+1}</div><div class="who"><div class="lname">${esc(r.n)}</div><div class="larch">${r.arch}</div></div><div class="lev ${r.ev>=0?'pos':'neg'}">${r.ev>=0?'+':''}${(+r.ev).toFixed(1)}<small>bb/100</small></div></div>`;});}
+ else{lb+=`<div class="lrow me"><div class="rk">—</div><div class="who"><div class="lname">${esc(myName||'You')}</div><div class="larch">${me.arch}</div></div><div class="lev" style="color:var(--muted2)">—<small>${pstats.evHands}/20 hands</small></div></div>`;}
+ if(!cloudOn)lb+=`<div class="cloudnote">Global board is off. Add a Supabase URL + anon key in the source to rank against everyone who plays.</div>`;
+ document.getElementById('leaderboard').innerHTML=lb;}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+function saveLbName(){myName=document.getElementById('lbName').value.trim();try{localStorage.setItem('sl_name',myName);}catch(e){}cloudPush();renderStats();}
+function resetStyle(){if(confirm('Reset your style + EV stats?')){pstats={hands:0,vpip:0,pfr:0,aggr:0,calls:0,evHands:0,evNet:0};savePStats();renderStats();}}
+
+/* ===== FAST CARD SELECTOR ===== */
+function newSel(){return{hero:[],board:[],fill:'hero'};}
+let anState=newSel(),qState=newSel();
+function selUsed(st){return new Set([...st.hero,...st.board]);}
+function tapCard(st,c,render){const ih=st.hero.indexOf(c),ib=st.board.indexOf(c);
+ if(ih>=0){st.hero.splice(ih,1);render();return;}if(ib>=0){st.board.splice(ib,1);render();return;}
+ if(st.fill==='hero'){if(st.hero.length<2){st.hero.push(c);if(st.hero.length===2)st.fill='board';}else{st.fill='board';if(st.board.length<5)st.board.push(c);}}else{if(st.board.length<5)st.board.push(c);}render();}
+function setFill(st,f,render){st.fill=f;render();}
+function clearSel(st,render){st.hero=[];st.board=[];st.fill='hero';render();}
+function slotCard(c){if(c===undefined||c===null)return`<div class="pcard empty">+</div>`;const r=RANKS[c%13],s=SUITS[(c/13)|0];return`<div class="pcard"><span class="s-${s}">${r}</span><span class="su s-${s}">${SYM[s]}</span></div>`;}
+function renderGrid(gridId,st,render){const u=selUsed(st);const g=document.getElementById(gridId);let html='';
+ for(let s=0;s<4;s++){html+='<div class="crow2">';for(let r=0;r<13;r++){const c=s*13+r;const sel=u.has(c);html+=`<div class="cg s-${SUITS[s]}${sel?' sel':''}" data-c="${c}"><span class="s-${SUITS[s]}">${RANKS[r]}${SYM[SUITS[s]]}</span></div>`;}html+='</div>';}
+ g.innerHTML=html;g.querySelectorAll('.cg').forEach(el=>el.onclick=()=>tapCard(st,+el.dataset.c,render));}
+function renderSlots(heroId,boardId,st){document.getElementById(heroId).innerHTML=slotCard(st.hero[0])+slotCard(st.hero[1]);let bh='';for(let i=0;i<5;i++)bh+=slotCard(st.board[i]);document.getElementById(boardId).innerHTML=bh;}
+let anOpp=2;
+function renderAn(){renderSlots('an-hero','an-board',anState);renderGrid('an-grid',anState,renderAn);
+ document.getElementById('an-fh').classList.toggle('on',anState.fill==='hero');document.getElementById('an-fb').classList.toggle('on',anState.fill==='board');runAnalyze();}
+function anBump(d){anOpp=Math.max(1,Math.min(8,anOpp+d));document.getElementById('an-opp').textContent=anOpp;runAnalyze();}
+function runAnalyze(){const hero=anState.hero,board=anState.board;if(hero.length!==2||board.length===1||board.length===2){document.getElementById('an-out').style.display='none';return;}
+ const r=equityFull(hero,[],anOpp,board,9000);const pot=parseFloat(document.getElementById('an-pot').value)||0,call=parseFloat(document.getElementById('an-call').value)||0;
+ document.getElementById('an-out').style.display='block';document.getElementById('an-eq').innerHTML=(r.equity*100).toFixed(1)+'<small>%</small>';
+ document.getElementById('an-vs').textContent='vs '+anOpp;document.getElementById('an-wt').textContent=(r.win*100).toFixed(0)+' / '+(r.tie*100).toFixed(0);
+ const be=call>0?call/(pot+call):0;document.getElementById('an-po').textContent=call>0?(pot/call).toFixed(1)+':1':'—';
+ const ev=call>0?(r.equity*(pot+call)-call):0;document.getElementById('an-ev').textContent=call>0?((ev>=0?'+':'')+ev.toFixed(0)):'—';
+ const v=document.getElementById('an-verdict');
+ if(call<=0){v.className='verdict thin';v.textContent='No price set — equity only.';}else if(r.equity>be+0.06){v.className='verdict take';v.textContent='Call — ahead of the price.';}else if(r.equity>=be){v.className='verdict thin';v.textContent='Thin call — just ahead, reads decide.';}else{v.className='verdict fold';v.textContent='Fold — price beats your equity.';}
+ document.getElementById('an-note').textContent=(anOpp>=2&&board.length>0)?'Multiway equity assumes random opponent ranges — a model, not a solve.':'Equity vs random hands. Real ranges shift this.';}
+let qIn=3;
+function renderQ(){renderSlots('q-hero','q-board',qState);renderGrid('q-grid',qState,renderQ);
+ document.getElementById('q-fh').classList.toggle('on',qState.fill==='hero');document.getElementById('q-fb').classList.toggle('on',qState.fill==='board');qAuto();}
+function qBump(d){qIn=Math.max(2,Math.min(9,qIn+d));document.getElementById('q-in').textContent=qIn;qAuto();}
+function qAuto(){const hero=qState.hero,board=qState.board;if(hero.length!==2||board.length===1||board.length===2){document.getElementById('q-out').style.display='none';return;}
+ const r=equityFull(hero,[],qIn-1,board,5000);document.getElementById('q-out').style.display='block';document.getElementById('q-eq').innerHTML=(r.equity*100).toFixed(1)+'<small>%</small>';
+ const fair=1/qIn*100,e=r.equity*100;const v=document.getElementById('q-verdict');
+ if(e>fair*1.4){v.className='verdict take';v.textContent=`Strong — ${e.toFixed(0)}% vs a ${fair.toFixed(0)}% fair share. Bet/raise.`;}else if(e>fair){v.className='verdict thin';v.textContent=`Ahead of fair share (${fair.toFixed(0)}%). Continue, control pot.`;}else{v.className='verdict fold';v.textContent=`Below ${fair.toFixed(0)}% fair share — needs odds or a read.`;}}
+
+/* ---- init ---- */
+buildSetup();renderAn();renderQ();
+</script>
+</body>
+</html>
