@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#16130f">
+<title>Flip Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16130f; --concrete:#e4e2dc; --paper:#f5f1e6; --paper-line:#ded7c4;
+    --marker:#d93b2b; --highlight:#f2c14e; --muted:#726c60; --line:#c9c5ba;
+    --ok:#2f7d52; --pend:#c8811f; --blue:#2b5fb0;
+    --card-shadow:0 1px 0 rgba(0,0,0,.04), 0 6px 16px rgba(20,16,12,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif; background:var(--concrete); color:var(--ink);
+    padding:0 0 96px; line-height:1.45;
+    background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1.4px); background-size:6px 6px;
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 14px}
+  header{background:var(--ink);color:var(--paper);padding:18px 0 16px;margin-bottom:14px;border-bottom:3px solid var(--marker)}
+  .brand{display:flex;align-items:baseline;gap:10px}
+  .brand h1{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:34px;line-height:.9;margin:0}
+  .brand .tag{font-family:'Space Mono',monospace;font-size:11px;color:var(--highlight)}
+  .sub{font-size:12.5px;color:#b8b2a4;margin-top:4px}
+
+  .ticket{background:var(--paper);border-radius:10px;margin-top:14px;padding:14px 14px 12px;box-shadow:var(--card-shadow);border:1px solid var(--paper-line);position:relative;overflow:hidden}
+  .ticket::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--marker)}
+  .ticket h2{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:14px;margin:0 0 10px;color:var(--muted)}
+  .duel{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:8px}
+  .deal{border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;background:#fff}
+  .deal.win{border-color:var(--ink);background:var(--highlight)}
+  .deal .lbl{font-family:'Space Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--muted)}
+  .deal.win .lbl{color:var(--ink)}
+  .deal .amt{font-family:'Space Mono',monospace;font-weight:700;font-size:22px;margin-top:2px}
+  .deal .note{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .vs{align-self:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:15px}
+  .verdict{margin-top:10px;font-size:12.5px}
+  .hoursrow{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12.5px;color:var(--muted)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 6px;text-align:center}
+  .stat .n{font-family:'Space Mono',monospace;font-weight:700;font-size:16px}
+  .stat .k{font-size:9.5px;text-transform:uppercase;color:var(--muted);margin-top:1px}
+
+  .shead{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:15px;color:var(--muted);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+  .shead::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .card{background:var(--paper);border:1px solid var(--paper-line);border-radius:10px;box-shadow:var(--card-shadow)}
+
+  /* snap */
+  .snap{padding:14px;text-align:center}
+  .snapbtn{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:19px;background:var(--ink);color:var(--paper);border:none;border-radius:10px;padding:16px;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+  .snapbtn:active{transform:translateY(1px)}
+  .snapbtn svg{width:22px;height:22px;stroke:var(--highlight)}
+  .snaphint{font-size:11.5px;color:var(--muted);margin-top:8px}
+  .preview{margin-top:12px;display:none}
+  .preview img{max-width:100%;max-height:220px;border-radius:9px;border:1px solid var(--line)}
+  .analyzing{display:none;align-items:center;gap:10px;justify-content:center;padding:14px;color:var(--muted);font-family:'Space Mono',monospace;font-size:13px}
+  .spinner{width:18px;height:18px;border:2.5px solid var(--line);border-top-color:var(--marker);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .result{display:none;margin-top:12px;text-align:left;border-top:1px dashed var(--line);padding-top:12px}
+  .result .rname{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:22px;line-height:1}
+  .result .rcat{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+  .pricerow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
+  .pbox{background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:9px 8px;text-align:center}
+  .pbox.ask{border-color:var(--marker)}
+  .pbox.floor{border-color:var(--muted)}
+  .pbox .pv{font-family:'Space Mono',monospace;font-weight:700;font-size:18px}
+  .pbox.ask .pv{color:var(--marker)}
+  .pbox .pk{font-size:9.5px;text-transform:uppercase;color:var(--muted);margin-top:1px}
+  .rnotes{font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:7px;padding:9px 10px;margin-bottom:10px}
+  .comps{margin-bottom:12px}
+  .comps .ct{font-family:'Space Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .comp{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--paper-line)}
+  .comp .cp{font-family:'Space Mono',monospace;font-weight:700;white-space:nowrap}
+  .comp .cs{color:var(--muted);font-size:10.5px}
+  .rerr{display:none;background:#fdeceb;border:1px solid var(--marker);color:#8f2318;font-size:12.5px;border-radius:7px;padding:10px;margin-top:10px}
+
+  form.add{padding:14px}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .f{display:flex;flex-direction:column;gap:4px}
+  .f.full{grid-column:1/-1}
+  label{font-family:'Space Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--muted)}
+  input,select,textarea{font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:7px;padding:9px 10px;width:100%}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
+  textarea{resize:vertical;min-height:52px}
+  .price-in{position:relative}
+  .price-in::before{content:"$";position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-family:'Space Mono',monospace;font-size:14px}
+  .price-in input{padding-left:22px;font-family:'Space Mono',monospace}
+  .btn{font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:16px;border:none;border-radius:8px;padding:12px;cursor:pointer;transition:transform .05s,filter .15s}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--marker);color:#fff;width:100%;margin-top:12px}
+  .btn-dark{background:var(--ink);color:var(--paper);width:100%;margin-top:10px}
+
+  .togglemanual{background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;text-decoration:underline;cursor:pointer;padding:8px;display:block;margin:6px auto 0}
+
+  .chips{display:flex;gap:7px;margin:14px 0 10px;overflow-x:auto;padding-bottom:2px}
+  .chip{flex:0 0 auto;font-family:'Space Mono',monospace;font-size:12px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;white-space:nowrap}
+  .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+  .items{display:flex;flex-direction:column;gap:10px}
+  .item{background:var(--paper);border:1px solid var(--paper-line);border-radius:10px;box-shadow:var(--card-shadow);padding:12px 14px;position:relative}
+  .item .hole{position:absolute;top:12px;right:13px;width:13px;height:13px;border-radius:50%;background:var(--concrete);box-shadow:inset 0 0 0 1.5px var(--line)}
+  .item .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .item .name{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:20px;line-height:1;padding-right:22px}
+  .item .cat{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+  .prices{display:flex;gap:16px;margin-top:9px;align-items:baseline}
+  .prices .ask{font-family:'Space Mono',monospace;font-weight:700;font-size:22px;color:var(--marker)}
+  .prices .floor{font-family:'Space Mono',monospace;font-size:12.5px;color:var(--muted)}
+  .prices .floor b{color:var(--ink)}
+  .pill{font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1.5px solid}
+  .pill.available{color:var(--ink);border-color:var(--line);background:#fff}
+  .pill.pending{color:#fff;border-color:var(--pend);background:var(--pend)}
+  .pill.sold{color:#fff;border-color:var(--ok);background:var(--ok)}
+  .soldnote{font-family:'Space Mono',monospace;font-size:11.5px;color:var(--ok);margin-top:7px}
+  .actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+  .mini{font-family:'Space Mono',monospace;font-size:11.5px;padding:7px 11px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+  .mini:active{transform:translateY(1px)}
+  .mini.go{border-color:var(--ok);color:var(--ok)}
+  .mini.ghost{border:none;color:var(--muted);margin-left:auto}
+  .empty{text-align:center;color:var(--muted);padding:34px 16px;font-size:13.5px}
+  .empty .big{font-family:'Barlow Condensed',sans-serif;font-size:19px;color:var(--ink);text-transform:uppercase;margin-bottom:4px}
+
+  .scrim{position:fixed;inset:0;background:rgba(20,16,12,.55);display:none;align-items:flex-end;justify-content:center;z-index:40}
+  .scrim.show{display:flex}
+  .sheet{background:var(--concrete);width:100%;max-width:640px;border-radius:16px 16px 0 0;max-height:90vh;overflow:auto;padding:16px 16px 28px}
+  .sheet h3{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;font-size:22px;margin:4px 0 14px}
+  .listing-box{background:var(--paper);border:1px dashed var(--ink);border-radius:9px;padding:13px;font-family:'Space Mono',monospace;font-size:13px;white-space:pre-wrap;line-height:1.5}
+  .copied{color:var(--ok);font-family:'Space Mono',monospace;font-size:12px;margin-left:8px;opacity:0;transition:opacity .2s}
+  .copied.on{opacity:1}
+  .storewarn{background:#fff3d6;border:1px solid var(--pend);color:#7a5410;font-size:11.5px;border-radius:7px;padding:7px 10px;margin-top:10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand"><h1>Flip Sheet</h1><span class="tag">// dad's garage lot</span></div>
+    <div class="sub">Snap a photo, get a price, log the sale. Facebook Marketplace only.</div>
+
+    <div class="ticket">
+      <h2>Your cut — live</h2>
+      <div class="duel">
+        <div class="deal" id="dealComm"><div class="lbl">Commission</div><div class="amt" id="commAmt">$0</div><div class="note">33% of final prices</div></div>
+        <div class="vs">VS</div>
+        <div class="deal" id="dealHour"><div class="lbl">Hourly</div><div class="amt" id="hourAmt">$0</div><div class="note">$16 × hours</div></div>
+      </div>
+      <div class="hoursrow">
+        <label for="hours" style="text-transform:none;font-family:inherit;font-size:12.5px;color:var(--muted)">Hours worked</label>
+        <div class="price-in" style="width:80px"><input id="hours" type="number" min="0" step="0.5" value="0" inputmode="decimal" style="padding-left:10px"></div>
+      </div>
+      <div class="verdict" id="verdict"></div>
+      <div class="storewarn" id="storeWarn" style="display:none">Saved data won't survive a reload here. Keep this tab open, or ask me to help you host it.</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n" id="stCount">0</div><div class="k">Items</div></div>
+      <div class="stat"><div class="n" id="stAsk">$0</div><div class="k">Asking</div></div>
+      <div class="stat"><div class="n" id="stPend">$0</div><div class="k">Pending</div></div>
+      <div class="stat"><div class="n" id="stSold">$0</div><div class="k">Sold</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="shead">Snap &amp; price</div>
+  <div class="card snap">
+    <button class="snapbtn" id="snapBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Take / choose a photo
+    </button>
+    <div class="snaphint">Identifies the item, pulls comparable prices, and suggests an asking price + your floor.</div>
+    <input type="file" id="fileIn" accept="image/*" capture="environment" style="display:none">
+
+    <div class="preview" id="preview"><img id="prevImg" alt="item"></div>
+    <div class="analyzing" id="analyzing"><span class="spinner"></span> Reading the item &amp; checking prices…</div>
+    <div class="rerr" id="rerr"></div>
+
+    <div class="result" id="result">
+      <div class="rname" id="rName"></div>
+      <div class="rcat" id="rCat"></div>
+      <div class="pricerow">
+        <div class="pbox"><div class="pv" id="rRange"></div><div class="pk">Market</div></div>
+        <div class="pbox ask"><div class="pv" id="rAsk"></div><div class="pk">List at</div></div>
+        <div class="pbox floor"><div class="pv" id="rFloor"></div><div class="pk">Your floor</div></div>
+      </div>
+      <div class="rnotes" id="rNotes"></div>
+      <div class="comps" id="rComps"></div>
+      <button class="btn btn-dark" id="saveAnalysis">Save to sheet</button>
+      <button class="togglemanual" id="tweakBtn">Adjust before saving</button>
+    </div>
+
+    <button class="togglemanual" id="manualBtn">or add an item by hand</button>
+  </div>
+
+  <form class="card add" id="addForm" autocomplete="off" style="display:none;margin-top:12px">
+    <div class="fgrid">
+      <div class="f full"><label for="name">Item</label><input id="name" placeholder="Rudis wrestling shoes"></div>
+      <div class="f"><label for="cat">Category</label>
+        <select id="cat"><option>Sports gear</option><option>Footwear</option><option>Kitchen</option><option>Auto</option><option>Electronics</option><option>Outdoor</option><option>Tools</option><option>Other</option></select></div>
+      <div class="f"><label for="cond">Condition</label>
+        <select id="cond"><option>Good used</option><option>Like new</option><option>New / unused</option><option>Fair / worn</option><option>For parts</option></select></div>
+      <div class="f"><label for="ask">Asking price</label><div class="price-in"><input id="ask" type="number" min="0" inputmode="decimal"></div></div>
+      <div class="f"><label for="floor">Bottom dollar</label><div class="price-in"><input id="floor" type="number" min="0" inputmode="decimal"></div></div>
+      <div class="f full"><label for="notes">Details (brand, size, flaws)</label><textarea id="notes"></textarea></div>
+    </div>
+    <button class="btn btn-primary" type="submit">Add to sheet</button>
+  </form>
+
+  <div class="chips" id="chips"></div>
+  <div class="items" id="items"></div>
+</div>
+
+<div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
+
+<script>
+"use strict";
+const KEY="flip-sheet:v2";
+const COMM_RATE=0.33, HOURLY=16;
+const REGION="Minnesota, USA";
+
+let memFallback=false, mem=null;
+async function loadState(){try{const r=await window.storage.get(KEY);return r&&r.value?JSON.parse(r.value):{items:[],hours:0};}catch(e){memFallback=true;return mem||{items:[],hours:0};}}
+async function saveState(s){mem=s;try{await window.storage.set(KEY,JSON.stringify(s));}catch(e){memFallback=true;}if(memFallback)document.getElementById('storeWarn').style.display='block';}
+
+let state={items:[],hours:0}, filter="All", pending=null;
+const $=id=>document.getElementById(id);
+const money=n=>"$"+(Math.round((+n||0)*100)/100).toLocaleString(undefined,{maximumFractionDigits:2});
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>(s||"").replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+/* ---------- photo analysis (Claude vision + web search) ---------- */
+$('snapBtn').onclick=()=>$('fileIn').click();
+$('fileIn').onchange=e=>{const f=e.target.files[0];if(f)handleFile(f);e.target.value="";};
+
+async function handleFile(file){
+  $('rerr').style.display='none';$('result').style.display='none';
+  const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=()=>rej();r.readAsDataURL(file);});
+  $('prevImg').src="data:"+file.type+";base64,"+b64;
+  $('preview').style.display='block';
+  $('analyzing').style.display='flex';
+  try{
+    const info=await analyze(b64,file.type||"image/jpeg");
+    showResult(info);
+  }catch(err){
+    $('rerr').textContent="Couldn't price this one automatically — try a clearer photo, or add it by hand below. ("+(err&&err.message?err.message:"error")+")";
+    $('rerr').style.display='block';
+  }finally{$('analyzing').style.display='none';}
+}
+
+async function analyze(b64,media){
+  const prompt=`You price used items to resell on Facebook Marketplace, local pickup in ${REGION}. Identify the item in the photo (brand/model if visible) and judge its condition from what you can see. Use web search to find what comparable used ones actually sell for right now. Then respond with ONLY a JSON object, no markdown fences or commentary:
+{"name":"","category":"Sports gear|Footwear|Kitchen|Auto|Electronics|Outdoor|Tools|Other","condition":"","low":0,"high":0,"asking":0,"floor":0,"comps":[{"title":"","price":"","source":""}],"notes":""}
+low/high = realistic used resale range USD. asking = smart start price, a bit above what you'd take. floor = walk-away price. comps = up to 3 real comparable listings found. notes = one short line on what drives the price or flaws to mention.`;
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      model:"claude-sonnet-4-6",max_tokens:1000,
+      messages:[{role:"user",content:[
+        {type:"image",source:{type:"base64",media_type:media,data:b64}},
+        {type:"text",text:prompt}
+      ]}],
+      tools:[{type:"web_search_20250305",name:"web_search"}]
+    })
+  });
+  if(!res.ok)throw new Error("api "+res.status);
+  const data=await res.json();
+  const text=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
+  const s=text.indexOf("{"),e=text.lastIndexOf("}");
+  if(s<0||e<0)throw new Error("no result");
+  return JSON.parse(text.slice(s,e+1));
+}
+
+function showResult(i){
+  pending={name:i.name||"Item",cat:i.category||"Other",cond:i.condition||"Good used",ask:+i.asking||0,floor:+i.floor||0,notes:i.notes||""};
+  $('rName').textContent=pending.name;
+  $('rCat').textContent=pending.cat+" · "+pending.cond;
+  $('rRange').textContent=money(i.low)+"–"+money(i.high);
+  $('rAsk').textContent=money(i.asking);
+  $('rFloor').textContent=money(i.floor);
+  $('rNotes').textContent=i.notes||"";
+  $('rNotes').style.display=i.notes?'block':'none';
+  const comps=(i.comps||[]).filter(c=>c&&(c.title||c.price));
+  $('rComps').innerHTML=comps.length?`<div class="ct">Comparable listings</div>`+comps.map(c=>
+    `<div class="comp"><div>${esc(c.title||"listing")}<div class="cs">${esc(c.source||"")}</div></div><div class="cp">${esc(String(c.price||""))}</div></div>`).join(''):'';
+  $('result').style.display='block';
+  $('result').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+$('saveAnalysis').onclick=()=>{if(!pending)return;addItem(pending);pending=null;$('result').style.display='none';$('preview').style.display='none';};
+$('tweakBtn').onclick=()=>{if(!pending)return;$('addForm').style.display='block';$('name').value=pending.name;$('cat').value=hasOpt('cat',pending.cat)?pending.cat:'Other';$('cond').value=hasOpt('cond',pending.cond)?pending.cond:'Good used';$('ask').value=pending.ask||'';$('floor').value=pending.floor||'';$('notes').value=pending.notes||'';pending=null;$('result').style.display='none';$('addForm').scrollIntoView({behavior:'smooth',block:'nearest'});};
+$('manualBtn').onclick=()=>{const f=$('addForm');f.style.display=f.style.display==='none'?'block':'none';};
+function hasOpt(sel,val){return[...$(sel).options].some(o=>o.value===val);}
+
+/* ---------- add / render ---------- */
+function addItem(o){state.items.push({id:uid(),name:o.name,cat:o.cat,cond:o.cond,ask:+o.ask||0,floor:+o.floor||0,notes:o.notes||"",status:'available',salePrice:0,buyer:''});persist();}
+
+$('addForm').addEventListener('submit',e=>{e.preventDefault();const name=$('name').value.trim();if(!name)return;addItem({name,cat:$('cat').value,cond:$('cond').value,ask:$('ask').value,floor:$('floor').value,notes:$('notes').value.trim()});e.target.reset();$('addForm').style.display='none';});
+
+function render(){
+  const items=state.items;
+  const sold=items.filter(i=>i.status==='sold');
+  const soldTotal=sold.reduce((a,i)=>a+(+i.salePrice||0),0);
+  const askTotal=items.filter(i=>i.status==='available').reduce((a,i)=>a+(+i.ask||0),0);
+  const pendTotal=items.filter(i=>i.status==='pending').reduce((a,i)=>a+(+i.ask||0),0);
+  $('stCount').textContent=items.length;$('stAsk').textContent=money(askTotal);$('stPend').textContent=money(pendTotal);$('stSold').textContent=money(soldTotal);
+
+  const comm=COMM_RATE*soldTotal, hrs=+state.hours||0, hour=HOURLY*hrs;
+  $('commAmt').textContent=money(comm);$('hourAmt').textContent=money(hour);
+  $('dealComm').classList.toggle('win',comm>=hour);$('dealHour').classList.toggle('win',hour>comm);
+  const breakeven=hrs>0?(HOURLY*hrs)/COMM_RATE:0;
+  let v="";
+  if(hrs<=0)v="Add your hours to compare. <b>Rule of thumb: commission wins if you clear about $49 in sales per hour.</b>";
+  else if(comm>=hour)v=`Commission is ahead by <b>${money(comm-hour)}</b>. You're pulling ${money(soldTotal/hrs)}/hr in sales vs the $49/hr break-even.`;
+  else v=`Hourly is ahead by <b>${money(hour-comm)}</b>. Commission passes it once your sold total tops <b>${money(breakeven)}</b> (now ${money(soldTotal)}).`;
+  $('verdict').innerHTML=v;
+
+  const cats=["All","Available","Pending","Sold",...[...new Set(items.map(i=>i.cat))]];
+  $('chips').innerHTML=cats.map(c=>`<div class="chip ${c===filter?'on':''}" data-f="${esc(c)}">${esc(c)}</div>`).join('');
+
+  let list=items.slice().reverse();
+  if(["Available","Pending","Sold"].includes(filter))list=list.filter(i=>i.status===filter.toLowerCase());
+  else if(filter!=="All")list=list.filter(i=>i.cat===filter);
+
+  if(!list.length){$('items').innerHTML=`<div class="empty"><div class="big">Nothing here yet</div>${items.length?"No items match this filter.":"Snap a photo above to price your first item."}</div>`;return;}
+  $('items').innerHTML=list.map(i=>{
+    const st=i.status||'available';
+    const soldLine=st==='sold'?`<div class="soldnote">Sold ${money(i.salePrice)}${i.buyer?" · "+esc(i.buyer):""} · your 33% = ${money(i.salePrice*COMM_RATE)}</div>`:'';
+    return `<div class="item"><span class="hole"></span>
+      <div class="top"><div><div class="name">${esc(i.name)}</div><div class="cat">${esc(i.cat)} · ${esc(i.cond)}</div></div><span class="pill ${st}">${st}</span></div>
+      <div class="prices"><span class="ask">${money(i.ask)}</span><span class="floor">floor <b>${money(i.floor)}</b></span></div>
+      ${soldLine}
+      <div class="actions">
+        <button class="mini" data-act="listing" data-id="${i.id}">Listing</button>
+        ${st!=='sold'?`<button class="mini" data-act="pending" data-id="${i.id}">${st==='pending'?'↺ Available':'Pending'}</button>`:''}
+        ${st!=='sold'?`<button class="mini go" data-act="sell" data-id="${i.id}">Log sale</button>`:`<button class="mini" data-act="unsell" data-id="${i.id}">↺ Reopen</button>`}
+        <button class="mini ghost" data-act="del" data-id="${i.id}">Delete</button>
+      </div></div>`;
+  }).join('');
+}
+
+/* listing + sale modal */
+function buildListing(i){const L=[`${i.name} in ${i.cond.toLowerCase()} condition.`];if(i.notes)L.push(i.notes.trim());L.push(`Asking ${money(i.ask)}. Cash and local pickup. Message me if interested.`);return `TITLE:\n${i.name} — ${i.cond}\n\nPRICE:\n${money(i.ask)}\n\nDESCRIPTION:\n${L.join("\n\n")}`;}
+function openSheet(h){$('sheet').innerHTML=h;$('scrim').classList.add('show');}
+function closeSheet(){$('scrim').classList.remove('show');}
+$('scrim').addEventListener('click',e=>{if(e.target.id==='scrim')closeSheet();});
+
+function showListing(i){const txt=buildListing(i);openSheet(`<h3>Listing — ${esc(i.name)}</h3><div class="listing-box" id="lbox">${esc(txt)}</div><div style="display:flex;align-items:center;margin-top:12px"><button class="btn btn-primary" style="width:auto;padding:11px 18px;margin:0" id="copyBtn">Copy listing</button><span class="copied" id="copied">Copied ✓</span><button class="mini ghost" id="closeBtn">Close</button></div>`);
+  $('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText(txt);}catch(e){const r=document.createRange();r.selectNode($('lbox'));const s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand('copy');}catch(_){}s.removeAllRanges();}$('copied').classList.add('on');setTimeout(()=>$('copied').classList.remove('on'),1400);};
+  $('closeBtn').onclick=closeSheet;}
+
+function showSell(i){openSheet(`<h3>Log sale — ${esc(i.name)}</h3><div class="f" style="margin-bottom:12px"><label for="sp">Final sale price</label><div class="price-in"><input id="sp" type="number" inputmode="decimal" value="${i.ask||''}"></div></div><div class="f" style="margin-bottom:6px"><label for="by">Buyer (optional)</label><input id="by" placeholder="Name"></div><div style="font-size:12px;color:var(--muted);margin:4px 0 14px">Floor was ${money(i.floor)}. Your 33% cut updates automatically.</div><button class="btn btn-primary" id="confirmSell">Log it</button><button class="mini ghost" style="display:block;margin:12px auto 0" id="cancelSell">Cancel</button>`);
+  $('confirmSell').onclick=()=>{i.status='sold';i.salePrice=+$('sp').value||0;i.buyer=$('by').value.trim();persist();closeSheet();};
+  $('cancelSell').onclick=closeSheet;}
+
+$('items').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const i=state.items.find(x=>x.id===b.dataset.id);if(!i)return;const a=b.dataset.act;
+  if(a==='listing')showListing(i);
+  else if(a==='pending'){i.status=i.status==='pending'?'available':'pending';persist();}
+  else if(a==='sell')showSell(i);
+  else if(a==='unsell'){i.status='available';i.salePrice=0;i.buyer='';persist();}
+  else if(a==='del'){if(confirm('Delete "'+i.name+'"?')){state.items=state.items.filter(x=>x.id!==i.id);persist();}}});
+$('chips').addEventListener('click',e=>{const c=e.target.closest('[data-f]');if(!c)return;filter=c.dataset.f;render();});
+$('hours').addEventListener('input',e=>{state.hours=+e.target.value||0;persist();});
+
+async function persist(){await saveState(state);render();}
+(async()=>{state=await loadState();$('hours').value=state.hours||0;if(memFallback)$('storeWarn').style.display='block';render();})();
+</script>
+</body>
+</html>
