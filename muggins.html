@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Muggins — cribbage trainer</title>
+<meta name="theme-color" content="#5B3A1E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href='data:application/json,{"name":"Muggins","short_name":"Muggins","start_url":".","display":"standalone","background_color":"%235B3A1E","theme_color":"%235B3A1E"}'>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700&family=Karla:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wood:#6B4423; --wood-d:#4A2E17;
+  --felt:#1F6B3A; --felt-d:#175730; --felt-l:#2A7C46;
+  --maple:#E6CDA0; --walnut:#3B2A1D; --brass:#C08A2E; --brass-hi:#EFC978;
+  --ivory:#F8F4EA; --ink:#1D1913; --red:#B02A22;
+  --slab:'Bitter',Georgia,serif; --body:'Karla','Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overflow:hidden}
+body{
+  font-family:var(--body);color:var(--ivory);
+  background:
+    repeating-linear-gradient(92deg,#00000012 0 2px,#ffffff08 2px 5px),
+    linear-gradient(160deg,var(--wood),var(--wood-d));
+  -webkit-text-size-adjust:100%;
+}
+.app{height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 6px) 8px calc(env(safe-area-inset-bottom) + 6px)}
+
+/* ---- rail: peg board + icons ---- */
+.rail{display:flex;align-items:center;gap:7px;flex:none;margin-bottom:6px}
+.icon{width:38px;height:38px;flex:none;border:none;border-radius:50%;cursor:pointer;
+  background:radial-gradient(circle at 32% 28%,#4A3520,#241708);color:var(--maple);
+  font-size:17px;line-height:1;box-shadow:0 2px 3px #0005}
+.boardstrip{flex:1;min-width:0;background:linear-gradient(180deg,#EBD4A8,#CFAF7C);
+  border-radius:7px;padding:5px 8px;box-shadow:inset 0 1px 0 #FFF7E5,0 2px 3px #0004}
+.street{display:flex;align-items:center;gap:6px;height:13px}
+.street .who{font-family:var(--slab);font-size:9.5px;color:var(--walnut);width:22px;flex:none}
+.street .num{font-family:var(--slab);font-weight:700;font-size:14px;color:var(--walnut);
+  width:26px;flex:none;text-align:right;font-variant-numeric:tabular-nums}
+.holes{position:relative;flex:1;min-width:0;height:11px;border-radius:3px;
+  background:repeating-linear-gradient(90deg,#00000026 0 2px,transparent 2px 5px);
+  box-shadow:inset 0 0 0 1px #0000001f}
+.skunkline{position:absolute;left:75.2%;top:1px;bottom:1px;width:2px;background:#A3332F;opacity:.55}
+.pegf,.pegb{position:absolute;top:1px;width:5px;height:9px;border-radius:2px;
+  transform:translateX(-50%);background:var(--brass);box-shadow:0 0 2px #0007}
+.street.bot .pegf,.street.bot .pegb{background:var(--walnut)}
+.pegb{opacity:.42;height:7px;top:2px}
+@media (prefers-reduced-motion:no-preference){.pegf,.pegb{transition:left .3s cubic-bezier(.3,.8,.4,1)}}
+
+/* ---- table ---- */
+.table{flex:1;min-height:0;display:flex;flex-direction:column;
+  border-radius:26px;padding:10px 10px 4px;
+  background:radial-gradient(120% 80% at 50% 20%,var(--felt-l),var(--felt) 55%,var(--felt-d));
+  box-shadow:inset 0 0 0 3px #ffffff14,inset 0 0 34px #00000055,0 4px 10px #0006}
+
+.seat{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px}
+.seat.top{padding-top:2px}
+.who-row{display:flex;align-items:center;gap:7px}
+.avatar{width:30px;height:30px;border-radius:8px;flex:none;
+  background:linear-gradient(160deg,#8C5A2B,#5A3315);border:2px solid var(--brass);
+  display:grid;place-items:center;font-size:15px}
+.name{font-size:11.5px;color:#CFE6D8;letter-spacing:.01em}
+.fanrow{display:flex;justify-content:center;align-items:flex-start;min-height:58px}
+.seat.you .fanrow{min-height:86px;align-items:flex-end}
+.slot{display:inline-block;margin:0 -13px;transform-origin:50% 100%}
+.seat.you .slot{margin:0 -10px}
+
+/* ---- cards ---- */
+.card{position:relative;width:56px;height:78px;border-radius:6px;flex:none;padding:0;border:none;
+  background:linear-gradient(170deg,#FFFDF7,#EFE7D6);color:var(--ink);cursor:pointer;
+  box-shadow:0 2px 4px #00000055,inset 0 0 0 1px #00000018;overflow:hidden}
+.card .pip{position:absolute;top:4px;left:5px;display:flex;flex-direction:column;align-items:center;line-height:.95}
+.card .r{font-family:var(--slab);font-weight:700;font-size:16px}
+.card .s{font-size:11px}
+.card .big{position:absolute;right:4px;bottom:2px;font-size:26px;opacity:.22}
+.card.red{color:var(--red)}
+.card.small{width:40px;height:56px}
+.card.small .r{font-size:12px}.card.small .s{font-size:8px}.card.small .big{font-size:18px;right:3px}
+.card.tiny{width:22px;height:31px}
+.card.back{background:
+  repeating-linear-gradient(45deg,#B3441F 0 4px,#C9542B 4px 8px);
+  box-shadow:inset 0 0 0 2px #F6E7D2,0 2px 4px #00000055}
+.card.back::after{content:'';position:absolute;inset:24% 26%;border-radius:50%;
+  background:#8E3416;box-shadow:inset 0 0 0 2px #F6E7D2}
+.card.dim{filter:brightness(.62) saturate(.7)}
+.card.sel{transform:translateY(-16px);box-shadow:0 0 0 2px var(--brass-hi),0 8px 12px #0007}
+.card.starter{box-shadow:0 0 0 2px var(--brass-hi),0 2px 6px #0006}
+@media (prefers-reduced-motion:no-preference){
+  .card{transition:transform .14s cubic-bezier(.2,.8,.3,1),box-shadow .14s ease}
+  @keyframes dealin{from{transform:translate(0,-38vh) rotate(-8deg) scale(.5);opacity:0}
+    to{transform:none;opacity:1}}
+  @keyframes land{from{transform:translateY(30px) scale(1.1);opacity:.15}to{transform:none;opacity:1}}
+  .card.dealin{animation:dealin .42s cubic-bezier(.2,.85,.3,1) backwards}
+  .card.land{animation:land .2s ease-out}
+}
+
+/* ---- play zone ---- */
+.playzone{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:4px}
+.mat{width:100%;max-width:420px;min-height:96px;border-radius:18px;padding:10px 12px;
+  display:flex;align-items:center;gap:12px;
+  background:radial-gradient(90% 120% at 50% 0%,#ffffff10,#00000018);
+  box-shadow:inset 0 0 0 2px #ffffff12,inset 0 3px 14px #00000030}
+.chip{width:58px;height:58px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-family:var(--slab);font-weight:700;font-size:23px;color:#FFF2D6;
+  background:radial-gradient(circle at 34% 26%,#E0A93F,#8C5C13);
+  box-shadow:inset 0 0 0 3px #F0D08A55,0 3px 6px #00000055;font-variant-numeric:tabular-nums}
+.chip.hot{background:radial-gradient(circle at 34% 26%,#D4553A,#7E2415);box-shadow:inset 0 0 0 3px #FFC9A855,0 0 12px #E2653D66}
+.pile{display:flex;flex-wrap:wrap;gap:4px;align-items:center;flex:1}
+.showrow{display:flex;align-items:center;gap:5px;justify-content:center;flex:1;flex-wrap:wrap}
+.plus{font-family:var(--slab);opacity:.55;font-size:15px}
+.ghosttext{font-size:12.5px;color:#BFDCCB;opacity:.75}
+.deckstack{position:relative;flex:1;display:flex;justify-content:center}
+.deckstack .card{position:absolute;top:-39px}
+.deckstack .card:nth-child(1){transform:translateX(-5px) rotate(-5deg)}
+.deckstack .card:nth-child(2){transform:rotate(1deg)}
+.deckstack .card:nth-child(3){transform:translateX(5px) rotate(6deg)}
+.side{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;max-width:56px}
+.side em{font-style:normal;font-size:9.5px;color:#C4DDCE;text-align:center;line-height:1.2}
+.cribmini{display:flex;gap:2px;margin-top:3px}
+
+/* ---- feedback ---- */
+.feedback{flex:none;min-height:34px;display:flex;justify-content:center;align-items:center;padding:0 4px}
+.talkbox{background:#00000040;border:1px solid #ffffff1a;border-radius:11px;padding:5px 10px;
+  font-size:12.5px;line-height:1.35;max-width:430px;text-align:center;color:#E8F2EA}
+.verdict{font-family:var(--slab);font-weight:700}
+.v-good{color:#9BE0A8}.v-mid{color:#F0CE7C}.v-bad{color:#F09A82}
+
+/* ---- dock ---- */
+.dock{flex:none;display:flex;align-items:center;gap:10px;padding:8px 4px 0;flex-wrap:wrap}
+#prompt{font-size:13.5px;color:#F0E3CB;flex:1;min-width:0}
+#controls{display:flex;gap:7px;align-items:center;margin-left:auto;flex:0 0 auto}
+.act{font-family:var(--body);font-weight:600;font-size:14px;cursor:pointer;
+  background:linear-gradient(180deg,#D79B36,#A76F1C);color:#241708;border:none;
+  border-radius:9px;padding:11px 16px;box-shadow:0 2px 0 #6E4712}
+.act:disabled{background:#00000030;color:#ffffff44;box-shadow:none;cursor:default}
+.act.ghost{background:#ffffff14;color:var(--maple);box-shadow:none}
+.act.wide{width:100%;margin-top:12px}
+.act:focus-visible,.card:focus-visible,.icon:focus-visible{outline:2px solid var(--brass-hi);outline-offset:2px}
+.pad{display:flex;align-items:center;gap:6px}
+.pad button{width:38px;height:38px;border-radius:9px;border:1px solid #ffffff2e;background:#00000030;
+  color:var(--ivory);font-family:var(--slab);font-size:16px;cursor:pointer}
+.pad b{font-family:var(--slab);font-size:22px;width:38px;text-align:center;color:var(--brass-hi);
+  font-variant-numeric:tabular-nums}
+
+/* ---- sheet ---- */
+.sheet{position:fixed;inset:0;background:#000000a8;display:none;align-items:flex-end;justify-content:center;z-index:20}
+.sheet.on{display:flex}
+.sheetcard{background:#22160C;width:100%;max-width:520px;max-height:82vh;overflow:auto;
+  border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));
+  box-shadow:0 -6px 20px #0007}
+.sheetcard h3{font-family:var(--slab);font-size:15px;margin:0 0 8px;color:var(--maple)}
+.sheetcard h3+h3,.report+h3{margin-top:14px}
+.set{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:9px 0;border-bottom:1px solid #ffffff12;font-size:14px}
+.seg{display:flex;gap:4px}
+.seg button{background:#ffffff12;border:none;color:#C9BBA6;font-size:13px;padding:8px 12px;
+  border-radius:7px;font-family:var(--body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--brass);color:#241708;font-weight:600}
+.report{width:100%;border-collapse:collapse;font-size:13.5px}
+.report td{padding:5px 0;border-bottom:1px solid #ffffff12}
+.report td:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--brass-hi)}
+.note{font-size:12.5px;color:#A9977E;margin:8px 0 4px}
+.log{font-size:12.5px;color:#A9BBAE;max-height:190px;overflow:auto}
+.log div{padding:2px 0;border-bottom:1px solid #ffffff0e}
+
+
+/* ---- bubbles, pops, mode ---- */
+.who-row{position:relative}
+.bubble{display:inline-block;background:#EDF5EF;color:#1E2C26;border-radius:12px;padding:4px 10px;
+  font-size:12px;font-weight:600;box-shadow:0 2px 5px #00000055}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+  .bubble{animation:pop .18s ease-out}
+}
+.seat.you{position:relative}
+#yoububble{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3}
+.scorepop{position:absolute;top:-15px;transform:translateX(-50%);font-family:var(--slab);font-weight:700;
+  font-size:13px;color:#7A4E12;pointer-events:none;font-style:normal}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes rise{0%{opacity:0;transform:translate(-50%,6px)}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-13px)}}
+  .scorepop{animation:rise 1.4s ease forwards}
+}
+.pegf.lit{box-shadow:0 0 0 2px #FFF3D0,0 0 8px var(--brass-hi)}
+.modechip{flex:none;font-size:11px;padding:3px 9px;border-radius:999px;background:#ffffff1a;color:#E2D3B4}
+.modechip.ranked{background:#8C2F2455;color:#F6CFC6}
+
+/* ---- cutting the deck ---- */
+.mat{position:relative}
+.cutmat{justify-content:center;gap:18px}
+.cutdeck{display:flex;align-items:flex-end;gap:16px}
+.cutstack{position:relative;width:78px;height:76px}
+.sliver{position:absolute;left:0;width:78px;height:6px;padding:0;border:none;border-radius:2px;cursor:pointer;
+  background:linear-gradient(180deg,#FFF9EE,#D6C4A4);box-shadow:0 1px 0 #00000038}
+.sliver:hover,.sliver:active{background:linear-gradient(180deg,#FFE8B4,#DDB86F);transform:translateX(5px)}
+.cutcard{width:56px;height:78px;display:grid;place-items:center}
+.cuthint{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:10.5px;color:#C4DDCE}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes lift{to{transform:translate(52px,-44px) rotate(9deg);opacity:0}}
+  .sliver.off{animation:lift .5s ease-in forwards}
+  @keyframes flip{from{transform:rotateY(85deg) scale(.85);opacity:.15}to{transform:none;opacity:1}}
+  .card.flip{animation:flip .5s ease-out}
+}
+
+/* ---- counting panel ---- */
+.countpanel{flex:1;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.entry{font-family:var(--slab);font-weight:700;font-size:42px;color:var(--brass-hi);min-width:62px;
+  text-align:center;font-variant-numeric:tabular-nums;line-height:1}
+.keys{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.keys button{min-width:46px;height:40px;border-radius:9px;border:1px solid #ffffff2e;background:#00000033;
+  color:var(--ivory);font-family:var(--body);font-size:13.5px;cursor:pointer}
+.act.big{padding:13px 22px;font-size:15px}
+
+/* ---- correction box ---- */
+.talkbox.bad{border-color:#E2664B;background:#4E1A1080;box-shadow:0 0 0 1px #E2664B55}
+.fix{display:block;margin-top:5px;color:#FFD9CA;font-size:12px}
+.mini{display:inline-flex;gap:3px;vertical-align:middle;margin:0 4px}
+.card.tiny .r{font-size:9px}.card.tiny .s{font-size:6px}.card.tiny .big{display:none}
+.card.tiny .pip{top:2px;left:3px}
+
+/* ---- review + menu ---- */
+.revrow{padding:8px 0;border-bottom:1px solid #ffffff12;font-size:13px}
+.revrow em{display:block;font-style:normal;color:#A9977E;font-size:12px;margin-top:3px}
+.revrow b{color:var(--brass-hi)}
+.grade{float:right;font-family:var(--slab);font-size:20px}
+.gA{color:#9BE0A8}.gB{color:#CFE08A}.gC{color:#F0CE7C}.gD{color:#F09A82}
+.menutitle{font-family:var(--slab);font-size:28px;margin:2px 0 4px;color:var(--maple)}
+.sheetcard .act.wide+.act.wide{margin-top:8px}
+
+
+/* ---- pegging callout band ---- */
+.callout{flex:none;min-height:30px;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.calloutbox{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:#FFF2D8;
+  background:linear-gradient(180deg,#00000055,#00000030);border:1px solid #ffffff20;
+  border-left:3px solid var(--brass);border-radius:10px;padding:5px 12px;max-width:100%;
+  text-align:center;box-shadow:0 2px 6px #00000044}
+.calloutbox i{font-style:normal;font-family:var(--slab);font-weight:700;font-size:12px;color:#CFE6D8}
+.calloutbox b{font-family:var(--slab);font-size:16px;color:var(--brass-hi);font-variant-numeric:tabular-nums}
+.calloutbox.bot{border-left-color:var(--walnut)}
+.calloutbox.bot i{color:#E9C9B4}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes calloutin{from{transform:translateY(7px) scale(.94);opacity:0}to{transform:none;opacity:1}}
+  .calloutbox{animation:calloutin .2s ease-out}
+}
+.sliver.locked{cursor:default}
+.sliver.locked:hover,.sliver.locked:active{background:linear-gradient(180deg,#FFF9EE,#D6C4A4);transform:none}
+
+.handlock{display:contents}
+.handlock .card{pointer-events:none;filter:brightness(.7) saturate(.75)}
+.handlock .card.sel{filter:none}
+.talkbox.bad{animation:none}
+@media (prefers-reduced-motion:no-preference){
+  @keyframes flag{0%{transform:scale(.96);opacity:0}60%{transform:scale(1.02)}100%{transform:none;opacity:1}}
+  .talkbox.bad{animation:flag .26s ease-out}
+}
+
+@media (max-height:680px){
+  .card{width:48px;height:68px}.card .r{font-size:14px}
+  .callout{min-height:26px}.calloutbox{font-size:12px;padding:4px 10px}
+  .seat.you .fanrow{min-height:74px}
+  .chip{width:50px;height:50px;font-size:20px}
+  .mat{min-height:82px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="rail">
+    <button class="icon" onclick="openSheet('settings')" aria-label="Settings">&#9881;</button>
+    <div class="boardstrip" id="board"></div>
+    <button class="icon" onclick="openSheet('report')" aria-label="Session report">&#9642;</button>
+  </div>
+
+  <div class="table">
+    <div class="seat top">
+      <div class="who-row"><span id="botbubble"></span><div class="avatar">&#9824;</div><span class="name" id="botlabel">Bot</span></div>
+      <div class="fanrow" id="bothand"></div>
+    </div>
+    <div class="callout" id="callout"></div>
+    <div class="playzone" id="play"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="seat you"><span id="yoububble"></span><div class="fanrow" id="hand"></div></div>
+  </div>
+
+  <div class="dock"><span class="modechip" id="modechip"></span><span id="prompt"></span><span id="controls"></span></div>
+</div>
+<div class="sheet" id="sheet" data-open=""></div>
+<script>
+/* ---------- cards ---------- */
+const SUITS = ['\u2660','\u2665','\u2666','\u2663'];
+const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const rk = c => c >> 2;
+const st = c => c & 3;
+const val = c => Math.min(rk(c) + 1, 10);
+const cname = c => RANKS[rk(c)] + SUITS[st(c)];
+const isRed = c => st(c) === 1 || st(c) === 2;
+const rnd = n => Math.floor(Math.random() * n);
+
+function fullDeck(){ const d = []; for (let i = 0; i < 52; i++) d.push(i); return d; }
+function shuffle(d){ for (let i = d.length - 1; i > 0; i--){ const j = rnd(i + 1); [d[i], d[j]] = [d[j], d[i]]; } return d; }
+
+/* ---------- hand scoring ---------- */
+function scoreHand(hand, starter, isCrib){
+  const all = hand.concat([starter]);
+  let total = 0; const parts = [];
+
+  let f = 0;
+  for (let m = 1; m < 32; m++){
+    let s = 0;
+    for (let i = 0; i < 5; i++) if (m & (1 << i)) s += val(all[i]);
+    if (s === 15) f++;
+  }
+  if (f){ total += 2 * f; parts.push('fifteen \u00d7' + f + ' for ' + (2 * f)); }
+
+  let p = 0;
+  for (let i = 0; i < 5; i++) for (let j = i + 1; j < 5; j++) if (rk(all[i]) === rk(all[j])) p++;
+  if (p){ total += 2 * p; parts.push(p + ' pair' + (p > 1 ? 's' : '') + ' for ' + (2 * p)); }
+
+  const cnt = {}; all.forEach(c => cnt[rk(c)] = (cnt[rk(c)] || 0) + 1);
+  const rs = Object.keys(cnt).map(Number).sort((a, b) => a - b);
+  let i = 0;
+  while (i < rs.length){
+    let j = i;
+    while (j + 1 < rs.length && rs[j + 1] === rs[j] + 1) j++;
+    const len = j - i + 1;
+    if (len >= 3){
+      let mult = 1;
+      for (let k = i; k <= j; k++) mult *= cnt[rs[k]];
+      total += len * mult;
+      parts.push(mult > 1 ? mult + ' runs of ' + len + ' for ' + (len * mult) : 'run of ' + len + ' for ' + len);
+    }
+    i = j + 1;
+  }
+
+  const s0 = st(hand[0]);
+  if (hand.every(c => st(c) === s0)){
+    if (st(starter) === s0){ total += 5; parts.push('flush for 5'); }
+    else if (!isCrib){ total += 4; parts.push('flush for 4'); }
+  }
+
+  if (hand.some(c => rk(c) === 10 && st(c) === st(starter))){ total += 1; parts.push('his nobs for 1'); }
+
+  return { total, parts };
+}
+
+/* ---------- pegging scoring ---------- */
+function pegScore(pile, count){
+  let pts = 0; const parts = [];
+  if (count === 15){ pts += 2; parts.push('fifteen for 2'); }
+  if (count === 31){ pts += 2; parts.push('thirty-one for 2'); }
+
+  const last = rk(pile[pile.length - 1]);
+  let n = 1;
+  while (n < pile.length && rk(pile[pile.length - 1 - n]) === last) n++;
+  if (n === 2){ pts += 2; parts.push('pair for 2'); }
+  else if (n === 3){ pts += 6; parts.push('three of a kind for 6'); }
+  else if (n >= 4){ pts += 12; parts.push('four of a kind for 12'); }
+
+  for (let k = pile.length; k >= 3; k--){
+    const seg = pile.slice(-k).map(rk).sort((a, b) => a - b);
+    let ok = true;
+    for (let x = 1; x < k; x++) if (seg[x] !== seg[x - 1] + 1) ok = false;
+    if (ok){ pts += k; parts.push('run of ' + k + ' for ' + k); break; }
+  }
+  return { pts, parts };
+}
+
+/* ---------- discard EV ---------- */
+// Opponent discard model: throwing INTO my crib they play safe (dodge 5s and
+// touching cards); throwing into their OWN crib they feed it.
+function oppPairOK(a, b, theirCrib){
+  const five = rk(a) === 4 || rk(b) === 4;
+  const helpful = five || rk(a) === rk(b) || Math.abs(rk(a) - rk(b)) <= 2 || val(a) + val(b) === 15;
+  if (theirCrib) return helpful || Math.random() < 0.55;   // they want a good crib
+  return !helpful || Math.random() < 0.40;                  // they want a dead crib
+}
+
+function analyzeDiscards(six, isDealer, samples){
+  samples = samples || 240;
+  const known = new Set(six), rest = [];
+  for (let c = 0; c < 52; c++) if (!known.has(c)) rest.push(c);
+  const out = [];
+  for (let a = 0; a < 6; a++) for (let b = a + 1; b < 6; b++){
+    const toss = [six[a], six[b]];
+    const keep = six.filter((_, i) => i !== a && i !== b);
+    let h = 0;
+    for (const s of rest) h += scoreHand(keep, s, false).total;
+    h /= rest.length;
+
+    let cr = 0;
+    for (let t = 0; t < samples; t++){
+      let i1, i2, i3, guard = 0;
+      do {
+        i1 = rnd(rest.length); i2 = rnd(rest.length); i3 = rnd(rest.length);
+        guard++;
+      } while ((i1 === i2 || i1 === i3 || i2 === i3 ||
+               !oppPairOK(rest[i1], rest[i2], !isDealer)) && guard < 30);
+      cr += scoreHand([toss[0], toss[1], rest[i1], rest[i2]], rest[i3], true).total;
+    }
+    cr /= samples;
+    out.push({ toss, keep, hand: h, crib: cr, ev: h + (isDealer ? cr : -cr) });
+  }
+  out.sort((x, y) => y.ev - x.ev);
+  return out;
+}
+
+/* ---------- pegging choice ---------- */
+function pegOptions(myHand, pile, count, unseen){
+  const legal = myHand.filter(c => val(c) + count <= 31);
+  if (!legal.length) return [];
+  const pool = unseen.slice(0, 46);
+  const out = [];
+  for (const c of legal){
+    const np = pile.concat([c]), nc = count + val(c);
+    const mine = pegScore(np, nc).pts;
+    let opp = 0, seen = 0;
+    if (nc === 31){
+      opp = 0;
+    } else {
+      let sum = 0, n = 0;
+      for (const o of pool){
+        if (val(o) + nc > 31) continue;
+        sum += pegScore(np.concat([o]), nc + val(o)).pts;
+        n++;
+      }
+      seen = n;
+      opp = n ? sum / n : -1; // nobody can answer: I take the go
+    }
+    let sc = mine - (opp < 0 ? -1 : 0.85 * opp);
+    // seat heuristics
+    if (count === 0){
+      if (rk(c) === 4) sc -= 1.1;              // never lead a five
+      if (rk(c) === 3) sc += 0.35;             // classic four lead
+      if (rk(c) <= 3) sc += 0.15;              // keep 31-fillers relevant
+    }
+    if (nc === 21) sc -= 0.45;                 // hands them a ten for 31
+    if (nc === 5)  sc -= 0.30;                 // face card makes 15
+    out.push({ card: c, score: sc, pts: mine, oppReply: opp < 0 ? 0 : opp, answers: seen });
+  }
+  out.sort((a, b) => b.score - a.score);
+  return out;
+}
+
+/* ---------- state ---------- */
+const OPT = { bot:'sharp', muggins:'off', count:'on', hint:'off', mode:'practice' };
+let G = null;
+let ST = { hands:0, dLoss:0, dN:0, pLoss:0, pN:0, pMissed:0, cErr:0, cN:0, leaks:[] };
+let LOG = [];
+let POPID = 0;
+const PACE = { bot:1100, hold:1600, cut:1000, callout:2200, show:900 };
+const $ = id => document.getElementById(id);
+
+function setOpt(k, v){ OPT[k] = v; openSheet('settings'); render(); }
+function startMode(m){ OPT.mode = m; newGame(); }
+
+function newGame(){
+  ST = { hands:0, dLoss:0, dN:0, pLoss:0, pN:0, pMissed:0, cErr:0, cN:0, leaks:[] };
+  LOG = [];
+  G = { scores:{ you:0, bot:0 }, prev:{ you:0, bot:0 }, dealer: Math.random() < .5 ? 'you' : 'bot' };
+  closeSheet();
+  deal();
+}
+
+function deal(){
+  const d = shuffle(fullDeck());
+  G.you = d.slice(0, 6).sort((a, b) => a - b);
+  G.bot = d.slice(6, 12);
+  G.rest = d.slice(12);
+  G.crib = []; G.starter = null; G.sel = [];
+  G.pile = []; G.count = 0; G.last = null; G.shows = null;
+  G.phase = 'discard'; G.fb = null; G.fresh = true; G.landed = null;
+  G.bubble = null; G.pop = null; G.callout = null; G.cutAnim = false;
+  G.pendingReset = false; G.pending = null; G.review = []; G.cutBy = null;
+  ST.hands++;
+  G.analysis = analyzeDiscards(G.you, G.dealer === 'you', 260);
+  log('\u2014 Hand ' + ST.hands + ', ' + (G.dealer === 'you' ? 'your' : 'bot\u2019s') + ' deal \u2014');
+  render();
+}
+
+function log(s){ LOG.unshift(s); if (LOG.length > 60) LOG.pop(); }
+function say(who, text){ G.bubble = { who, text }; }
+
+function callout(who, text, pts){
+  G.callout = { who, text, pts, id: ++POPID };
+  const id = POPID;
+  setTimeout(() => { if (G.callout && G.callout.id === id){ G.callout = null; render(); } }, PACE.callout);
+}
+
+function peg(who, pts, why){
+  if (!pts) return;
+  G.prev[who] = G.scores[who];
+  G.scores[who] = Math.min(121, G.scores[who] + pts);
+  G.pop = { who, pts, id: ++POPID };
+  const myPop = POPID;
+  setTimeout(() => { if (G.pop && G.pop.id === myPop){ G.pop = null; render(); } }, PACE.callout);
+  callout(who, why, pts);
+  log((who === 'you' ? 'You' : 'Bot') + ' peg ' + pts + ' \u2014 ' + why + ' (' + G.scores[who] + ')');
+  if (G.scores[who] >= 121){ G.phase = 'over'; G.winner = who; }
+}
+
+/* record a graded decision: practice shows it now, ranked banks it for the review */
+function note(f){
+  G.review.push(f);
+  if (OPT.mode === 'practice') G.fb = f;
+}
+
+function isLeak(f){
+  return OPT.mode === 'practice' && verdict(f.loss, f.type === 'discard')[0] === 'v-bad';
+}
+
+function continuePlay(){
+  const p = G.pending;
+  G.pending = null;
+  if (!p) return;
+  if (p.kind === 'discard') finishDiscard();
+  else if (p.kind === 'peg'){ G.bubble = null; commit('you', p.card); }
+}
+
+/* ---------- discard ---------- */
+function toggleSel(c){
+  if (G.phase !== 'discard' || G.pending) return;
+  const i = G.sel.indexOf(c);
+  if (i >= 0) G.sel.splice(i, 1);
+  else if (G.sel.length < 2) G.sel.push(c);
+  render();
+}
+
+function discardReason(m, b, isD){
+  const dh = b.hand - m.hand, dcRaw = b.crib - m.crib;
+  const r = [];
+  if (!isD && m.toss.some(c => rk(c) === 4) && !b.toss.some(c => rk(c) === 4))
+    r.push('a five in their crib is the most expensive card you own');
+  if (isD && b.toss.some(c => rk(c) === 4) && !m.toss.some(c => rk(c) === 4))
+    r.push('fives belong in your own crib');
+  if (dh >= 0.4) r.push('the keep is worth ' + dh.toFixed(1) + ' more once the cut lands');
+  else if (dh <= -0.4) r.push('it keeps ' + (-dh).toFixed(1) + ' less in hand but wins it back in the crib');
+  if (Math.abs(dcRaw) >= 0.4)
+    r.push(isD ? 'and your crib picks up ' + dcRaw.toFixed(1) : 'and their crib gets ' + (-dcRaw).toFixed(1) + ' less');
+  if (!r.length) r.push('close call, only ' + (b.ev - m.ev).toFixed(2) + ' between them');
+  return r.join(', ');
+}
+
+function confirmDiscard(){
+  const mine = G.analysis.find(o => o.toss.includes(G.sel[0]) && o.toss.includes(G.sel[1]));
+  const best = G.analysis[0];
+  const loss = best.ev - mine.ev;
+  const isD = G.dealer === 'you';
+  ST.dLoss += loss; ST.dN++;
+  if (loss > 0.35) ST.leaks.push({ kind:'discard', loss, txt:'Threw ' + mine.toss.map(cname).join(' ') + ' over ' + best.toss.map(cname).join(' ') });
+  const f = { type:'discard', mine, best, loss, cards:best.toss, why: loss > 0.02 ? discardReason(mine, best, isD) : '' };
+  note(f);
+  if (isLeak(f)){ G.pending = { kind:'discard' }; render(); return; }
+  finishDiscard();
+}
+
+function finishDiscard(){
+  G.crib = G.sel.slice();
+  G.you = G.you.filter(c => !G.sel.includes(c));
+  const ba = analyzeDiscards(G.bot, G.dealer === 'bot', OPT.bot === 'sharp' ? 200 : 90);
+  const pick = OPT.bot === 'sharp' ? ba[0] : (Math.random() < .25 ? ba[1] : ba[0]);
+  G.crib = G.crib.concat(pick.toss);
+  G.bot = pick.keep;
+  G.sel = [];
+  G.phase = 'cut';
+  G.cutBy = G.dealer === 'you' ? 'bot' : 'you';
+  render();
+  if (G.cutBy === 'bot') setTimeout(() => cutAt(0.15 + Math.random() * .7), PACE.cut);
+}
+
+/* ---------- the cut ---------- */
+function cutAt(frac){
+  if (G.phase !== 'cut' || G.cutAnim) return;
+  const idx = Math.min(G.rest.length - 1, Math.max(0, Math.floor(frac * G.rest.length)));
+  G.starter = G.rest[idx];
+  G.rest = G.rest.filter(c => c !== G.starter);
+  G.cutAnim = true; G.cutFrac = frac;
+  render();
+  setTimeout(finishCut, 820);
+}
+
+function finishCut(){
+  G.cutAnim = false;
+  if (rk(G.starter) === 10){ peg(G.dealer, 2, 'his heels'); say(G.dealer, 'His heels'); }
+  G.pegYou = G.you.slice();
+  G.pegBot = G.bot.slice();
+  G.playedYou = []; G.playedBot = [];
+  G.turn = G.dealer === 'you' ? 'bot' : 'you';
+  if (G.phase !== 'over') G.phase = 'peg';
+  G.fb = null;
+  render();
+  if (G.turn === 'bot' && G.phase === 'peg') setTimeout(botPeg, PACE.bot);
+}
+
+/* ---------- pegging ---------- */
+function unseenFor(who){
+  const known = new Set([G.starter]);
+  if (who === 'you'){
+    G.you.forEach(c => known.add(c)); G.crib.slice(0, 2).forEach(c => known.add(c));
+  } else {
+    G.bot.forEach(c => known.add(c)); G.crib.slice(2).forEach(c => known.add(c));
+  }
+  G.playedYou.forEach(c => known.add(c)); G.playedBot.forEach(c => known.add(c));
+  const u = [];
+  for (let c = 0; c < 52; c++) if (!known.has(c)) u.push(c);
+  return u;
+}
+
+function pegReason(m, b, count){
+  const r = [];
+  if (b.pts > m.pts) r.push('the ' + cname(b.card) + ' scores ' + b.pts + ' on the spot');
+  if (count === 0 && rk(m.card) === 4) r.push('leading a five hands them fifteen-two');
+  if (count + val(m.card) === 21) r.push('21 lets any ten-card take 31');
+  if (count + val(m.card) === 5) r.push('leaving 5 invites a face card for fifteen');
+  if (m.oppReply - b.oppReply > 0.25)
+    r.push('yours gives back ' + m.oppReply.toFixed(1) + ' on average, the ' + cname(b.card) + ' only ' + b.oppReply.toFixed(1));
+  if (!r.length) r.push('the ' + cname(b.card) + ' holds the safer count');
+  return r.join('; ');
+}
+
+function playYou(c){
+  if (G.phase !== 'peg' || G.turn !== 'you' || G.cutAnim || G.pendingReset || G.pending) return;
+  if (val(c) + G.count > 31) return;
+  const opts = pegOptions(G.pegYou, G.pile, G.count, unseenFor('you'));
+  const mine = opts.find(o => o.card === c), best = opts[0];
+  const loss = best.score - mine.score, at = G.count;
+  ST.pLoss += loss; ST.pN++;
+  if (best.pts > mine.pts) ST.pMissed += best.pts - mine.pts;
+  if (loss > 0.6) ST.leaks.push({ kind:'peg', loss, txt:'Played ' + cname(c) + ' at ' + at + ' over ' + cname(best.card) });
+  const f = { type:'peg', mine, best, loss, at, cards:[best.card], why: loss > 0.05 ? pegReason(mine, best, at) : '' };
+  note(f);
+  if (isLeak(f)){ G.pending = { kind:'peg', card:c }; render(); return; }
+  G.bubble = null;
+  commit('you', c);
+}
+
+function botPeg(){
+  if (G.phase !== 'peg' || G.turn !== 'bot' || G.pendingReset) return;
+  const opts = pegOptions(G.pegBot, G.pile, G.count, unseenFor('bot'));
+  if (!opts.length){ advance(); return; }
+  const pick = (OPT.bot === 'sharp' || opts.length === 1 || Math.random() > .25) ? opts[0] : opts[1];
+  G.bubble = null;
+  commit('bot', pick.card);
+}
+
+function commit(who, c){
+  G.pile.push(c); G.count += val(c); G.landed = c;
+  if (who === 'you'){ G.pegYou = G.pegYou.filter(x => x !== c); G.playedYou.push(c); }
+  else { G.pegBot = G.pegBot.filter(x => x !== c); G.playedBot.push(c); }
+  G.last = who;
+  const s = pegScore(G.pile, G.count);
+  if (s.pts){
+    peg(who, s.pts, s.parts.join(', '));
+    if (who === 'bot' && s.pts >= 4) say('bot', s.parts[0]);
+  }
+  if (G.phase === 'over'){ render(); return; }
+  advance();
+}
+
+function advance(){
+  const done = !G.pegYou.length && !G.pegBot.length;
+  const other = G.turn === 'you' ? 'bot' : 'you';
+  const hand = w => w === 'you' ? G.pegYou : G.pegBot;
+  const can = w => hand(w).some(c => val(c) + G.count <= 31);
+
+  if (done){
+    if (G.count !== 31) peg(G.last, 1, 'last card');
+    if (G.phase === 'over'){ render(); return; }
+    G.pendingReset = true;
+    render();
+    setTimeout(() => { G.pendingReset = false; startShow(); }, PACE.hold);
+    return;
+  }
+
+  if (can(other)){ G.turn = other; }
+  else if (can(G.turn)){
+    say(other, 'Go');
+    log((other === 'you' ? 'You say' : 'Bot says') + ' go');
+  } else {
+    const sayer = G.last === 'you' ? 'bot' : 'you';
+    say(sayer, 'Go');
+    if (G.count !== 31) peg(G.last, 1, 'go');
+    if (G.phase === 'over'){ render(); return; }
+    G.pendingReset = true;
+    render();
+    setTimeout(() => {
+      G.pendingReset = false;
+      G.pile = []; G.count = 0; G.landed = null; G.bubble = null;
+      G.turn = G.last === 'you' ? 'bot' : 'you';
+      if (!can(G.turn)) G.turn = G.last;
+      render();
+      if (G.turn === 'bot' && G.phase === 'peg') setTimeout(botPeg, PACE.bot);
+    }, PACE.hold);
+    return;
+  }
+  render();
+  if (G.turn === 'bot' && G.phase === 'peg') setTimeout(botPeg, PACE.bot);
+}
+
+/* ---------- the show ---------- */
+function startShow(){
+  const pone = G.dealer === 'you' ? 'bot' : 'you';
+  G.shows = [
+    { who: pone, cards: pone === 'you' ? G.you : G.bot, crib:false },
+    { who: G.dealer, cards: G.dealer === 'you' ? G.you : G.bot, crib:false },
+    { who: G.dealer, cards: G.crib, crib:true }
+  ];
+  G.showIdx = 0; G.entry = 0; G.phase = 'show'; G.fb = null; G.bubble = null;
+  nextShow();
+}
+
+function nextShow(){
+  if (G.showIdx >= G.shows.length){
+    if (OPT.mode === 'ranked' && G.review.length && $('sheet').dataset.open !== 'review'){
+      openSheet('review'); return;
+    }
+    G.dealer = G.dealer === 'you' ? 'bot' : 'you';
+    closeSheet();
+    deal(); return;
+  }
+  const s = G.shows[G.showIdx];
+  s.res = scoreHand(s.cards, G.starter, s.crib);
+  if (s.who === 'you' && OPT.count === 'on'){ G.entry = 0; G.phase = 'count'; render(); return; }
+  awardShow(s.res.total, null);
+}
+
+function submitCount(){
+  const s = G.shows[G.showIdx];
+  const said = G.entry, real = s.res.total;
+  ST.cN++;
+  let note2 = '';
+  if (said !== real){
+    ST.cErr++;
+    if (said < real && OPT.muggins === 'on'){
+      const d = real - said;
+      note2 = 'Muggins \u2014 bot takes the ' + d + ' you left behind.';
+      say('bot', 'Muggins!');
+      peg('bot', d, 'muggins');
+    } else {
+      note2 = said < real ? 'Short by ' + (real - said) + '. Corrected.' : 'Over by ' + (said - real) + '. Corrected.';
+    }
+    ST.leaks.push({ kind:'count', loss:Math.abs(real - said), txt:'Called ' + said + ' on a ' + real });
+    G.review.push({ type:'count', said, real, loss:Math.abs(real - said), cards:s.cards,
+      why:'the count was ' + real + ' \u2014 ' + s.res.parts.join(', ') });
+  }
+  G.phase = 'show';
+  awardShow(real, note2);
+}
+
+function awardShow(total, note2){
+  const s = G.shows[G.showIdx];
+  const label = s.crib ? (s.who === 'you' ? 'Your crib' : 'Bot\u2019s crib') : (s.who === 'you' ? 'Your hand' : 'Bot\u2019s hand');
+  peg(s.who, total, label + ' ' + total);
+  G.fb = { type:'show', label, cards:s.cards, res:s.res, note:note2, who:s.who };
+  G.showIdx++;
+  render();
+}
+
+/* ---------- rendering ---------- */
+function cardHTML(c, cls, onclick, i){
+  const delay = (i != null) ? ' style="animation-delay:' + (i * 70) + 'ms"' : '';
+  if (c === null) return '<div class="card back ' + (cls || '') + '"' + delay + '></div>';
+  return '<button class="card ' + (isRed(c) ? 'red ' : '') + (cls || '') + '"' + delay +
+    (onclick ? ' onclick="' + onclick + '"' : ' tabindex="-1"') + '>' +
+    '<span class="pip"><span class="r">' + RANKS[rk(c)] + '</span><span class="s">' + SUITS[st(c)] + '</span></span>' +
+    '<span class="big">' + SUITS[st(c)] + '</span></button>';
+}
+
+function fan(cards, opts){
+  opts = opts || {};
+  const n = cards.length;
+  const spread = Math.min(9, 46 / Math.max(n, 1));
+  let h = '';
+  cards.forEach((c, i) => {
+    const t = n === 1 ? 0 : (i - (n - 1) / 2);
+    const rot = t * spread * (opts.flat ? .35 : 1);
+    const lift = Math.abs(t) * (opts.flat ? .8 : 2.6);
+    const cls = (opts.cls ? opts.cls(c) : '') + (G.fresh ? ' dealin' : '');
+    h += '<span class="slot" style="transform:rotate(' + rot.toFixed(1) + 'deg) translateY(' + lift.toFixed(1) + 'px)">' +
+      cardHTML(c, cls, opts.click ? opts.click(c) : '', G.fresh ? i : null) + '</span>';
+  });
+  return h;
+}
+
+function track(who, label){
+  const sc = G.scores[who], pv = G.prev[who];
+  const pos = v => (v / 121 * 100).toFixed(2) + '%';
+  const pop = (G.pop && G.pop.who === who)
+    ? '<i class="scorepop" style="left:' + pos(sc) + '">+' + G.pop.pts + '</i>' : '';
+  return '<div class="street ' + who + '"><span class="who">' + label + '</span>' +
+    '<span class="holes"><i class="skunkline"></i>' +
+    (pv > 0 && pv !== sc ? '<i class="pegb" style="left:' + pos(pv) + '"></i>' : '') +
+    (sc > 0 ? '<i class="pegf' + (G.pop && G.pop.who === who ? ' lit' : '') + '" style="left:' + pos(sc) + '"></i>' : '') +
+    pop + '</span><span class="num">' + sc + '</span></div>';
+}
+
+function cutDeckHTML(){
+  const N = 14;
+  let h = '<div class="cutdeck"><div class="cutstack">';
+  for (let i = 0; i < N; i++){
+    const f = (i + .5) / N;
+    const off = G.cutAnim && f > G.cutFrac ? ' off' : '';
+    const mine = G.cutBy === 'you';
+    h += '<button class="sliver' + off + (mine ? '' : ' locked') + '" style="bottom:' + (i * 5) +
+      'px;animation-delay:' + ((N - i) * 12) + 'ms"' +
+      (mine ? ' onclick="cutAt(' + f.toFixed(3) + ')" aria-label="cut here"' : ' tabindex="-1"') + '></button>';
+  }
+  h += '</div><div class="cutcard">' +
+    (G.starter !== null ? cardHTML(G.starter, 'flip') : '<span class="card back"></span>') +
+    '</div></div>';
+  return h;
+}
+
+function render(){
+  $('board').innerHTML = track('you', 'You') + track('bot', 'Bot');
+  $('modechip').textContent = OPT.mode === 'ranked' ? 'Ranked' : 'Practice';
+  $('modechip').className = 'modechip ' + OPT.mode;
+
+  const botCards = G.phase === 'discard' ? 6 : (G.pegBot ? G.pegBot.length : 4);
+  const showBot = (G.phase === 'show') && G.fb && G.fb.who === 'bot';
+  $('bothand').innerHTML = showBot
+    ? fan(G.fb.cards, { flat:true, cls:() => 'small' })
+    : fan(new Array(botCards).fill(null), { flat:true, cls:() => 'small' });
+  $('botlabel').textContent = G.dealer === 'bot' ? 'Bot deals' : 'Bot';
+  $('callout').innerHTML = G.callout
+    ? '<span class="calloutbox ' + G.callout.who + '"><i>' + (G.callout.who === 'you' ? 'You' : 'Bot') + '</i> ' +
+      G.callout.text + (G.callout.pts ? ' <b>+' + G.callout.pts + '</b>' : '') + '</span>'
+    : '';
+  $('botbubble').innerHTML = (G.bubble && G.bubble.who === 'bot') ? '<span class="bubble">' + G.bubble.text + '</span>' : '';
+  $('yoububble').innerHTML = (G.bubble && G.bubble.who === 'you') ? '<span class="bubble">' + G.bubble.text + '</span>' : '';
+
+  const side = (withCrib) => '<div class="side">' +
+    (G.starter !== null ? cardHTML(G.starter, 'small starter') + '<em>cut</em>' : '') +
+    (withCrib && G.crib.length === 4 ? '<div class="cribmini"><span class="card back tiny"></span>' +
+      '<span class="card back tiny"></span></div><em>' + (G.dealer === 'you' ? 'your crib' : 'bot crib') + '</em>' : '') +
+    '</div>';
+
+  let p = '';
+  if (G.phase === 'peg'){
+    p = '<div class="mat"><div class="chip' + (G.count === 31 ? ' hot' : '') + '">' + G.count + '</div>' +
+      '<div class="pile">' + (G.pile.length
+        ? G.pile.map(c => cardHTML(c, 'small' + (c === G.landed ? ' land' : ''))).join('')
+        : '<span class="ghosttext">lead a card</span>') + '</div>' + side(true) + '</div>';
+  } else if (G.phase === 'cut'){
+    p = '<div class="mat cutmat">' + cutDeckHTML() +
+      '<div class="cuthint">' + (G.starter !== null ? 'the cut' :
+      G.cutBy === 'bot' ? 'bot cuts \u2014 it\u2019s your crib' : 'tap the deck where you want to cut') + '</div></div>';
+  } else if (G.phase === 'count'){
+    const s = G.shows[G.showIdx];
+    p = '<div class="mat"><div class="countpanel"><span class="entry">' + G.entry + '</span>' +
+      '<span class="keys"><button onclick="bump(-1)">\u22121</button><button onclick="bump(1)">+1</button>' +
+      '<button onclick="bump(2)">+2</button><button onclick="bump(5)">+5</button>' +
+      '<button onclick="bump(-G.entry)">clear</button></span></div>' + side(false) + '</div>';
+  } else if (G.phase === 'show'){
+    const cards = G.fb ? G.fb.cards : [];
+    p = '<div class="mat"><div class="showrow">' + cards.map(c => cardHTML(c, 'small')).join('') +
+      '<span class="plus">+</span>' + cardHTML(G.starter, 'small starter') + '</div></div>';
+  } else {
+    p = '<div class="mat"><div class="deckstack"><span class="card back"></span>' +
+      '<span class="card back"></span><span class="card back"></span></div></div>';
+  }
+  $('play').innerHTML = p;
+
+  let hand = '', prompt = '', ctl = '';
+  if (G.phase === 'discard'){
+    prompt = 'Throw two into ' + (G.dealer === 'you' ? 'your crib' : 'the bot\u2019s crib');
+    hand = fan(G.you, { cls: c => G.sel.includes(c) ? 'sel' : '', click: c => 'toggleSel(' + c + ')' });
+    ctl = '<button class="act" onclick="confirmDiscard()"' + (G.sel.length === 2 ? '' : ' disabled') + '>Throw</button>' +
+      (OPT.hint === 'on' && OPT.mode === 'practice' ? '<button class="act ghost" onclick="openSheet(\'table\')">Table</button>' : '');
+  } else if (G.phase === 'cut'){
+    prompt = G.starter !== null ? 'Cut made' : (G.cutBy === 'bot' ? 'Bot cuts for your crib' : 'Cut the deck');
+    hand = fan(G.you, { cls: () => 'dim' });
+    if (G.starter === null && G.cutBy === 'you')
+      ctl = '<button class="act ghost" onclick="cutAt(Math.random())">Cut for me</button>';
+  } else if (G.phase === 'peg'){
+    const yours = G.turn === 'you' && !G.pendingReset;
+    prompt = G.pendingReset
+      ? (G.count === 31 ? 'Thirty-one' : !G.pegYou.length && !G.pegBot.length ? 'Last card' : 'Go \u2014 count resets')
+      : yours ? 'Your play \u2014 ' + (31 - G.count) + ' to give' : 'Bot is thinking';
+    hand = fan(G.pegYou, {
+      cls: c => (yours && val(c) + G.count <= 31) ? '' : 'dim',
+      click: c => (yours && val(c) + G.count <= 31) ? 'playYou(' + c + ')' : ''
+    });
+    if (yours && !G.pegYou.some(c => val(c) + G.count <= 31)) ctl = '<button class="act" onclick="advance()">Say go</button>';
+  } else if (G.phase === 'count'){
+    const s = G.shows[G.showIdx];
+    prompt = 'Count ' + (s.crib ? 'the crib' : 'your hand') + (OPT.muggins === 'on' ? ' \u00b7 muggins on' : '');
+    hand = fan(s.cards.concat([G.starter]), { cls: c => c === G.starter ? 'starter' : '' });
+    ctl = '<button class="act big" onclick="submitCount()">Call ' + G.entry + '</button>';
+  } else if (G.phase === 'show'){
+    prompt = 'The show';
+    hand = fan(G.you, { cls: () => 'dim' });
+    ctl = '<button class="act" onclick="nextShow()">' + (G.showIdx >= 3 ? 'Deal again' : 'Next') + '</button>';
+  } else if (G.phase === 'over'){
+    const l = G.winner === 'you' ? G.scores.bot : G.scores.you;
+    prompt = (G.winner === 'you' ? 'You win' : 'Bot wins') + ' ' + G.scores[G.winner] + '\u2013' + l +
+      (l < 61 ? ' \u00b7 double skunk' : l < 91 ? ' \u00b7 skunk' : '');
+    ctl = '<button class="act" onclick="openSheet(\'menu\')">New game</button>';
+  }
+  if (G.pending){
+    prompt = G.pending.kind === 'discard' ? 'Leak \u2014 look at the throw' : 'Leak \u2014 look at the play';
+    ctl = '<button class="act big" onclick="continuePlay()">Play on</button>';
+    hand = '<span class="handlock">' + hand + '</span>';
+  }
+  $('hand').innerHTML = hand;
+  $('prompt').textContent = prompt;
+  $('controls').innerHTML = ctl;
+  $('feedback').innerHTML = G.fb ? fbHTML(G.fb) : '';
+  G.fresh = false;
+  if ($('sheet').dataset.open === 'report') openSheet('report');
+}
+
+function bump(n){ G.entry = Math.max(0, Math.min(29, G.entry + n)); render(); }
+
+function verdict(loss, tight){
+  const a = tight ? [0.25, 0.8] : [0.4, 1.2];
+  if (loss <= a[0]) return ['v-good', loss <= 0.02 ? 'Best play' : 'Fine'];
+  if (loss <= a[1]) return ['v-mid', 'Slightly off'];
+  return ['v-bad', 'Leak'];
+}
+
+function miniCards(cards){ return '<span class="mini">' + cards.map(c => cardHTML(c, 'tiny')).join('') + '</span>'; }
+
+function fbHTML(f){
+  if (f.type === 'discard'){
+    const v = verdict(f.loss, true);
+    const bad = v[0] === 'v-bad';
+    let h = '<span class="verdict ' + v[0] + '">' + v[1] + '</span> ' + f.mine.keep.map(cname).join(' ') +
+      ' is worth ' + f.mine.ev.toFixed(2);
+    if (f.loss > 0.02) h += '; keeping ' + f.best.keep.map(cname).join(' ') + ' was ' + f.best.ev.toFixed(2);
+    if (bad) h += '<span class="fix">Throw ' + miniCards(f.best.toss) + ' \u2014 ' + f.why + '</span>';
+    return '<div class="talkbox' + (bad ? ' bad' : '') + '">' + h + '</div>';
+  }
+  if (f.type === 'peg'){
+    const v = verdict(f.loss, false);
+    const bad = v[0] === 'v-bad';
+    let h = '<span class="verdict ' + v[0] + '">' + v[1] + '</span> ' + cname(f.mine.card) + ' takes ' + f.mine.pts +
+      ', gives back ' + f.mine.oppReply.toFixed(1);
+    if (bad) h += '<span class="fix">Play ' + miniCards([f.best.card]) + ' \u2014 ' + f.why + '</span>';
+    else if (f.loss > 0.05) h += '; ' + cname(f.best.card) + ' was better';
+    return '<div class="talkbox' + (bad ? ' bad' : '') + '">' + h + '</div>';
+  }
+  if (f.type === 'show'){
+    let h = '<span class="verdict">' + f.label + ' ' + f.res.total + '</span> ' +
+      (f.res.parts.length ? f.res.parts.join(', ') : 'nothing there');
+    if (f.note) h += ' \u2014 ' + f.note;
+    return '<div class="talkbox">' + h + '</div>';
+  }
+  return '';
+}
+
+/* ---------- sheets ---------- */
+function openSheet(which){
+  const el = $('sheet');
+  el.dataset.open = which;
+  let body = '', closeBtn = '<button class="act ghost wide" onclick="closeSheet()">Close</button>';
+
+  if (which === 'menu'){
+    body = '<h2 class="menutitle">Muggins</h2><p class="note">Six-card cribbage against a bot that plays the numbers.</p>' +
+      '<button class="act wide" onclick="startMode(\'practice\')">Practice \u2014 grade every play as it happens</button>' +
+      '<button class="act ghost wide" onclick="startMode(\'ranked\')">Ranked \u2014 hold the analysis until the hand ends</button>';
+    closeBtn = '';
+  } else if (which === 'settings'){
+    const seg = (k, label, vals) => '<div class="set"><span>' + label + '</span><span class="seg">' +
+      vals.map(v => '<button aria-pressed="' + (OPT[k] === v[0]) + '" onclick="setOpt(\'' + k + '\',\'' + v[0] + '\')">' + v[1] + '</button>').join('') +
+      '</span></div>';
+    body = '<h3>Settings</h3>' +
+      seg('mode', 'Mode', [['practice','Practice'],['ranked','Ranked']]) +
+      seg('bot', 'Bot strength', [['steady','Steady'],['sharp','Sharp']]) +
+      seg('count', 'Counting', [['off','Auto'],['on','I count']]) +
+      seg('muggins', 'Muggins', [['off','Off'],['on','On']]) +
+      seg('hint', 'Discard table button', [['off','Hide'],['on','Show']]) +
+      '<div class="set"><span>Start over</span><button class="act" onclick="openSheet(\'menu\')">New game</button></div>';
+  } else if (which === 'report'){
+    body = '<h3>Session</h3>' + reportHTML() +
+      '<h3>Hand log</h3><div class="log">' + LOG.map(l => '<div>' + l + '</div>').join('') + '</div>';
+  } else if (which === 'table'){
+    body = '<h3>Every throw, ranked</h3><table class="report">' +
+      G.analysis.map(o => '<tr><td>keep ' + o.keep.map(cname).join(' ') + '</td><td>' + o.ev.toFixed(2) + '</td></tr>').join('') +
+      '</table><p class="note">Hand average across all 46 cuts, crib added or subtracted by seat.</p>';
+  } else if (which === 'review'){
+    body = reviewHTML();
+    closeBtn = '<button class="act wide" onclick="nextShow()">Deal the next hand</button>';
+  }
+  el.innerHTML = '<div class="sheetcard">' + body + closeBtn + '</div>';
+  el.classList.add('on');
+}
+function closeSheet(){ const el = $('sheet'); el.classList.remove('on'); el.dataset.open = ''; }
+
+function reviewHTML(){
+  const lost = G.review.reduce((s, f) => s + (f.loss || 0), 0);
+  const grade = lost < 0.35 ? 'A' : lost < 1 ? 'B' : lost < 2.2 ? 'C' : 'D';
+  let h = '<h3>Hand ' + ST.hands + ' review <span class="grade g' + grade + '">' + grade + '</span></h3>' +
+    '<p class="note">' + lost.toFixed(2) + ' points given away across ' + G.review.length + ' decisions.</p>';
+  h += G.review.map(f => {
+    if (f.type === 'discard'){
+      const v = verdict(f.loss, true);
+      return '<div class="revrow"><span class="verdict ' + v[0] + '">' + v[1] + '</span> threw ' +
+        f.mine.toss.map(cname).join(' ') + (f.loss > 0.02 ? ', best was ' + f.best.toss.map(cname).join(' ') +
+        ' <b>\u2212' + f.loss.toFixed(2) + '</b>' : '') + (f.why ? '<em>' + f.why + '</em>' : '') + '</div>';
+    }
+    if (f.type === 'peg'){
+      const v = verdict(f.loss, false);
+      if (f.loss <= 0.4) return '';
+      return '<div class="revrow"><span class="verdict ' + v[0] + '">' + v[1] + '</span> played ' + cname(f.mine.card) +
+        ' at ' + f.at + ', better was ' + cname(f.best.card) + ' <b>\u2212' + f.loss.toFixed(2) + '</b>' +
+        (f.why ? '<em>' + f.why + '</em>' : '') + '</div>';
+    }
+    if (f.type === 'count'){
+      return '<div class="revrow"><span class="verdict v-bad">Miscount</span> called ' + f.said + ' on a ' + f.real +
+        '<em>' + f.why + '</em></div>';
+    }
+    return '';
+  }).join('');
+  return h;
+}
+
+function reportHTML(){
+  if (!ST.dN) return '<p class="note">Play a hand and the numbers show up here.</p>';
+  const leaks = ST.leaks.slice().sort((a, b) => b.loss - a.loss).slice(0, 4);
+  return '<table class="report">' +
+    '<tr><td>Hands played</td><td>' + ST.hands + '</td></tr>' +
+    '<tr><td>Lost per throw</td><td>' + (ST.dLoss / ST.dN).toFixed(2) + '</td></tr>' +
+    '<tr><td>Total lost in discards</td><td>' + ST.dLoss.toFixed(1) + '</td></tr>' +
+    (ST.pN ? '<tr><td>Peg equity lost per play</td><td>' + (ST.pLoss / ST.pN).toFixed(2) + '</td></tr>' : '') +
+    (ST.pN ? '<tr><td>Pegs left on the table</td><td>' + ST.pMissed + '</td></tr>' : '') +
+    (ST.cN ? '<tr><td>Miscounts</td><td>' + ST.cErr + ' of ' + ST.cN + '</td></tr>' : '') +
+    '</table>' +
+    (leaks.length ? '<p class="note">Worst decisions</p><table class="report">' +
+      leaks.map(l => '<tr><td>' + l.txt + '</td><td>\u2212' + l.loss.toFixed(1) + '</td></tr>').join('') + '</table>' : '');
+}
+
+newGame();
+openSheet('menu');
+
+</script>
+</body>
+</html>
