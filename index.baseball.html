@@ -1,0 +1,1317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Solverline Dugout</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: dugout clipboard. Dark scoreboard header with a tab rail, one working column up to 1180px, scouting reports slide in from the right. */
+:root{
+  --bg:#edf1ef; --surface:#ffffff; --raise:#f6f9f7; --ink:#13201b; --muted:#56675f; --line:#d4ddd8;
+  --accent:#17734a; --accent-ink:#ffffff; --accent-soft:#dbeee3;
+  --bar:#13201b; --bar-ink:#e9f1ed; --bar-muted:#9fb3aa; --bar-line:#2a3a33;
+  --stub:#855c00; --good:#17734a; --bad:#b2352e; --warn:#8f6400; --mid:#d19a10; --grass:#cfe5d3; --grass2:#c2dcc7; --dirt:#e6d2b5; --chalk:#ffffff;
+  --r-diamond:#2668b8; --r-gold:#a5770a; --r-silver:#6f7d87; --r-bronze:#94592f; --r-common:#66746f; --r-red:#b8233a;
+  --font-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1512; --surface:#15201c; --raise:#1a2722; --ink:#e4ede8; --muted:#93a59d; --line:#27362f;
+  --accent:#4cc283; --accent-ink:#06150d; --accent-soft:#183326;
+  --bar:#09100d; --bar-ink:#e4ede8; --bar-muted:#8aa096; --bar-line:#22312b;
+  --stub:#e3b64a; --good:#4cc283; --bad:#ef6b60; --warn:#e3b64a; --mid:#d9a83a; --grass:#183427; --grass2:#1c3b2d; --dirt:#3f3123; --chalk:#c9d6cf;
+  --r-diamond:#4c92e6; --r-gold:#c99a24; --r-silver:#8e9ca6; --r-bronze:#b87648; --r-common:#7c8a85; --r-red:#e0475c;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1512; --surface:#15201c; --raise:#1a2722; --ink:#e4ede8; --muted:#93a59d; --line:#27362f;
+  --accent:#4cc283; --accent-ink:#06150d; --accent-soft:#183326;
+  --bar:#09100d; --bar-ink:#e4ede8; --bar-muted:#8aa096; --bar-line:#22312b;
+  --stub:#e3b64a; --good:#4cc283; --bad:#ef6b60; --warn:#e3b64a; --mid:#d9a83a; --grass:#183427; --grass2:#1c3b2d; --dirt:#3f3123; --chalk:#c9d6cf;
+  --r-diamond:#4c92e6; --r-gold:#c99a24; --r-silver:#8e9ca6; --r-bronze:#b87648; --r-common:#7c8a85; --r-red:#e0475c;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bar)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;letter-spacing:.01em;text-wrap:balance;margin:0;line-height:1.1}
+h2{font-size:30px;text-transform:uppercase}
+h3{font-size:21px;text-transform:uppercase}
+p{margin:0}
+.num,.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bar);color:var(--bar-ink);border-bottom:1px solid var(--bar-line)}
+.top .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:12px 8px}
+.brand{display:flex;align-items:baseline;gap:8px;margin-right:auto}
+.brand b{font-family:var(--font-display);font-size:30px;letter-spacing:.06em;line-height:1}
+.brand span{font-size:12px;color:var(--bar-muted);letter-spacing:.08em;text-transform:uppercase}
+.datachip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--bar-line);border-radius:999px;padding:4px 12px;font-size:13px;color:var(--bar-ink);background:transparent;cursor:pointer}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--warn);flex:none}
+.dot.live{background:var(--accent)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.top .seg{border-color:var(--bar-line)}
+.top .seg button{color:var(--bar-ink)}
+.top .seg button[aria-pressed="true"]{color:var(--accent-ink)}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs a{flex:none;color:var(--bar-muted);text-decoration:none;font-family:var(--font-display);font-size:18px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:6px 12px 10px;border-bottom:3px solid transparent}
+.tabs a[aria-current="page"]{color:var(--bar-ink);border-bottom-color:var(--accent)}
+.tabs a .pro{font-family:var(--font-body);font-size:10px;letter-spacing:.06em;vertical-align:3px;margin-left:4px;color:var(--accent)}
+
+main{padding-block:24px 64px}
+section[data-view]{display:grid;gap:20px}
+.head{display:flex;gap:12px;align-items:end;justify-content:space-between;flex-wrap:wrap}
+.head p{max-width:62ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.notice{border:1px dashed var(--line);border-radius:10px;padding:12px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--raise)}
+.notice p{flex:1 1 280px;min-width:0}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:4px 10px;font-size:13px}
+.btn.link{border:0;background:none;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer}
+.filters{display:flex;gap:12px;flex-wrap:wrap;align-items:end}
+.field{display:grid;gap:4px}
+.field input,.field select,.field textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.field input[type=number]{width:120px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;cursor:pointer;font-weight:600;font-size:13px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pro-pill{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 5px;vertical-align:2px}
+
+/* tables */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tbl th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--raise)}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.r,.tbl th.r{text-align:right}
+.tbl tbody tr.click{cursor:pointer}
+.tbl tbody tr.click:hover{background:var(--raise)}
+.pname{font-weight:600;white-space:nowrap}
+.psub{font-size:12px;color:var(--muted);white-space:nowrap}
+.rk{font-family:var(--font-display);font-size:22px;font-weight:700;width:44px}
+.score{font-family:var(--font-mono);font-weight:500;font-size:16px}
+.stub{font-family:var(--font-mono);color:var(--stub);white-space:nowrap}
+.rar{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.ovr{font-family:var(--font-display);font-weight:700;font-size:18px;color:#fff;border-radius:5px;padding:0 6px;min-width:32px;text-align:center;line-height:24px;background:var(--r-common)}
+.ovr.diamond{background:var(--r-diamond)}.ovr.gold{background:var(--r-gold)}.ovr.silver{background:var(--r-silver)}.ovr.bronze{background:var(--r-bronze)}.ovr.red{background:var(--r-red)}
+.tag{display:inline-block;font-size:12px;font-weight:600;background:var(--accent-soft);color:var(--ink);border-radius:4px;padding:2px 8px;white-space:nowrap}
+.delta.up{color:var(--good)}.delta.down{color:var(--bad)}
+.lock{color:var(--muted);font-size:12px}
+
+/* cards grid */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.up{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:10px;align-content:start}
+.up .swap{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline}
+.up .gain{font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--good);line-height:1}
+.stat-row{display:flex;gap:24px;flex-wrap:wrap}
+.stat .v{font-family:var(--font-display);font-size:34px;font-weight:700;line-height:1}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.slot{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;text-align:left;width:100%}
+.slot:hover{border-color:var(--accent)}
+.slot .pos{font-family:var(--font-display);font-weight:700;font-size:18px;width:38px;flex:none;color:var(--muted)}
+.slot .who{flex:1;min-width:0}
+.slot .who div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot.empty .who{color:var(--muted);font-style:italic}
+.lineup{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.lineup li{display:grid;grid-template-columns:34px 1fr auto;gap:2px 10px;padding:10px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.lineup li:last-child{border-bottom:0}
+.lineup .n{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--accent);grid-row:span 2;line-height:1}
+.lineup .why{grid-column:2/4;font-size:13px;color:var(--muted)}
+
+/* report sheet */
+.sheet-back{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40}
+.sheet{position:fixed;top:0;right:0;bottom:0;width:min(540px,100%);z-index:41;background:var(--surface);border-left:1px solid var(--line);overflow-y:auto;padding:calc(16px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) 20px;display:grid;gap:18px;align-content:start}
+.sheet .x{position:sticky;top:0;justify-self:end;margin-bottom:-36px}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:130px 1fr 44px;gap:10px;align-items:center;font-size:13px}
+.bar .track{height:8px;border-radius:4px;background:var(--raise);border:1px solid var(--line);overflow:hidden}
+.bar .fill{height:100%;background:var(--muted)}
+.bar .fill.hi{background:var(--good)}.bar .fill.lo{background:var(--bad)}
+.rlist{margin:0;padding-left:18px;display:grid;gap:6px}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.kv div{background:var(--raise);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.kv b{display:block;font-family:var(--font-mono);font-size:15px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.form-grid .field input{width:100%}
+textarea{width:100%;min-height:120px;font-family:var(--font-mono);font-size:12px}
+pre.code{background:var(--raise);border:1px solid var(--line);border-radius:8px;padding:12px;font-size:12px;max-height:180px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin:0}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:8px}
+.locked{display:grid;gap:12px;justify-items:start;padding:28px;border:1px dashed var(--accent);border-radius:12px;background:var(--accent-soft)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:60;font-size:14px}
+.slider{display:grid;grid-template-columns:150px 1fr 48px;gap:12px;align-items:center}
+.slider input{width:100%;accent-color:var(--accent)}
+
+/* card tiles + heat */
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:10px;cursor:pointer;align-content:start;min-width:0}
+.tile:hover{border-color:var(--accent)}
+.t-head{display:grid;grid-template-columns:78px 1fr;gap:12px;align-items:start}
+.t-head .pname,.t-head .psub{overflow:hidden;text-overflow:ellipsis}
+.face{--rc:var(--r-common);width:78px;height:106px;border-radius:8px;background:linear-gradient(160deg,var(--rc) 0%,color-mix(in oklab,var(--rc) 55%,#000) 100%);color:#fff;display:grid;grid-template-rows:auto auto 1fr;justify-items:center;align-items:start;padding:7px 4px 6px;box-shadow:inset 0 0 0 2px color-mix(in oklab,var(--rc) 55%,#fff);position:relative;overflow:hidden}
+.face::after{content:"";position:absolute;left:-30%;right:-30%;bottom:-62%;height:100%;border-radius:50%;border-top:1px dashed rgba(255,255,255,.35)}
+.face b{font-family:var(--font-display);font-size:34px;line-height:1}
+.face .jn{position:absolute;right:-4px;bottom:-10px;font-family:var(--font-display);font-weight:700;font-size:64px;line-height:1;color:#fff;opacity:.16;letter-spacing:-.02em;pointer-events:none}
+.face.lg .jn{font-size:110px;bottom:-18px}
+.face .sheen{position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.38) 45%,rgba(255,255,255,.08) 52%,transparent 64%);background-size:250% 100%;background-position:120% 0;mix-blend-mode:screen;pointer-events:none;z-index:3}
+.face.red .sheen{background-image:linear-gradient(115deg,transparent 28%,rgba(255,220,230,.45) 44%,rgba(255,255,255,.12) 52%,transparent 66%)}
+@media (prefers-reduced-motion:no-preference){.tile:hover .face .sheen,.dd-head .face .sheen{animation:foil 1.6s ease-in-out}@keyframes foil{from{background-position:120% 0}to{background-position:-40% 0}}}
+.face .fp{font-family:var(--font-display);font-size:14px;letter-spacing:.06em;line-height:1.2}
+.face .ft{font-size:10px;letter-spacing:.1em;align-self:end;opacity:.9;font-weight:600}
+.face.diamond{--rc:var(--r-diamond)}.face.gold{--rc:var(--r-gold)}.face.silver{--rc:var(--r-silver)}.face.bronze{--rc:var(--r-bronze)}.face.red{--rc:var(--r-red)}
+.face.team{background:linear-gradient(165deg,var(--tc) 0%,var(--tc) 52%,color-mix(in oklab,var(--tc) 55%,#000) 100%);box-shadow:inset 0 0 0 3px var(--rc),inset 0 0 0 4px rgba(255,255,255,.25)}
+.face.team::before{content:"";position:absolute;left:0;right:0;top:60%;height:7%;background:var(--tc2);opacity:.95}
+.face .fs{position:relative;z-index:1}
+.face .rb{position:absolute;top:4px;right:4px;font-family:var(--font-body);font-size:8px;font-weight:700;letter-spacing:.04em;background:var(--rc);color:#fff;border-radius:3px;padding:1px 3px;box-shadow:0 0 0 1px rgba(255,255,255,.5);z-index:2;line-height:1.3}
+.face .fser{font-size:9px;letter-spacing:.06em;text-transform:uppercase;opacity:.9;max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;align-self:end;position:relative;z-index:1}
+.face.lg .rb{font-size:10px;top:6px;right:6px;padding:1px 5px}
+.face.lg{grid-template-rows:auto auto 1fr auto}
+.face.lg{width:112px;height:150px;border-radius:12px;padding-top:12px}
+.face.lg b{font-size:54px}.face.lg .fp{font-size:22px}.face.lg .ft{font-size:12px}
+.heat{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.heat.full{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+.hc{--h:var(--mid);background:color-mix(in oklab,var(--h) 18%,var(--surface));border-bottom:3px solid var(--h);border-radius:6px;padding:4px 7px 3px;display:grid;line-height:1.2;min-width:0}
+.hc span{font-size:10px;letter-spacing:.06em;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hc b{font-family:var(--font-mono);font-size:15px;font-weight:500}
+.hc i{font-style:normal;font-size:10px;color:var(--muted)}
+.t-meta{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.rankbadge{font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--accent);margin-right:4px}
+.legend{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.legend .g{width:110px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--bad),var(--mid),var(--good))}
+.dd-head{display:grid;grid-template-columns:112px 1fr;gap:16px;align-items:start;padding-right:72px}
+.fit{display:grid;gap:8px}
+.fit-row{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--raise)}
+.fit-row .pos{font-family:var(--font-display);font-weight:700;font-size:18px}
+.fit-row .g{font-family:var(--font-mono);font-weight:500}
+.fit-row .g.up{color:var(--good)}.fit-row .g.down{color:var(--bad)}
+.cmpbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:35;background:var(--ink);color:var(--bg);border-radius:999px;padding:6px 6px 6px 16px;display:flex;gap:10px;align-items:center;font-size:14px;max-width:calc(100% - 32px)}
+.cmpbar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cmpbar .btn{background:var(--bg);color:var(--ink);border-color:var(--bg);flex:none}
+.cmp-row{display:grid;grid-template-columns:1fr 96px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cmp-row>:first-child{text-align:right}
+.cmp-row .mid{color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;text-align:center;font-weight:600}
+.cmp-row .v{font-family:var(--font-mono)}
+.cmp-row .win{font-weight:700;color:var(--good)}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.diamond-wrap{display:grid;gap:12px}
+.diamond{position:relative;width:100%;max-width:640px;aspect-ratio:1/1;margin:0 auto;border-radius:14px;overflow:hidden;background:var(--surface);border:1px solid var(--line)}
+.diamond svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.dslot{position:absolute;transform:translate(-50%,-50%);width:clamp(72px,21%,128px);display:grid;justify-items:center;gap:1px;padding:5px 4px;border-radius:10px;border:1px solid var(--line);background:var(--surface);cursor:pointer;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.dslot:hover{border-color:var(--accent)}
+.dslot .dp{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.06em;color:var(--accent);line-height:1}
+.dslot .dn{font-weight:600;font-size:12px;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dslot .ds{font-family:var(--font-mono);font-size:11px;color:var(--muted);line-height:1.2;display:flex;gap:4px;align-items:center}
+.dslot .ds .ovr{font-size:12px;line-height:16px;min-width:22px;padding:0 3px;border-radius:3px}
+.dslot.empty{border-style:dashed;background:color-mix(in oklab,var(--surface) 80%,transparent)}
+.dslot.empty .dn{color:var(--muted);font-weight:500}
+@media (max-width:480px){.t-head{grid-template-columns:70px 1fr}.face{width:70px;height:95px}.dslot{width:clamp(64px,23%,96px);padding:3px 2px}.dslot .dn{font-size:11px}}
+.pools{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.pool{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:10px;align-content:start;min-width:0}
+.pool .pname-in{font-family:var(--font-display);font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;border:0;border-bottom:1px dashed var(--line);background:transparent;padding:2px 0;width:100%}
+.plist{display:grid;gap:4px;max-height:280px;overflow-y:auto}
+.pitem{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;font-size:13px;padding:4px 6px;border-radius:6px;background:var(--raise)}
+.pitem .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pitem.pick{background:var(--accent-soft);outline:1px solid var(--accent)}
+.sres{display:grid;gap:2px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.sres button{display:flex;gap:8px;align-items:center;text-align:left;border:0;background:var(--surface);padding:6px 8px;cursor:pointer;font-size:13px}
+.sres button:hover{background:var(--raise)}
+.give{display:grid;gap:6px}
+.give-row{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;font-size:14px}
+.give-row .pos{font-family:var(--font-display);font-weight:700;font-size:17px;color:var(--accent)}
+@media (max-width:560px){
+  h2{font-size:26px}
+  .bar{grid-template-columns:100px 1fr 40px}
+  .dd-head{grid-template-columns:84px 1fr;padding-right:0;padding-top:36px}
+  .face.lg{width:84px;height:114px}.face.lg b{font-size:40px}
+  .slider{grid-template-columns:110px 1fr 40px}
+  .sheet{top:auto;height:90%;border-left:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="row">
+      <div class="brand"><b>DUGOUT</b><span>Solverline · The Show 26</span></div>
+      <button class="datachip" id="dataChip" type="button"><span class="dot" id="dataDot"></span><span id="dataLabel">Example cards</span></button>
+      <div class="seg" role="group" aria-label="Tier preview">
+        <button type="button" id="tierPro" aria-pressed="true">Premium</button>
+        <button type="button" id="tierFree" aria-pressed="false">Free view</button>
+      </div>
+    </div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#board">Board</a>
+      <a href="#top">Top 100</a>
+      <a href="#team">My Team<span class="pro">PRO</span></a>
+      <a href="#lineup">Lineup<span class="pro">PRO</span></a>
+      <a href="#moneyball">Moneyball<span class="pro">PRO</span></a>
+      <a href="#coop">Co-op Draft<span class="pro">PRO</span></a>
+      <a href="#log">Game Log<span class="pro">PRO</span></a>
+      <a href="#weights">Weights<span class="pro">PRO</span></a>
+      <a href="#data">Data</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section data-view="board" id="v-board"></section>
+  <section data-view="top" id="v-top" hidden></section>
+  <section data-view="team" id="v-team" hidden></section>
+  <section data-view="lineup" id="v-lineup" hidden></section>
+  <section data-view="moneyball" id="v-moneyball" hidden></section>
+  <section data-view="coop" id="v-coop" hidden></section>
+  <section data-view="log" id="v-log" hidden></section>
+  <section data-view="weights" id="v-weights" hidden></section>
+  <section data-view="data" id="v-data" hidden></section>
+</main>
+
+<div class="sheet-back" id="sheetBack" hidden></div>
+<aside class="sheet" id="sheet" hidden aria-modal="true" role="dialog"></aside>
+<div class="toast" id="toast" hidden></div>
+<div class="cmpbar" id="cmpbar" hidden></div>
+
+<script type="text/plain" id="snippet">(async()=>{const g=async u=>{for(let t=0;t<4;t++){try{const r=await fetch(u);if(r.ok)return await r.json()}catch(e){}await new Promise(r=>setTimeout(r,800*(t+1)))}return{}};
+const all=async(b,k)=>{const f=await g(b+1),n=f.total_pages||1,o=[f];for(let p=2;p<=n;p+=6){const B=[];for(let q=p;q<p+6&&q<=n;q++)B.push(g(b+q));o.push(...await Promise.all(B));console.log(k,Math.min(p+5,n),'of',n)}return o.flatMap(j=>j[k]||[])};
+const L=await all('/apis/listings.json?type=mlb_card&page=','listings'),I=await all('/apis/items.json?type=mlb_card&page=','items'),P={};L.forEach(l=>{if(l.item)P[l.item.uuid]=[l.best_sell_price||0,l.best_buy_price||0]});
+const F='uuid name jersey_number display_position display_secondary_positions team_short_name series ovr rarity bat_hand throw_hand contact_left contact_right power_left power_right plate_vision plate_discipline batting_clutch fielding_ability arm_strength arm_accuracy reaction_time reaction_left reaction_right reaction_forward reaction_back blocking speed base_stealing baserunning_ability baserunning_aggression stamina hits_per_bf k_per_bf hits_per_bf_left hits_per_bf_right k_per_bf_left k_per_bf_right bb_per_bf hr_per_bf pitch_velocity pitch_control pitch_movement pitching_clutch is_sellable locations'.split(' ');
+window.__dugout=JSON.stringify({v:2,game:location.host,at:Date.now(),f:F,r:I.map(i=>F.map(k=>i[k]??null).concat(P[i.uuid]||[0,0]))});console.log('Done:',I.length,'cards. Now run: copy(window.__dugout)')})();</script>
+
+<script>
+/* ===== Engine: pure functions, no DOM ===== */
+const HIT_POS=['C','1B','2B','3B','SS','LF','CF','RF'];
+const BOARD_POS=[...HIT_POS,'DH','SP','RP'];
+const POS_NAME={C:'catchers','1B':'first basemen','2B':'second basemen','3B':'third basemen',SS:'shortstops',LF:'left fielders',CF:'center fielders',RF:'right fielders',DH:'DHs',SP:'starters',RP:'relievers'};
+const SLOTS=['C','1B','2B','3B','SS','LF','CF','RF','DH','SP1','SP2','SP3','SP4','SP5','RP1','RP2','RP3','RP4','RP5','RP6'];
+const slotPos=s=>s.startsWith('SP')?'SP':s.startsWith('RP')?'RP':s;
+const isPitchPos=P=>P==='SP'||P==='RP';
+const PRESETS={
+  balanced:{label:'Balanced',con:30,pow:32,vis:18,dis:12,clu:8,def:100,spd:100},
+  brewers:{label:'Brewers style',con:38,pow:16,vis:22,dis:16,clu:8,def:160,spd:150},
+  meta:{label:'Power meta',con:28,pow:44,vis:14,dis:8,clu:6,def:60,spd:60}
+};
+// Which defensive attributes matter at each spot (weights sum to 1)
+const DEFW={C:{fld:.3,arm:.2,acc:.15,rea:.1,blk:.25},'1B':{fld:.6,rea:.3,acc:.1},'2B':{fld:.4,rea:.3,arm:.1,acc:.2},'3B':{fld:.3,rea:.3,arm:.25,acc:.15},SS:{fld:.35,rea:.3,arm:.2,acc:.15},LF:{fld:.3,rea:.3,spd:.2,arm:.1,acc:.1},CF:{fld:.25,rea:.3,spd:.25,arm:.1,acc:.1},RF:{fld:.3,rea:.25,spd:.1,arm:.25,acc:.1}};
+// How much defense counts at each spot, relative to offense = 1, at 100% defense importance
+const POSDEF={C:.45,SS:.45,CF:.4,'2B':.35,'3B':.28,RF:.22,LF:.18,'1B':.12,DH:0};
+const SPD_BASE=.12;
+const PW={SP:{h9:.2,k9:.2,bb9:.12,hr9:.2,ctl:.07,vel:.05,mov:.06,sta:.06,pcl:.04},RP:{h9:.2,k9:.24,bb9:.12,hr9:.2,ctl:.08,vel:.06,mov:.05,pcl:.05}};
+const RAW_H=['cl','cr','pl','pr','vis','dis','clu','fld','arm','acc','rea','blk','spd','bra','agg'];
+const RAW_P=['h9','k9','bb9','hr9','vel','ctl','mov','sta','pcl'];
+const NUM=['o','cl','cr','pl','pr','vis','dis','clu','fld','arm','acc','rea','blk','spd','bra','agg','sta','h9','k9','bb9','hr9','vel','ctl','mov','pcl','h9l','h9r','k9l','k9r','bs','bb'];
+
+function normPos(p){p=String(p||'').toUpperCase().trim();return p==='CP'?'RP':p}
+function mkCard(o){
+  const c={id:String(o.id??o.n),n:String(o.n||'Unknown'),jn:String(o.jn??'').replace(/[^0-9]/g,'').slice(0,2),t:String(o.t||''),se:String(o.se||''),ra:String(o.ra||''),b:String(o.b||''),th:String(o.th||'')};
+  for(const k of NUM)c[k]=Number(o[k])||0;
+  c.p=normPos(o.p)||'DH';
+  c.sec=String(o.s||'').split(/[,\/]/).map(normPos).filter(x=>x&&x!==c.p);
+  c.s=c.sec.join(', ');
+  c.h=!isPitchPos(c.p);
+  if(o.custom)c.custom=true;
+  c.mkt=o.mkt==null?true:!!o.mkt;
+  c.loc=Array.isArray(o.loc)?o.loc.map(String):[];
+  return c;
+}
+const avg2=(a,b)=>(a+b)/2;
+function offVs(c,hand,w){
+  const con=hand==='R'?c.cr:c.cl, pow=hand==='R'?c.pr:c.pl;
+  const t=w.con+w.pow+w.vis+w.dis+w.clu||1;
+  return (w.con*con+w.pow*pow+w.vis*c.vis+w.dis*c.dis+w.clu*c.clu)/t;
+}
+const offAll=(c,w)=>.7*offVs(c,'R',w)+.3*offVs(c,'L',w);
+function defAt(c,P){const W=DEFW[P];if(!W)return 0;let s=0;for(const k in W)s+=W[k]*c[k];return s}
+const spdScore=c=>.55*c.spd+.3*c.bra+.15*c.agg;
+function hitScore(c,P,w){
+  const O=offAll(c,w);
+  const wd=(POSDEF[P]||0)*w.def/100, ws=SPD_BASE*w.spd/100;
+  const D=wd?defAt(c,P):0;
+  return (O+D*wd+spdScore(c)*ws)/(1+wd+ws);
+}
+function pitchScore(c,P){const W=PW[P]||PW.RP;let s=0,t=0;for(const k in W){s+=W[k]*c[k];t+=W[k]}return s/t}
+const scoreAt=(c,P,w)=>isPitchPos(P)?pitchScore(c,P):hitScore(c,P,w);
+function eligible(c,P){
+  if(P==='DH')return c.h;
+  if(P==='SP')return c.p==='SP';
+  if(P==='RP')return c.p==='RP'||c.p==='SP';
+  return c.h&&(c.p===P||c.sec.includes(P));
+}
+const HM={con:c=>avg2(c.cl,c.cr),pow:c=>avg2(c.pl,c.pr),eye:c=>avg2(c.vis,c.dis),def:(c,P)=>P==='DH'?null:defAt(c,P),spd:spdScore};
+const HM_LABEL={con:'contact',pow:'power',eye:'plate discipline',def:'defense',spd:'speed & stealing'};
+const PM=['h9','k9','bb9','hr9','vel','ctl','mov','sta'];
+const PM_LABEL={h9:'hit prevention',k9:'strikeouts',bb9:'walk prevention',hr9:'HR prevention',vel:'velocity',ctl:'command',mov:'movement',sta:'stamina'};
+
+function buildModel(cards,w){
+  const groups={};
+  for(const c of cards){const P=c.p;(groups[P]||(groups[P]=[])).push(c);c.sc=scoreAt(c,P,w);c.ms=scoreAt(c,P,PRESETS.meta)}
+  const pt={};
+  for(const P in groups){
+    const g=groups[P];
+    [...g].sort((a,b)=>b.ms-a.ms).forEach((c,i)=>c.mrk=i+1);
+    g.sort((a,b)=>b.sc-a.sc).forEach((c,i)=>c.rk=i+1);
+    const t=pt[P]={};
+    const keys=isPitchPos(P)?PM:Object.keys(HM);
+    for(const m of keys){t[m]=g.map(c=>isPitchPos(P)?c[m]:HM[m](c,P)).filter(v=>v!=null).sort((a,b)=>a-b)}
+    t.sc=g.map(c=>c.sc).sort((a,b)=>a-b);
+    for(const k of (isPitchPos(P)?RAW_P:RAW_H))t['a:'+k]=g.map(c=>c[k]).filter(v=>v>0).sort((a,b)=>a-b);
+  }
+  [...cards].sort((a,b)=>b.sc-a.sc).forEach((c,i)=>c.ork=i+1);
+  return {groups,pt};
+}
+function pct(model,P,m,v){
+  const a=model.pt[P]&&model.pt[P][m];if(!a||!a.length||v==null)return .5;
+  let lo=0,hi=a.length;while(lo<hi){const mid=(lo+hi)>>1;if(a[mid]<=v)lo=mid+1;else hi=mid}
+  return lo/a.length;
+}
+function metricsFor(c,P,model){
+  const keys=isPitchPos(P)?PM.filter(m=>m!=='sta'||P==='SP'):Object.keys(HM).filter(m=>!(m==='def'&&P==='DH'));
+  return keys.map(m=>{const v=isPitchPos(P)?c[m]:HM[m](c,P);return {m,label:isPitchPos(P)?PM_LABEL[m]:HM_LABEL[m],v,p:pct(model,c.p===P?P:c.p,m,v)}});
+}
+function archetype(c,P,model){
+  const M={};for(const x of metricsFor(c,P,model))M[x.m]=x.p;
+  const sp=pct(model,c.p,'sc',c.sc);
+  if(isPitchPos(P)){
+    if(M.k9>=.8&&M.hr9>=.6)return 'Bat-misser';
+    if(M.k9>=.8)return 'Strikeout artist';
+    if(M.hr9>=.8&&M.h9>=.6)return 'Contact killer';
+    if(M.bb9>=.8&&M.ctl>=.6)return 'Command artist';
+    if(P==='SP'&&M.sta>=.85&&sp>=.5)return 'Workhorse';
+    if(M.vel>=.85)return 'Flamethrower';
+    if(M.h9<=.3&&M.hr9<=.3)return 'Hittable';
+    return sp>=.6?'Solid arm':P==='SP'?'Back-end starter':'Middle relief';
+  }
+  const split=Math.abs(offVs(c,'R',PRESETS.balanced)-offVs(c,'L',PRESETS.balanced));
+  const d=M.def??.5;
+  if(M.con>=.75&&M.pow>=.75&&d>=.75&&M.spd>=.7)return 'Five-tool';
+  if(M.con>=.75&&M.pow>=.75)return 'Complete hitter';
+  if(d>=.8&&M.con<.4&&M.pow<.4)return 'Defensive specialist';
+  if(d>=.7&&M.con>=.6&&M.pow<.55)return 'Glove-first contact bat';
+  if(M.pow>=.75&&M.con<.5)return 'Three-true-outcomes slugger';
+  if(M.pow>=.7&&d<.35&&P!=='DH')return 'Bat-only masher';
+  if(M.spd>=.75&&d>=.65)return 'Speed & defense';
+  if(M.spd>=.7&&(M.con>=.65||M.eye>=.7))return 'Table-setter';
+  if(split>=10)return 'Platoon bat';
+  return sp>=.6?'Solid regular':sp>=.3?'Role player':'Bench depth';
+}
+function topOf(n){return n<=0?1:n}
+function report(c,model,w,cards){
+  const P=c.p, pos=POS_NAME[P]||P;
+  const mets=metricsFor(c,P,model);
+  const strengths=mets.filter(x=>x.p>=.75).sort((a,b)=>b.p-a.p).slice(0,2).map(x=>`Top ${topOf(Math.round((1-x.p)*100))}% ${x.label} among ${pos} (${Math.round(x.v)})`);
+  const weaknesses=mets.filter(x=>x.p<=.3).sort((a,b)=>a.p-b.p).slice(0,2).map(x=>`Bottom ${topOf(Math.round(x.p*100))}% ${x.label} among ${pos} (${Math.round(x.v)})`);
+  const notes=[];
+  if(c.h){
+    const r=offVs(c,'R',w),l=offVs(c,'L',w);
+    if(Math.abs(r-l)>=10)notes.push(r>l?`Platoon split: ${Math.round(r)} vs RHP, ${Math.round(l)} vs LHP. Sit him against lefties if you have a better option.`:`Reverse split: ${Math.round(l)} vs LHP, ${Math.round(r)} vs RHP. Most valuable against lefty starters.`);
+    if(c.spd>=80)notes.push(`Real steal threat: speed ${c.spd}, stealing ${c.bra}. Green-light him on the bases.`);
+    else if(c.spd&&c.spd<=45)notes.push(`Station-to-station runner (speed ${c.spd}). Don't send him on close plays.`);
+    if(c.sec.length)notes.push(`Can also play ${c.sec.join(', ')}.`);
+  }else{
+    if(P==='SP'&&c.sta&&c.sta<60)notes.push(`Low stamina (${c.sta}). Expect him to tire by the 5th.`);
+    if(c.h9l&&c.h9r&&Math.abs(c.h9r-c.h9l)>=15)notes.push(c.h9r>c.h9l?`Much tougher on righties (H/9 ${c.h9r} vs R, ${c.h9l} vs L). Keep him away from lefty-heavy lineups.`:`Much tougher on lefties (H/9 ${c.h9l} vs L, ${c.h9r} vs R). A weapon against left-handed bats.`);
+  }
+  let value=null;
+  if(c.bs>0){
+    const g=model.groups[P].filter(x=>x.bs>0);
+    const best=g[0];
+    if(best&&best.id!==c.id)value=`${Math.round(c.sc/best.sc*100)}% of the top ${P}'s score (${best.n}) for ${Math.max(1,Math.round(c.bs/best.bs*100))}% of the price.`;
+    else if(best)value=`Best ${P} on the market by your weights.`;
+  }else value='Not on the market right now (no listing price).';
+  let meta=null;
+  const diff=c.mrk-c.rk;
+  if(Math.abs(diff)>=8){
+    const M={};for(const x of mets)M[x.m]=x.p;
+    let why;
+    if(c.h){
+      if(diff>0)why=(M.def??0)>=.65?'his glove counts for more in your weights':M.spd>=.65?'your weights value his speed':M.con>M.pow?'your weights favor contact over power':'his all-around game';
+      else why=M.pow>=.65?`the meta loves his power (${Math.round(HM.pow(c))})`:(M.def??1)<=.4?`your weights punish his glove (${Math.round(defAt(c,P))})`:'the meta leans harder on raw power';
+    }else why='pitchers use the same weights in both, so this is a tie-break effect';
+    meta=`You rank him #${c.rk} at ${P}, the power meta ranks him #${c.mrk}: ${why}.`;
+  }
+  return {tag:archetype(c,P,model),strengths,weaknesses,notes,value,meta,mets};
+}
+function alternatives(c,model){
+  const g=(model.groups[c.p]||[]).filter(x=>x.id!==c.id&&x.bs>0&&x.mkt&&!x.custom&&x.sc>=c.sc-4);
+  return (c.bs>0?g.filter(x=>x.bs<=c.bs*.6):g).sort((a,b)=>b.sc-a.sc).slice(0,3);
+}
+function teamFit(c,team,w){
+  const rows=[];
+  for(const s of SLOTS){
+    const P=slotPos(s);if(!eligible(c,P))continue;
+    const cur=team[s]||null;if(cur&&cur.id===c.id){rows.push({slot:s,P,cur,mine:true,v:scoreAt(c,P,w),gain:0,team:0});continue}
+    const v=scoreAt(c,P,w),cv=cur?scoreAt(cur,P,w):0;
+    rows.push({slot:s,P,cur,v,gain:v-cv,team:(v-cv)*slotWeight(s)});
+  }
+  // for pitchers keep only the weakest slot of each type (the one he would replace)
+  const out=[];const seen={};
+  for(const r of rows.sort((a,b)=>b.gain-a.gain)){const k=isPitchPos(r.P)?r.P:r.slot;if(seen[k])continue;seen[k]=1;out.push(r)}
+  const best=out.find(r=>!r.mine)||null;
+  let bat=null;
+  if(best&&!isPitchPos(best.P)&&best.gain>0){
+    const t2={...team,[best.slot]:c};
+    const hs=[...HIT_POS,'DH'].map(s=>t2[s]).filter(Boolean);
+    const spot=h=>{const L=buildLineup(hs,h,w);const x=L.find(y=>y.c.id===c.id);return x?x.spot:null};
+    bat={R:spot('R'),L:spot('L')};
+  }
+  return {rows:out,best,bat};
+}
+/* Co-op draft: min-cost max-flow so every player brings exactly their quota and the combined team scores highest */
+class Flow{
+  constructor(n){this.n=n;this.g=Array.from({length:n},()=>[])}
+  add(u,v,cap,cost){const e={v,cap,cost,rev:this.g[v].length};this.g[u].push(e);this.g[v].push({v:u,cap:0,cost:-cost,rev:this.g[u].length-1});return e}
+  run(s,t){
+    const n=this.n;
+    for(;;){
+      const dist=new Array(n).fill(Infinity),inq=new Array(n).fill(false),pv=new Array(n),pe=new Array(n);dist[s]=0;const q=[s];inq[s]=true;
+      while(q.length){const u=q.shift();inq[u]=false;const g=this.g[u];for(let i=0;i<g.length;i++){const e=g[i];if(e.cap>0&&dist[u]+e.cost<dist[e.v]){dist[e.v]=dist[u]+e.cost;pv[e.v]=u;pe[e.v]=i;if(!inq[e.v]){inq[e.v]=true;q.push(e.v)}}}}
+      if(dist[t]===Infinity)break;
+      let f=Infinity;for(let v=t;v!==s;v=pv[v])f=Math.min(f,this.g[pv[v]][pe[v]].cap);
+      for(let v=t;v!==s;v=pv[v]){const e=this.g[pv[v]][pe[v]];e.cap-=f;this.g[v][e.rev].cap+=f}
+    }
+  }
+}
+const COOP_HIT=['C','1B','2B','3B','SS','LF','CF','RF','DH'];
+const COOP_PIT=['SP1','SP2','SP3','SP4','SP5','RP1','RP2','RP3','RP4','RP5','RP6'];
+function coopPart(pools,quota,slots,w,hit){
+  pools=pools.map(p=>p.filter(c=>hit?c.h:!c.h));
+  const card={};pools.flat().forEach(c=>card[c.id]=c);
+  const ids=Object.keys(card),np=pools.length;
+  const N=2+np+ids.length*2+slots.length,s=0,t=N-1;
+  const PN=i=>1+i,Gi=k=>1+np+2*k,Go=k=>Gi(k)+1,SN=j=>1+np+2*ids.length+j;
+  const F=new Flow(N);
+  pools.forEach((_,i)=>F.add(s,PN(i),quota,0));
+  const pe=[];
+  pools.forEach((pool,i)=>{const seen=new Set();for(const c of pool){if(seen.has(c.id))continue;seen.add(c.id);pe.push({i,id:c.id,e:F.add(PN(i),Gi(ids.indexOf(c.id)),1,0)})}});
+  ids.forEach((id,k)=>F.add(Gi(k),Go(k),1,0));
+  const se=[];
+  ids.forEach((id,k)=>slots.forEach((sl,j)=>{const P=slotPos(sl);if(eligible(card[id],P))se.push({id,sl,e:F.add(Go(k),SN(j),1,-Math.round(scoreAt(card[id],P,w)*slotWeight(sl)*10000))})}));
+  slots.forEach((_,j)=>F.add(SN(j),t,1,0));
+  F.run(s,t);
+  const slotOf={};se.filter(x=>x.e.cap===0).forEach(x=>slotOf[x.id]=x.sl);
+  const byPlayer=pools.map(()=>[]);
+  pe.filter(x=>x.e.cap===0).forEach(x=>byPlayer[x.i].push({c:card[x.id],slot:slotOf[x.id],P:slotPos(slotOf[x.id])}));
+  byPlayer.forEach(a=>a.sort((x,y)=>slots.indexOf(x.slot)-slots.indexOf(y.slot)));
+  const team={};byPlayer.flat().forEach(x=>team[x.slot]=x.c);
+  return {byPlayer,team,short:byPlayer.map(a=>quota-a.length)};
+}
+const seqSlots=(pre,n)=>Array.from({length:Math.max(0,n)},(_,i)=>pre+(i+1));
+function coopSolve(pools,hq,spq,rpq,w){
+  const n=pools.length;
+  const H=coopPart(pools,hq,COOP_HIT,w,true);
+  const S=coopPart(pools.map(p=>p.filter(c=>c.p==='SP')),spq,seqSlots('SP',n*spq),w,false);
+  const Rp=coopPart(pools.map(p=>p.filter(c=>c.p==='RP')),rpq,seqSlots('RP',n*rpq),w,false);
+  const Pi={byPlayer:pools.map((_,i)=>S.byPlayer[i].concat(Rp.byPlayer[i])),team:{...S.team,...Rp.team}};
+  const team={...H.team,...Pi.team};
+  const filled=Object.entries(team).map(([sl,c])=>scoreAt(c,slotPos(sl),w));
+  const names={};let dupes=[];for(const c of Object.values(team)){if(names[c.n])dupes.push(c.n);names[c.n]=1}
+  return {hit:H,pit:Pi,sp:S,rp:Rp,team,avg:filled.length?filled.reduce((a,b)=>a+b,0)/filled.length:0,dupes};
+}
+// Best full team from one set of owned cards: every hitter at his best spot, 5 starters, 6 relievers
+function bestTeamFrom(pool,w){
+  const H=coopPart([pool],9,COOP_HIT,w,true);
+  const S=coopPart([pool.filter(c=>c.p==='SP')],5,seqSlots('SP',5),w,false);
+  const usedSP=new Set(Object.values(S.team).map(c=>c.id));
+  const R=coopPart([pool.filter(c=>!c.h&&!usedSP.has(c.id))],6,seqSlots('RP',6),w,false);
+  return {...H.team,...S.team,...R.team};
+}
+function teamScore(team,w){
+  const part={H:[],SP:[],RP:[]};
+  for(const s of SLOTS){const P=slotPos(s);const c=team[s];const v=c?scoreAt(c,P,w):0;(isPitchPos(P)?part[P]:part.H).push(v)}
+  const m=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  return {total:.6*m(part.H)+.3*m(part.SP)+.1*m(part.RP),hit:m(part.H),sp:m(part.SP),rp:m(part.RP)};
+}
+const slotWeight=s=>{const P=slotPos(s);return P==='SP'?.3/5:P==='RP'?.1/6:.6/9};
+function upgradeReason(newC,oldC,P){
+  if(!oldC)return 'Fills an empty slot.';
+  if(isPitchPos(P)){
+    const d=['h9','k9','bb9','hr9'].map(m=>({m,d:newC[m]-oldC[m]})).filter(x=>x.d>0).sort((a,b)=>b.d-a.d).slice(0,2);
+    return d.length?d.map(x=>`+${Math.round(x.d)} ${PM_LABEL[x.m]}`).join(', '):'Better overall arm.';
+  }
+  const d=Object.keys(HM).filter(m=>!(m==='def'&&P==='DH')).map(m=>({m,d:(HM[m](newC,P)??0)-(HM[m](oldC,P)??0)})).filter(x=>x.d>0).sort((a,b)=>b.d-a.d).slice(0,2);
+  return d.length?d.map(x=>`+${Math.round(x.d)} ${HM_LABEL[x.m]}`).join(', '):'Better overall by your weights.';
+}
+function upgradeCandidates(team,cards,w,mktOnly){
+  const onTeam=new Set(Object.values(team).filter(Boolean).map(c=>c.id));
+  const out=[];
+  for(const s of SLOTS){
+    const P=slotPos(s),cur=team[s]||null,curS=cur?scoreAt(cur,P,w):0;
+    for(const c of cards){
+      if(onTeam.has(c.id)||c.custom||!eligible(c,P))continue;
+      if(mktOnly&&!(c.mkt&&c.bs>0))continue;
+      const v=scoreAt(c,P,w);if(v<=curS+.5)continue;
+      out.push({slot:s,P,c,cur,score:v,gain:v-curS,team:(v-curS)*slotWeight(s),price:c.bs||0});
+    }
+  }
+  return out;
+}
+function bestUpgrades(team,cards,w,budget,mode,mktOnly){
+  const all=upgradeCandidates(team,cards,w,mktOnly);
+  const bySlot={};
+  for(const x of all){if(mode==='budget'&&!(x.price>0&&x.price<=budget))continue;(bySlot[x.slot]||(bySlot[x.slot]=[])).push(x)}
+  for(const s in bySlot)bySlot[s].sort((a,b)=>b.team-a.team||a.price-b.price);
+  if(mode!=='budget'){
+    const picks=[],used=new Set();
+    const tops=Object.values(bySlot).map(a=>a).sort((a,b)=>b[0].team-a[0].team);
+    for(const arr of tops){const x=arr.find(y=>!used.has(y.c.id));if(x){picks.push(x);used.add(x.c.id)}if(picks.length===3)break}
+    return {picks,total:picks.reduce((a,x)=>a+x.price,0)};
+  }
+  const pool=[];for(const s in bySlot)pool.push(...bySlot[s].slice(0,6));
+  let best={picks:[],gain:0,total:0};
+  const n=pool.length;
+  const consider=(arr)=>{const g=arr.reduce((a,x)=>a+x.team,0),t=arr.reduce((a,x)=>a+x.price,0);if(t<=budget&&(g>best.gain+1e-9||(Math.abs(g-best.gain)<1e-9&&t<best.total)))best={picks:arr,gain:g,total:t}};
+  for(let i=0;i<n;i++){
+    consider([pool[i]]);
+    for(let j=i+1;j<n;j++){
+      const a=pool[i],b=pool[j];if(a.slot===b.slot||a.c.id===b.c.id||a.price+b.price>budget)continue;
+      consider([a,b]);
+      for(let k=j+1;k<n;k++){
+        const c=pool[k];if(c.slot===a.slot||c.slot===b.slot||c.c.id===a.c.id||c.c.id===b.c.id)continue;
+        if(a.price+b.price+c.price>budget)continue;consider([a,b,c]);
+      }
+    }
+  }
+  best.picks.sort((a,b)=>b.team-a.team);
+  return {picks:best.picks,total:best.total};
+}
+function slotUpgrades(team,cards,w,budget,mode,mktOnly){
+  const all=upgradeCandidates(team,cards,w,mktOnly);
+  // each card is suggested once: the biggest team-score gains claim their slot first, so a starter goes to the rotation before the pen
+  const pool=all.filter(x=>mode!=='budget'||(x.price>0&&x.price<=budget)).sort((a,b)=>b.team-a.team||a.price-b.price);
+  const best={},used=new Set();
+  for(const x of pool){if(best[x.slot]||used.has(x.c.id))continue;best[x.slot]=x;used.add(x.c.id)}
+  return SLOTS.map(s=>({slot:s,P:slotPos(s),cur:team[s]||null,pick:best[s]||null}));
+}
+function buildLineup(hitters,hand,w){
+  const H=hitters.filter(Boolean).map(c=>{const con=hand==='R'?c.cr:c.cl,pow=hand==='R'?c.pr:c.pl;return {c,off:offVs(c,hand,w),obp:.5*con+.3*c.vis+.2*c.dis,pow,spd:spdScore(c)}}).sort((a,b)=>b.off-a.off);
+  const slots=new Array(Math.min(9,H.length));
+  const why={};
+  if(H.length<5){H.forEach((x,i)=>{slots[i]=x;why[i]='Best available bat by your weights.'});return slots.map((x,i)=>({spot:i+1,...x,why:why[i]}))}
+  const top3=H.slice(0,3),next2=H.slice(3,5),rest=H.slice(5);
+  const four=top3.reduce((a,b)=>b.pow>a.pow?b:a);
+  const rem=top3.filter(x=>x!==four);
+  const lead=rem.reduce((a,b)=>(b.obp+.15*b.spd)>(a.obp+.15*a.spd)?b:a);
+  const two=rem.find(x=>x!==lead);
+  const five=next2.reduce((a,b)=>b.pow>a.pow?b:a);
+  const three=next2.find(x=>x!==five);
+  slots[0]=lead;why[0]=`Best on-base skills of your top three bats (OBP rating ${Math.round(lead.obp)})${lead.c.spd>=75?`, and he can run (speed ${lead.c.spd})`:''}.`;
+  slots[1]=two;why[1]='One of your three best hitters. The 2-hole gets more at-bats than anyone but leadoff, often with a runner on.';
+  slots[2]=three;why[2]='4th/5th best bat. In this model the 3-hole matters a bit less than 2 and 4.';
+  slots[3]=four;why[3]=`Most power among your top three bats (power ${Math.round(four.pow)} vs ${hand}HP).`;
+  slots[4]=five;why[4]=`Power bat behind the cleanup hitter (power ${Math.round(five.pow)}).`;
+  if(rest.length){
+    const r=[...rest];
+    let nine=null;
+    if(r.length>=2){const last2=r.slice(-2);nine=last2.reduce((a,b)=>(b.obp*.5+b.spd*.5)>(a.obp*.5+a.spd*.5)?b:a);r.splice(r.indexOf(nine),1)}
+    r.forEach((x,i)=>{slots[5+i]=x;why[5+i]='Next best bat by your weights.'});
+    if(nine){slots[5+r.length]=nine;why[5+r.length]=`Second leadoff: best on-base and speed mix at the bottom (speed ${nine.c.spd}).`}
+  }
+  return slots.map((x,i)=>({spot:i+1,...x,why:why[i]}));
+}
+function flipList(cards,minP,maxP){
+  return cards.filter(c=>c.mkt&&c.bs>0&&c.bb>0&&c.bs>=minP&&c.bs<=maxP).map(c=>{const buyAt=c.bb+1,sellAt=c.bs-1,net=Math.floor(sellAt*.9),profit=net-buyAt;return {c,buyAt,sellAt,profit,roi:profit/buyAt}}).filter(x=>x.profit>0).sort((a,b)=>b.profit-a.profit);
+}
+function replacementLevel(model,P){
+  const g=model.groups[P]||[];const cheap=g.filter(c=>c.bs>0&&c.bs<=1000).map(c=>c.sc).sort((a,b)=>a-b);
+  if(cheap.length)return cheap[Math.floor(cheap.length/2)];
+  const all=g.map(c=>c.sc).sort((a,b)=>a-b);return all.length?all[Math.floor(all.length*.2)]:0;
+}
+function valueList(model,pos,maxP){
+  const out=[];
+  for(const P in model.groups){
+    if(pos!=='ALL'&&P!==pos)continue;
+    const repl=replacementLevel(model,P);
+    for(const c of model.groups[P]){if(!(c.bs>0)||!c.mkt||c.bs>maxP||c.sc<=repl)continue;out.push({c,P,over:c.sc-repl,per1k:(c.sc-repl)/Math.max(c.bs,100)*1000})}
+  }
+  return out.sort((a,b)=>b.per1k-a.per1k);
+}
+function fromItem(it,bs,bb){
+  const avg=(...a)=>{const v=a.filter(x=>x!=null&&x!==0).map(Number);return v.length?Math.round(v.reduce((x,y)=>x+y,0)/v.length):0};
+  return {id:it.uuid,n:it.name,jn:it.jersey_number,p:it.display_position,s:it.display_secondary_positions,t:it.team_short_name,se:it.series,o:it.ovr,ra:it.rarity,b:it.bat_hand,th:it.throw_hand,
+    cl:it.contact_left,cr:it.contact_right,pl:it.power_left,pr:it.power_right,vis:it.plate_vision,dis:it.plate_discipline,clu:it.batting_clutch,
+    fld:it.fielding_ability,arm:it.arm_strength,acc:it.arm_accuracy,rea:it.reaction_time??avg(it.reaction_left,it.reaction_right,it.reaction_forward,it.reaction_back),blk:it.blocking,
+    spd:it.speed,bra:it.base_stealing||it.baserunning_ability||0,agg:it.baserunning_aggression,
+    sta:it.stamina,h9:it.hits_per_bf??avg(it.hits_per_bf_left,it.hits_per_bf_right),k9:it.k_per_bf??avg(it.k_per_bf_left,it.k_per_bf_right),bb9:it.bb_per_bf,hr9:it.hr_per_bf,
+    vel:it.pitch_velocity,ctl:it.pitch_control,mov:it.pitch_movement,pcl:it.pitching_clutch,mkt:it.is_sellable==null&&!Array.isArray(it.locations)?null:(it.is_sellable!==false&&(!Array.isArray(it.locations)||it.locations.includes('COMMUNITY MARKET'))),loc:Array.isArray(it.locations)?it.locations:null,h9l:it.hits_per_bf_left,h9r:it.hits_per_bf_right,k9l:it.k_per_bf_left,k9r:it.k_per_bf_right,bs,bb};
+}
+function parseCards(text){
+  const j=JSON.parse(text);
+  let rows=[];
+  if(j&&Array.isArray(j.k)&&Array.isArray(j.r))rows=j.r.map(r=>{const o={};j.k.forEach((k,i)=>o[k]=r[i]);return o});
+  else if(Array.isArray(j))rows=j;
+  else if(j&&Array.isArray(j.f)&&Array.isArray(j.r))rows=j.r.map(r=>{const o={};j.f.forEach((k,i)=>o[k]=r[i]);return fromItem(o,r[j.f.length]||0,r[j.f.length+1]||0)});
+  else if(j&&Array.isArray(j.listings))rows=j.listings.filter(l=>l.item).map(l=>fromItem(l.item,l.best_sell_price,l.best_buy_price));
+  else if(j&&Array.isArray(j.items))rows=j.items.map(it=>fromItem(it,0,0));
+  else throw new Error('Unrecognized format');
+  const cards=rows.map(mkCard).filter(c=>c.p);
+  const hit=cards.filter(c=>c.h),pit=cards.filter(c=>!c.h);
+  const okH=hit.filter(c=>c.cl||c.cr).length,okP=pit.filter(c=>c.h9||c.k9).length;
+  return {cards,game:j.game||'',at:j.at||Date.now(),healthy:(hit.length?okH/hit.length:1)>.5&&(pit.length?okP/pit.length:1)>.5};
+}
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function exampleCards(){
+  const R=mulberry(26),rnd=(a,b)=>a+R()*(b-a),pick=a=>a[Math.floor(R()*a.length)];
+  const FN=['Cal','Reggie','Tomas','Eli','Marco','Dante','Brooks','Theo','Ruben','Silas','Hector','Owen','Rafael','Wes','Nolan','Kenji','Andres','Levi','Mateo','Gus','Damon','Iker','Rhett','Joaquin','Beau','Cyrus','Emil','Tate','Arlo','Quinn'];
+  const LN=['Brannigan','Okafor','Vela','Lindqvist','Marchetti','Coffey','Haldane','Ibarra','Pruitt','Sandoval','Whitlock','Arceneaux','Tanabe','Dorsey','Valdespino','Kowalczyk','Ferrante','Mabry','Ostrander','Sutter','Quarles','Delacroix','Abernathy','Rosales','Nakai','Pelfrey','Castellano','Hargrove','Bautell','Winslow','Moreau','Ekberg','Garland','Fairchild','Toussaint','Vukovich'];
+  const TEAMS=['MIL','CHC','STL','CIN','PIT','LAD','NYY','BOS','ATL','HOU','SEA','TOR','SD','MIN'];
+  const used=new Set();const name=()=>{let s;do{s=pick(FN)+' '+pick(LN)}while(used.has(s));used.add(s);return s};
+  const cl=v=>Math.max(20,Math.min(125,Math.round(v)));
+  const ovrOf=()=>{const u=R();return Math.round(u<.25?rnd(62,74):u<.5?rnd(75,81):u<.78?rnd(82,88):u<.94?rnd(89,94):rnd(95,99))};
+  const price=o=>Math.round((o<75?rnd(80,500):o<80?rnd(400,2500):o<85?rnd(1800,12000):o<90?rnd(8000,60000):o<95?rnd(40000,250000):rnd(150000,800000))/10)*10;
+  const rar=o=>o>=85?'Diamond':o>=80?'Gold':o>=75?'Silver':o>=65?'Bronze':'Common';
+  const counts={C:12,'1B':12,'2B':12,'3B':12,SS:12,LF:12,CF:12,RF:12,SP:24,RP:20};
+  const SEC={C:['1B'],'1B':['3B','LF'],'2B':['SS','3B'],'3B':['1B','2B'],SS:['2B','3B'],LF:['RF','1B'],CF:['LF','RF'],RF:['LF','1B']};
+  const out=[];let n=0;
+  for(const [P,k] of Object.entries(counts))for(let i=0;i<k;i++){
+    const o=ovrOf(),q=o+rnd(-4,4);
+    const c={id:'ex-'+(n++),n:name(),jn:String(1+Math.floor(R()*99)),p:P,t:pick(TEAMS),se:'Example',o,ra:rar(o),b:pick(['R','R','L','S']),th:pick(['R','R','L'])};
+    if(isPitchPos(P)){
+      const a=pick(['k','command','sinker','power','balanced']);
+      c.h9=cl(q+rnd(-8,8)+(a==='sinker'?8:0));c.k9=cl(q+rnd(-10,10)+(a==='k'?14:a==='sinker'?-10:a==='power'?8:0));
+      c.bb9=cl(q+rnd(-10,8)+(a==='command'?14:a==='power'?-10:0));c.hr9=cl(q+rnd(-8,8)+(a==='sinker'?12:0));
+      c.vel=cl(q+rnd(-12,8)+(a==='power'||a==='k'?12:-4));c.ctl=cl(q+rnd(-10,6)+(a==='command'?12:0));c.mov=cl(q+rnd(-10,8)+(a==='sinker'?10:0));
+      c.sta=P==='SP'?cl(rnd(62,99)):cl(rnd(20,45));c.pcl=cl(q+rnd(-12,10));
+    }else{
+      const a=pick(['slugger','contact','glove','speed','balanced','balanced']);
+      const dPos={C:-4,'1B':-14,'2B':4,'3B':0,SS:8,LF:-6,CF:6,RF:0}[P];
+      const pw=a==='slugger'?14:a==='contact'?-12:a==='glove'?-8:a==='speed'?-12:0,ct=a==='contact'?10:a==='slugger'?-10:0,dg=a==='glove'?14:a==='slugger'?-12:a==='speed'?4:0,sp=a==='speed'?22:a==='slugger'?-14:0;
+      const split=R()<.2?rnd(10,22)*(R()<.5?1:-1):rnd(-5,5);
+      const cB=q+ct+rnd(-6,6),pB=q+pw+rnd(-8,8);
+      c.cr=cl(cB+split/2);c.cl=cl(cB-split/2);c.pr=cl(pB+split/2);c.pl=cl(pB-split/2);
+      c.vis=cl(q+ct/2+rnd(-12,10));c.dis=cl(q+rnd(-14,10));c.clu=cl(q+rnd(-15,12));
+      c.fld=cl(q+dPos+dg+rnd(-10,8));c.rea=cl(q+dPos+dg+rnd(-12,8));c.arm=cl(q+dg/2+rnd(-14,10)+(['RF','3B','C'].includes(P)?6:0));c.acc=cl(q+dg/2+rnd(-12,8));
+      c.blk=P==='C'?cl(q+dg+rnd(-10,8)):cl(rnd(20,40));
+      c.spd=cl(rnd(35,75)+sp+(P==='CF'||P==='SS'?8:0)+(P==='C'||P==='1B'?-14:0));c.bra=cl(c.spd+rnd(-12,12));c.agg=cl(c.spd+rnd(-20,10));
+      c.s=R()<.5?pick(SEC[P]):'';
+    }
+    c.bs=price(o);c.bb=Math.round(c.bs*rnd(.72,.93)/10)*10;
+    out.push(c);
+  }
+  return out.map(mkCard);
+}
+function exampleTeam(cards){
+  const by=P=>cards.filter(c=>c.p===P).sort((a,b)=>b.o-a.o);
+  const t={};
+  for(const P of HIT_POS)t[P]=by(P)[6]?.id;
+  t.DH=by('1B')[3]?.id;
+  by('SP').slice(8,13).forEach((c,i)=>t['SP'+(i+1)]=c.id);
+  by('RP').slice(5,11).forEach((c,i)=>t['RP'+(i+1)]=c.id);
+  return t;
+}
+if(typeof module!=='undefined')module.exports={bestTeamFrom,slotUpgrades,coopSolve,teamFit,alternatives,exampleCards,exampleTeam,buildModel,report,bestUpgrades,buildLineup,flipList,valueList,teamScore,PRESETS,SLOTS,parseCards,scoreAt,slotPos};
+</script>
+
+<script>
+/* ===== UI ===== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>n==null||isNaN(n)?'—':Math.round(n).toLocaleString();
+const VIEWS=['board','top','team','lineup','moneyball','coop','log','weights','data'];
+const PRO_VIEWS=['team','lineup','moneyball','log','weights'];
+const LS_CARDS='dugout.cards.v1',LS_STATE='dugout.state.v1';
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
+
+let DATA={cards:[],source:'example',game:'',at:0};
+let MODEL=null;
+let state={preset:'balanced',w:{...PRESETS.balanced},team:{},custom:[],budget:25000,upTab:'budget',mktOnly:true,log:[],tier:'pro',mb:'value',board:{pos:'SS',q:'',max:'',limit:40,mode:'tiles'},top:{kind:'all',max:'',limit:48},compare:[],own:[],coop:{n:3,hq:3,spq:1,rpq:2,players:[{name:'Player 1',ids:[]},{name:'Player 2',ids:[]},{name:'Player 3',ids:[]},{name:'Player 4',ids:[]}],example:false},mbPos:'ALL',mbMax:50000,flipMin:1000,flipMax:100000};
+let dbRef=null,saveTimer=null;
+
+function allCards(){return DATA.cards.concat(state.custom.map(mkCard).map(c=>(c.custom=true,c)))}
+let CARDS=[];
+function rebuild(){CARDS=allCards();MODEL=buildModel(CARDS,state.w)}
+const byId=id=>CARDS.find(c=>c.id===id);
+function teamCards(){const t={};for(const s of SLOTS){const id=state.team[s];t[s]=id?byId(id)||null:null}return t}
+
+function persist(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{
+    const blob={own:state.own,mktOnly:state.mktOnly,coop:state.coop,preset:state.preset,w:state.w,team:state.team,custom:state.custom,budget:state.budget,upTab:state.upTab,log:state.log,tier:state.tier,dataSource:DATA.source};
+    lsSet(LS_STATE,JSON.stringify(blob));
+    if(dbRef){try{await dbRef.set({json:JSON.stringify(blob),saved:Date.now()})}catch(e){}}
+  },700);
+}
+function applySaved(b){
+  if(!b)return;
+  for(const k of ['preset','w','team','custom','budget','upTab','log','tier','coop','mktOnly','own'])if(b[k]!=null)state[k]=b[k];
+}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2600)}
+
+function rarClass(ra){ra=String(ra).toLowerCase();return ra.includes('red')?'red':ra.includes('diamond')?'diamond':ra.includes('gold')?'gold':ra.includes('silver')?'silver':ra.includes('bronze')?'bronze':''}
+const ovrChip=c=>`<span class="ovr ${rarClass(c.ra)}" title="${esc(c.ra||'')}">${c.o||'–'}</span>`;
+const price=c=>c.bs>0?`<span class="stub">${fmt(c.bs)}</span>`:'<span class="muted small">no listing</span>';
+const isFree=()=>state.tier==='free';
+function heatColor(p){p=Math.max(0,Math.min(1,p));return p>=.5?`color-mix(in oklab, var(--good) ${Math.round((p-.5)*200)}%, var(--mid))`:`color-mix(in oklab, var(--mid) ${Math.round(p*200)}%, var(--bad))`}
+const STAT_LABEL={cr:'CON vs R',cl:'CON vs L',pr:'POW vs R',pl:'POW vs L',vis:'VISION',dis:'DISCIPLINE',clu:'CLUTCH',fld:'FIELDING',rea:'REACTION',arm:'ARM STR',acc:'ARM ACC',blk:'BLOCKING',spd:'SPEED',bra:'STEALING',agg:'AGGRESSION',h9:'H/9',k9:'K/9',bb9:'BB/9',hr9:'HR/9',vel:'VELOCITY',ctl:'CONTROL',mov:'MOVEMENT',sta:'STAMINA',pcl:'CLUTCH'};
+const SHORT={cr:'CON R',cl:'CON L',pr:'POW R',pl:'POW L',vis:'VIS',dis:'DISC',clu:'CLUT',fld:'FLD',blk:'BLK',spd:'SPD',h9:'H/9',k9:'K/9',bb9:'BB/9',hr9:'HR/9',vel:'VELO',ctl:'CTRL',mov:'MOVE',sta:'STAM',pcl:'CLUT'};
+function frontStats(c){
+  if(!c.h)return ['h9','k9','bb9','hr9','vel','ctl','mov',c.p==='SP'?'sta':'pcl'];
+  return ['cr','cl','pr','pl','vis','dis',c.p==='DH'?'clu':c.p==='C'?'blk':'fld','spd'];
+}
+function hcell(c,k,full){
+  const v=c[k];const p=pct(MODEL,c.p,'a:'+k,v);
+  return `<div class="hc" style="--h:${v?heatColor(p):'var(--line)'}" title="${STAT_LABEL[k]}: better than ${Math.round(p*100)}% of ${esc(POS_NAME[c.p]||c.p)}"><span>${full?STAT_LABEL[k]:SHORT[k]}</span><b>${v||'–'}</b>${full?`<i>${v?Math.round(p*100)+'th pct':'n/a'}</i>`:''}</div>`;
+}
+const TEAM_COLORS={ARI:['#A71930','#30CED8'],AZ:['#A71930','#30CED8'],ATL:['#13274F','#CE1141'],BAL:['#DF4601','#000000'],BOS:['#0C2340','#BD3039'],CHC:['#0E3386','#CC3433'],CWS:['#27251F','#C4CED4'],CHW:['#27251F','#C4CED4'],CIN:['#C6011F','#000000'],CLE:['#00385D','#E50022'],COL:['#33006F','#C4CED4'],DET:['#0C2340','#FA4616'],HOU:['#002D62','#EB6E1F'],KC:['#004687','#BD9B60'],LAA:['#BA0021','#003263'],LAD:['#005A9C','#EF3E42'],MIA:['#00A3E0','#EF3340'],MIL:['#12284B','#FFC52F'],MIN:['#002B5C','#D31145'],NYM:['#002D72','#FF5910'],NYY:['#0C2340','#C4CED3'],OAK:['#003831','#EFB21E'],ATH:['#003831','#EFB21E'],PHI:['#E81828','#002D72'],PIT:['#27251F','#FDB827'],SD:['#2F241D','#FFC425'],SF:['#FD5A1E','#27251F'],SEA:['#0C2C56','#005C5C'],STL:['#C41E3A','#0C2340'],TB:['#092C5C','#8FBCE6'],TEX:['#003278','#C0111F'],TOR:['#134A8E','#E8291C'],WSH:['#AB0003','#14225A'],WAS:['#AB0003','#14225A']};
+const RAR_SHORT=ra=>{ra=String(ra).toLowerCase();return ra.includes('red')?'RED DIA':ra.includes('diamond')?'DIAMOND':ra.includes('gold')?'GOLD':ra.includes('silver')?'SILVER':ra.includes('bronze')?'BRONZE':ra?'COMMON':''};
+const faceHtml=(c,lg)=>{const tc=TEAM_COLORS[String(c.t).toUpperCase()];return `<div class="face ${rarClass(c.ra)}${tc?' team':''}${lg?' lg':''}" aria-hidden="true"${tc?` style="--tc:${tc[0]};--tc2:${tc[1]}"`:''}>${c.jn?`<span class="jn">${esc(c.jn)}</span>`:''}${/diamond|red/.test(rarClass(c.ra))?'<span class="sheen"></span>':''}${tc&&RAR_SHORT(c.ra)?`<span class="rb">${lg?RAR_SHORT(c.ra):RAR_SHORT(c.ra).slice(0,3)}</span>`:''}<b class="fs">${c.o||'–'}</b><span class="fp fs">${esc(c.p)}</span><span class="ft fs">${esc(c.t||'')}</span>${lg&&c.se?`<span class="fser">${esc(c.se)}</span>`:''}</div>`};
+function tileHtml(c,badge){
+  const can=!isFree()||c.rk<=10;
+  return `<div class="tile" role="button" tabindex="0" data-card="${esc(c.id)}" aria-label="${esc(c.n)} scouting report">
+    <div class="t-head">${faceHtml(c)}<div style="min-width:0;display:grid;gap:4px"><div class="pname">${esc(c.n)}</div><div class="psub">${esc([c.se,c.b&&c.th?`B/T ${c.b}/${c.th}`:'',c.s&&'also '+c.s].filter(Boolean).join(' · '))}</div><div>${can?`<span class="tag">${esc(archetype(c,c.p,MODEL))}</span>`:'<span class="lock">Premium report</span>'}</div></div></div>
+    <div class="heat">${frontStats(c).map(k=>hcell(c,k)).join('')}</div>
+    <div class="t-meta"><span><span class="rankbadge">${badge}</span><span class="muted">score</span> <b class="num">${c.sc.toFixed(1)}</b></span>${price(c)}</div></div>`;
+}
+const legend=`<span class="legend">Worse <span class="g"></span> Better, vs same position</span>`;
+
+function lockedPanel(what){
+  return `<div class="locked"><span class="pro-pill">Premium</span><h3>${esc(what)}</h3><p class="muted">This is what free users would see. Premium unlocks the team upgrade finder, lineup calculator, Moneyball, game log and custom weights.</p><button class="btn primary" type="button" data-act="tier-pro">Switch back to Premium</button></div>`;
+}
+
+/* ---------- Board ---------- */
+function renderBoard(){
+  const b=state.board,P=b.pos;
+  const g=(MODEL.groups[P]||[]).filter(c=>(!b.q||c.n.toLowerCase().includes(b.q.toLowerCase()))&&(!b.max||(c.bs>0&&c.bs<=Number(b.max))));
+  const rows=g.slice(0,b.limit).map(c=>{
+    const d=c.mrk-c.rk;
+    const canReport=!isFree()||c.rk<=10;
+    return `<tr class="click" data-card="${esc(c.id)}" tabindex="0">
+      <td class="rk">${c.rk}</td>
+      <td><div class="pname">${esc(c.n)}</div><div class="psub">${esc([c.t,c.se,c.s&&('also '+c.s)].filter(Boolean).join(' · '))}</div></td>
+      <td>${ovrChip(c)}</td>
+      <td>${canReport?`<span class="tag">${esc(archetype(c,P,MODEL))}</span>`:'<span class="lock">Premium report</span>'}</td>
+      <td class="r score">${c.sc.toFixed(1)}</td>
+      <td class="r num">#${c.mrk} ${d?`<span class="delta ${d>0?'up':'down'}">${d>0?'▲':'▼'}${Math.abs(d)}</span>`:''}</td>
+      <td class="r">${price(c)}</td></tr>`}).join('');
+  $('#v-board').innerHTML=`
+    <div class="head"><div><h2>Card board</h2><p class="muted">Ranked by your weights (${esc(PRESETS[state.preset]?.label||'Custom')}). Tap a card for its scouting report. The meta column shows where a power-first ranking would put him.</p></div></div>
+    <div class="filters">
+      <div class="chips" role="group" aria-label="Position">${BOARD_POS.map(p=>`<button class="chip" type="button" data-pos="${p}" aria-pressed="${p===P}">${p}</button>`).join('')}</div>
+    </div>
+    <div class="filters">
+      <label class="field"><span class="label">Search</span><input id="bq" type="search" value="${esc(b.q)}" placeholder="Player name"></label>
+      <label class="field"><span class="label">Max price (stubs)</span><input id="bmax" type="number" min="0" step="500" value="${esc(b.max)}" placeholder="Any"></label>
+      <div class="seg" role="group" aria-label="View"><button type="button" data-bmode="tiles" aria-pressed="${b.mode==='tiles'}">Cards</button><button type="button" data-bmode="list" aria-pressed="${b.mode!=='tiles'}">List</button></div>
+      ${legend}
+    </div>
+    ${b.mode==='tiles'?`<div class="tiles">${g.slice(0,b.limit).map(c=>tileHtml(c,'#'+c.rk)).join('')||`<p class="muted">No ${esc(P)} cards match.</p>`}</div>`:`<div class="scroll"><table class="tbl"><thead><tr><th>#</th><th>Card</th><th>OVR</th><th>Archetype</th><th class="r">Your score</th><th class="r">Meta rank</th><th class="r">Buy now</th></tr></thead>
+    <tbody>${rows||`<tr><td colspan="7" class="muted">No ${esc(P)} cards match.</td></tr>`}</tbody></table></div>`}
+    ${g.length>b.limit?`<div><button class="btn" type="button" data-act="more">Show more (${g.length-b.limit} left)</button></div>`:''}`;
+}
+
+/* ---------- Top 100 ---------- */
+function renderTop(){
+  const T=state.top;
+  let list=[...CARDS].filter(c=>!c.custom).sort((a,b)=>b.sc-a.sc);
+  if(T.kind==='hit')list=list.filter(c=>c.h);else if(T.kind==='pit')list=list.filter(c=>!c.h);
+  if(T.max)list=list.filter(c=>c.bs>0&&c.bs<=Number(T.max));
+  list=list.slice(0,100);
+  $('#v-top').innerHTML=`
+    <div class="head"><div><h2>Top 100 overall</h2><p class="muted">Every position on one board, ranked by your weights. Hitters are scored at their main position, so a great glove at short counts. Hitters and pitchers share the same ratings scale, so treat the mixed list as a guide and the split lists as the cleaner read.</p></div></div>
+    <div class="filters">
+      <div class="seg" role="group" aria-label="Card type"><button type="button" data-topk="all" aria-pressed="${T.kind==='all'}">All</button><button type="button" data-topk="hit" aria-pressed="${T.kind==='hit'}">Hitters</button><button type="button" data-topk="pit" aria-pressed="${T.kind==='pit'}">Pitchers</button></div>
+      <label class="field"><span class="label">Max price (stubs)</span><input id="tmax" type="number" min="0" step="1000" value="${esc(T.max)}" placeholder="Any"></label>
+      ${legend}
+    </div>
+    <div class="tiles">${list.slice(0,T.limit).map((c,i)=>tileHtml(c,'#'+(i+1))).join('')||'<p class="muted">No cards in that price range.</p>'}</div>
+    ${list.length>T.limit?`<div><button class="btn" type="button" data-act="topmore">Show more (${list.length-T.limit} left)</button></div>`:''}`;
+}
+
+/* ---------- Compare ---------- */
+function renderCmpBar(){
+  const bar=$('#cmpbar');const ids=state.compare;
+  if(!ids.length){bar.hidden=true;return}
+  const a=byId(ids[0]);
+  bar.innerHTML=`<span>Comparing <b>${esc(a?a.n:'card')}</b>. Open another card and tap Compare.</span><button class="btn small" type="button" data-act="cmp-clear">Cancel</button>`;
+  bar.hidden=false;
+}
+function openCompare(a,b){
+  const keys=a.h&&b.h?RAW_H:!a.h&&!b.h?RAW_P:[];
+  const row=(lab,va,vb,fa,fb,hi=true)=>{const wa=hi?va>vb:va<vb,wb=hi?vb>va:vb<va;return `<div class="cmp-row"><span class="v ${wa?'win':''}">${fa}</span><span class="mid">${lab}</span><span class="v ${wb?'win':''}">${fb}</span></div>`};
+  const fit=c=>{const f=teamFit(c,teamCards(),state.w);return f.best?f.best.gain:0};
+  openSheet(`<div style="padding-right:72px"><span class="label">Head to head</span><h2>${esc(a.n)} vs ${esc(b.n)}</h2></div>
+    <div class="cmp-row"><span>${faceHtml(a)}</span><span class="mid">${esc(a.p)} / ${esc(b.p)}</span><span>${faceHtml(b)}</span></div>
+    ${row('Your score',a.sc,b.sc,a.sc.toFixed(1),b.sc.toFixed(1))}
+    ${row('Pos rank',-a.rk,-b.rk,'#'+a.rk+' '+a.p,'#'+b.rk+' '+b.p)}
+    ${row('Team gain',fit(a),fit(b),(fit(a)>0?'+':'')+fit(a).toFixed(1),(fit(b)>0?'+':'')+fit(b).toFixed(1))}
+    ${row('Buy now',a.bs||Infinity,b.bs||Infinity,a.bs?fmt(a.bs):'—',b.bs?fmt(b.bs):'—',false)}
+    ${keys.map(k=>row(STAT_LABEL[k],a[k],b[k],a[k]||'—',b[k]||'—')).join('')}
+    ${!keys.length?'<p class="muted small">One is a hitter and one is a pitcher, so only score and price line up.</p>':''}
+    <p class="small muted">Team gain is how much each one would add at his best slot on your current team.</p>`);
+}
+
+/* ---------- Report sheet ---------- */
+function openSheet(html){$('#sheet').innerHTML=`<button class="btn small x" type="button" data-act="close">Close</button>`+html;$('#sheet').hidden=false;$('#sheetBack').hidden=false;$('#sheet').scrollTop=0;$('#sheet .x').focus()}
+function closeSheet(){$('#sheet').hidden=true;$('#sheetBack').hidden=true}
+function openReport(id){
+  const c=byId(id);if(!c)return;
+  if(state.compare.length===1&&state.compare[0]!==id&&state.cmpPick){state.cmpPick=false;const a=byId(state.compare[0]);state.compare=[];renderCmpBar();if(a){openCompare(a,c);return}}
+  if(isFree()&&c.rk>10){openSheet(`<div class="dd-head">${faceHtml(c,true)}<div><h2>${esc(c.n)}</h2></div></div>${lockedPanel('Full scouting reports')}`);return}
+  const r=report(c,MODEL,state.w,CARDS);
+  const team=teamCards();
+  const bars=r.mets.map(x=>`<div class="bar"><span>${esc(x.label)}</span><div class="track"><div class="fill" style="width:${Math.max(3,Math.round(x.p*100))}%;background:${heatColor(x.p)}"></div></div><span class="num">${Math.round(x.v)}</span></div>`).join('');
+  const all=(c.h?RAW_H.filter(k=>k!=='blk'||c.p==='C'):RAW_P.filter(k=>k!=='sta'||c.p==='SP'));
+  // team fit
+  let fitHtml='';
+  if(isFree())fitHtml=`<p class="small"><span class="pro-pill">Premium</span> See exactly how he'd change your lineup and team score.</p>`;
+  else{
+    const f=teamFit(c,team,state.w);
+    const mine=f.rows.find(x=>x.mine);
+    if(mine)fitHtml=`<p>Already on your team at <b>${esc(mine.slot)}</b> (score ${mine.v.toFixed(1)}).</p>`;
+    else if(!f.rows.length)fitHtml='<p class="muted">He can\'t play any slot on your team.</p>';
+    else{
+      const b=f.best;
+      const verdict=b.gain>0.5?`Best fit: <b>${esc(b.slot)}</b>, replacing ${b.cur?esc(b.cur.n):'an empty slot'}. That's <b class="delta up">+${b.gain.toFixed(1)}</b> at the spot and +${b.team.toFixed(2)} team score.`:`He wouldn't start for you. Your ${esc(b.slot)} is already ${Math.abs(b.gain).toFixed(1)} points better by your weights.`;
+      const batTxt=f.bat?` He'd bat <b>${ord(f.bat.R)}</b> vs righties and <b>${ord(f.bat.L)}</b> vs lefties.`:'';
+      fitHtml=`<p>${verdict}${b.gain>0.5?batTxt:''}</p><div class="fit">${f.rows.slice(0,4).map(x=>`<div class="fit-row"><span class="pos">${esc(isPitchPos(x.P)?x.P:x.slot)}</span><span class="small">${x.cur?'vs '+esc(x.cur.n)+` (${scoreAt(x.cur,x.P,state.w).toFixed(1)})`:'empty slot'}</span><span class="g ${x.gain>0.5?'up':x.gain<-0.5?'down':''}">${x.gain>0?'+':''}${x.gain.toFixed(1)}</span></div>`).join('')}</div>
+      ${b.gain>0.5?`<div class="btnrow"><button class="btn primary small" type="button" data-apply="${esc(b.slot)}|${esc(c.id)}">Put him at ${esc(b.slot)}</button></div>`:''}`;
+    }
+  }
+  const alts=alternatives(c,MODEL);
+  openSheet(`
+    <div class="dd-head">${faceHtml(c,true)}<div style="display:grid;gap:6px;min-width:0">
+      <span class="label">${esc([c.p,c.t,c.se].filter(Boolean).join(' · '))}</span><h2>${esc(c.n)}</h2>
+      <div><span class="tag">${esc(r.tag)}</span></div>
+      <div class="small muted">#${c.rk} ${esc(c.p)} · #${c.ork} overall · score <b class="num">${c.sc.toFixed(1)}</b>${c.b?` · B/T ${esc(c.b)}/${esc(c.th)}`:''}</div>
+      <div class="small">${c.bs>0?`Buy now <span class="stub">${fmt(c.bs)}</span> · best buy order <span class="stub">${fmt(c.bb)}</span>`:'<span class="muted">Not on the market</span>'}</div>
+    </div></div>
+    <div class="btnrow"><button class="btn small" type="button" data-cmp="${esc(c.id)}">Compare</button>${/^[0-9a-f]{32}$/.test(c.id)?`<a class="btn small" href="https://${esc(/theshow\.com$/.test(DATA.game)?DATA.game:'mlb26.theshow.com')}/items/${esc(c.id)}" target="_blank" rel="noopener">See the real card ↗</a>`:''}${legend}</div>
+    <div><div class="label" style="margin-bottom:8px">How he fits your team</div>${fitHtml}</div>
+    ${r.strengths.length?`<div><div class="label">Strengths</div><ul class="rlist">${r.strengths.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`:''}
+    ${r.weaknesses.length?`<div><div class="label">Weaknesses</div><ul class="rlist">${r.weaknesses.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`:''}
+    ${r.notes.length?`<div><div class="label">Notes</div><ul class="rlist">${r.notes.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></div>`:''}
+    <div><div class="label" style="margin-bottom:8px">Every rating</div><div class="heat full">${all.map(k=>hcell(c,k,true)).join('')}</div></div>
+    <div><div class="label" style="margin-bottom:8px">Skill groups vs ${esc(POS_NAME[c.p]||c.p)}</div><div class="bars">${bars}</div></div>
+    <div><div class="label">Value</div><p>${esc(r.value)}</p></div>
+    ${c.loc.length||!c.mkt?`<div><div class="label">How to get him</div><p>${!c.mkt?'<b style="color:var(--bad)">Not sold on the Community Market.</b> ':''}${c.loc.length?esc(c.loc.map(x=>x.toLowerCase().replace(/\b\w/g,m=>m.toUpperCase())).join(' · ')):''}</p></div>`:''}
+    ${r.meta?`<div><div class="label">You vs the meta</div><p>${esc(r.meta)}</p></div>`:''}
+    ${alts.length?`<div><div class="label" style="margin-bottom:8px">${c.bs>0?'Cheaper cards that play close to him':'Market cards that play close to him'}</div><div class="fit">${alts.map(x=>`<div class="fit-row" role="button" tabindex="0" data-card="${esc(x.id)}" style="cursor:pointer"><span>${ovrChip(x)}</span><span><span class="pname">${esc(x.n)}</span><br><span class="small muted">${(x.sc-c.sc).toFixed(1)} score${c.bs>0?` · saves ${fmt(c.bs-x.bs)} stubs`:''}</span></span><span class="stub">${fmt(x.bs)}</span></div>`).join('')}</div></div>`:''}`);
+}
+const ord=n=>n==null?'—':n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:n%10]||'th');
+
+/* ---------- Team ---------- */
+function renderTeam(){
+  const team=teamCards(),ts=teamScore(team,state.w);
+  const filled=SLOTS.filter(s=>team[s]).length;
+  const slotHtml=SLOTS.filter(s=>isPitchPos(slotPos(s))).map(s=>{const c=team[s],P=slotPos(s);return `<button class="slot ${c?'':'empty'}" type="button" data-slot="${s}"><span class="pos">${s}</span><span class="who">${c?`<div class="pname">${esc(c.n)}</div><div class="psub">${esc(c.se||c.p)} · ${c.o} OVR${c.custom?' · custom':''}</div>`:'<div>Empty — tap to add</div>'}</span>${c?`<span class="score">${scoreAt(c,P,state.w).toFixed(1)}</span>`:''}</button>`}).join('');
+  const SPOT={CF:[50,13],LF:[19,25],RF:[81,25],SS:[36,45],'2B':[64,45],'3B':[20,61],'1B':[80,61],C:[50,92],DH:[86,90]};
+  const lastName=n=>{const p=String(n).split(' ');return p.length>1?p.slice(1).join(' '):n};
+  const dslots=Object.entries(SPOT).map(([s,[x,y]])=>{const c=team[s];return `<button class="dslot ${c?'':'empty'}" type="button" data-slot="${s}" style="left:${x}%;top:${y}%" aria-label="${s}: ${c?esc(c.n):'empty'}"><span class="dp">${s}</span><span class="dn">${c?esc(lastName(c.n)):'+ Add'}</span>${c&&c.se?`<span class="ds" style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block">${esc(c.se)}</span>`:''}${c?`<span class="ds">${ovrChip(c)}${scoreAt(c,s,state.w).toFixed(1)}</span>`:''}</button>`}).join('');
+  const field=`<svg viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="none">
+    <rect width="100" height="100" fill="var(--surface)"/>
+    <path d="M50 86 L1 37 Q50 -22 99 37 Z" fill="var(--grass)"/>
+    <path d="M50 86 L12 48 Q50 2 88 48 Z" fill="var(--grass2)" opacity=".6"/>
+    <path d="M50 92 L77 65 Q50 26 23 65 Z" fill="var(--dirt)"/>
+    <path d="M50 81 L66 65 L50 49 L34 65 Z" fill="var(--grass)"/>
+    <circle cx="50" cy="65" r="3.4" fill="var(--dirt)"/>
+    <line x1="50" y1="86" x2="1" y2="37" stroke="var(--chalk)" stroke-width=".5"/><line x1="50" y1="86" x2="99" y2="37" stroke="var(--chalk)" stroke-width=".5"/>
+    <g fill="var(--chalk)"><rect x="64.8" y="63.8" width="2.4" height="2.4" transform="rotate(45 66 65)"/><rect x="48.8" y="47.8" width="2.4" height="2.4" transform="rotate(45 50 49)"/><rect x="32.8" y="63.8" width="2.4" height="2.4" transform="rotate(45 34 65)"/><path d="M48.6 85 h2.8 v1.4 l-1.4 1.4 l-1.4 -1.4 z"/><rect x="48.9" y="64.6" width="2.2" height=".8"/></g>
+  </svg>`;
+  let ups='';
+  const res=bestUpgrades(team,CARDS,state.w,Number(state.budget)||0,state.upTab,state.mktOnly);
+  const picks=isFree()?res.picks.slice(0,1):res.picks;
+  ups=picks.length?`<div class="grid3">${picks.map(x=>`<div class="up">
+      <div class="label">${esc(x.slot)} upgrade</div>
+      <div class="gain">+${x.gain.toFixed(1)}</div>
+      <div class="swap"><span class="label">Out</span><span>${x.cur?esc(x.cur.n):'<span class="muted">empty</span>'}</span><span class="label">In</span><button class="btn link" type="button" data-card="${esc(x.c.id)}">${esc(x.c.n)}</button></div>
+      <p class="small">${esc(upgradeReason(x.c,x.cur,x.P))} · <span class="tag">${esc(archetype(x.c,x.c.p,MODEL))}</span></p>
+      <p class="small muted">Team score +${x.team.toFixed(2)} · ${x.price>0?`<span class="stub">${fmt(x.price)}</span> stubs${state.upTab==='budget'?` · ${(x.team/Math.max(x.price,1)*10000).toFixed(2)} per 10k`:''}`:'not on market'}</p>
+      <div><button class="btn small" type="button" data-apply="${esc(x.slot)}|${esc(x.c.id)}">Put him in</button></div></div>`).join('')}</div>
+      ${state.upTab==='budget'&&picks.length>1?`<p class="small muted">All ${picks.length} together cost <span class="stub">${fmt(res.total)}</span> of your ${fmt(state.budget)} stubs.</p>`:''}
+      ${isFree()?`<p class="small"><span class="pro-pill">Premium</span> Free shows 1 upgrade a week. Premium shows the best 3 that fit your budget together.</p>`:''}`
+    :`<p class="muted">${state.upTab==='budget'?'Nothing beats your current cards for that budget. Raise the budget or try the No budget tab.':'Your lineup is already the best possible at every slot by your weights.'}</p>`;
+  $('#v-team').innerHTML=`
+    <div class="head"><div><h2>My team</h2><p class="muted">Tap a slot to pick a card from the loaded data, or enter one by hand. Upgrades are scored with your weights at that exact position.</p></div>
+    <div class="stat-row"><div class="stat"><div class="label">Team score</div><div class="v num">${ts.total.toFixed(1)}</div></div><div class="stat"><div class="label">Lineup</div><div class="v num">${ts.hit.toFixed(1)}</div></div><div class="stat"><div class="label">Rotation</div><div class="v num">${ts.sp.toFixed(1)}</div></div><div class="stat"><div class="label">Pen</div><div class="v num">${ts.rp.toFixed(1)}</div></div></div></div>
+    ${filled<SLOTS.length?`<div class="notice"><p>${filled} of ${SLOTS.length} slots filled. Empty slots count as zero, so fill them before trusting the team score.</p></div>`:''}
+    <div class="diamond-wrap"><div class="diamond">${field}${dslots}</div><p class="small muted" style="text-align:center">Tap a position to fill it. DH sits in the dugout corner.</p></div>
+    <h3>Rotation & bullpen</h3>
+    <div class="slots">${slotHtml}</div>
+    <div class="head" style="margin-top:8px"><h3>Top upgrades</h3>
+      <div class="filters"><div class="seg" role="group" aria-label="Budget mode"><button type="button" data-uptab="budget" aria-pressed="${state.upTab==='budget'}">Budget</button><button type="button" data-uptab="none" aria-pressed="${state.upTab!=='budget'}">No budget</button></div>
+      ${state.upTab==='budget'?`<label class="field"><span class="label">Stubs to spend</span><input id="budget" type="number" min="0" step="1000" value="${esc(state.budget)}"></label>`:''}
+      <label class="small" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input id="mktonly" type="checkbox" ${state.mktOnly?'checked':''}> Only cards I can buy on the market</label></div></div>
+    ${ups}
+    ${isFree()?'':everyPositionHtml(team)}`;
+}
+function everyPositionHtml(team){
+  const rows=slotUpgrades(team,CARDS,state.w,Number(state.budget)||0,state.upTab,state.mktOnly);
+  return `<h3>Best upgrade at every position</h3>
+  <p class="small muted">${state.upTab==='budget'?`Each row is the best single card at that spot that costs ${fmt(state.budget)} stubs or less.`:'Each row is the best card at that spot, no price limit.'} ${state.mktOnly?'Only cards you can buy on the Community Market right now.':'Includes cards you can only get from programs, packs or rewards.'}</p>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Slot</th><th>Now</th><th>Upgrade</th><th class="r">Gain</th><th class="r">Price</th><th></th></tr></thead><tbody>
+  ${rows.map(r=>{const cur=r.cur?`<span class="pname">${esc(r.cur.n)}</span><div class="psub">${esc(r.cur.se)} · ${scoreAt(r.cur,r.P,state.w).toFixed(1)}</div>`:'<span class="muted">empty</span>';
+    if(!r.pick)return `<tr><td class="rk" style="font-size:18px">${r.slot}</td><td>${cur}</td><td colspan="4" class="muted small">${r.cur?'Already your best option here':'No eligible card found'}</td></tr>`;
+    const x=r.pick;return `<tr class="click" data-card="${esc(x.c.id)}" tabindex="0"><td class="rk" style="font-size:18px">${r.slot}</td><td>${cur}</td><td><span class="pname">${esc(x.c.n)}</span><div class="psub">${esc(x.c.se)} · ${x.c.o} OVR · ${esc(upgradeReason(x.c,x.cur,x.P))}</div></td><td class="r num delta up">+${x.gain.toFixed(1)}</td><td class="r">${price(x.c)}</td><td class="r"><button class="btn small" type="button" data-apply="${esc(x.slot)}|${esc(x.c.id)}">Put in</button></td></tr>`}).join('')}
+  </tbody></table></div>`;
+}
+function openPicker(slot){
+  const P=slotPos(slot);
+  openSheet(`<div style="padding-right:72px"><span class="label">Slot ${esc(slot)}</span><h2>Pick a card</h2></div>
+    <label class="field"><span class="label">Search eligible ${esc(P)} cards</span><input id="pq" type="search" placeholder="Player name" autocomplete="off"></label>
+    <div id="plist"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-custom="${esc(slot)}">Enter a card by hand</button>${state.team[slot]?`<button class="btn" type="button" data-clear="${esc(slot)}">Clear slot</button>`:''}</div>`);
+  const draw=()=>{
+    const q=($('#pq')?.value||'').toLowerCase();
+    const list=CARDS.filter(c=>eligible(c,P)&&(!q||c.n.toLowerCase().includes(q))).map(c=>({c,v:scoreAt(c,P,state.w)})).sort((a,b)=>b.v-a.v).slice(0,40);
+    $('#plist').innerHTML=`<div class="scroll"><table class="tbl"><tbody>${list.map(x=>`<tr class="click" data-pick="${esc(slot)}|${esc(x.c.id)}" tabindex="0"><td><div class="pname">${esc(x.c.n)}</div><div class="psub" style="white-space:normal"><b style="color:var(--ink)">${esc(x.c.se||'—')}</b> · ${esc(x.c.t||'')} · ${esc(x.c.p)}${x.c.s?' · also '+esc(x.c.s):''}${x.c.custom?' · custom':''}</div></td><td>${ovrChip(x.c)}</td><td class="r score">${x.v.toFixed(1)}</td><td class="r">${price(x.c)}</td></tr>`).join('')||'<tr><td class="muted">No matches.</td></tr>'}</tbody></table></div>`;
+  };
+  draw();$('#pq').addEventListener('input',draw);
+}
+const HIT_FIELDS=[['cr','Contact vs R'],['cl','Contact vs L'],['pr','Power vs R'],['pl','Power vs L'],['vis','Vision'],['dis','Discipline'],['clu','Clutch'],['fld','Fielding'],['rea','Reaction'],['arm','Arm strength'],['acc','Arm accuracy'],['blk','Blocking (C)'],['spd','Speed'],['bra','Stealing'],['agg','Aggression']];
+const PIT_FIELDS=[['h9','H/9'],['k9','K/9'],['bb9','BB/9'],['hr9','HR/9'],['vel','Velocity'],['ctl','Control'],['mov','Movement'],['sta','Stamina'],['pcl','Clutch']];
+function openCustom(slot){
+  const P=slotPos(slot),pit=isPitchPos(P);
+  const F=pit?PIT_FIELDS:HIT_FIELDS;
+  openSheet(`<div style="padding-right:72px"><span class="label">Slot ${esc(slot)}</span><h2>Enter a card</h2><p class="muted small">Copy the ratings off the card in Diamond Dynasty. Leave a box blank if it doesn't apply.</p></div>
+    <form id="cform" class="form-grid">
+      <label class="field" style="grid-column:1/-1"><span class="label">Name</span><input id="cf-n" required></label>
+      <label class="field"><span class="label">Position</span><select id="cf-p">${(pit?['SP','RP']:[...HIT_POS,'DH']).map(p=>`<option ${p===P?'selected':''}>${p}</option>`).join('')}</select></label>
+      <label class="field"><span class="label">OVR</span><input id="cf-o" type="number" min="40" max="99"></label>
+      <label class="field"><span class="label">Price (stubs)</span><input id="cf-bs" type="number" min="0"></label>
+      ${F.map(([k,l])=>`<label class="field"><span class="label">${l}</span><input id="cf-${k}" type="number" min="0" max="125"></label>`).join('')}
+      <div style="grid-column:1/-1"><button class="btn primary" type="submit">Save card to ${esc(slot)}</button></div>
+    </form>`);
+  $('#cform').addEventListener('submit',e=>{
+    e.preventDefault();
+    const o={id:'custom-'+Date.now(),n:$('#cf-n').value.trim()||'Custom card',p:$('#cf-p').value,o:$('#cf-o').value,bs:$('#cf-bs').value,se:'Custom',custom:true};
+    for(const [k] of F)o[k]=$('#cf-'+k).value;
+    state.custom.push(o);state.team[slot]=o.id;rebuild();persist();closeSheet();render();toast('Card saved to '+slot);
+  });
+}
+
+/* ---------- Lineup ---------- */
+function renderLineup(){
+  if(isFree()){$('#v-lineup').innerHTML=lockedPanel('Lineup calculator');return}
+  const team=teamCards();
+  const hitters=[...HIT_POS,'DH'].map(s=>team[s]).filter(Boolean);
+  const side=h=>{const L=buildLineup(hitters,h,state.w);return `<div class="panel"><h3>vs ${h==='R'?'right':'left'}-handed starter</h3><ol class="lineup">${L.map(x=>`<li><span class="n">${x.spot}</span><span class="pname"><button class="btn link" type="button" data-card="${esc(x.c.id)}">${esc(x.c.n)}</button> <span class="psub">${esc(posOf(x.c,team))}</span></span><span class="num small">${x.off.toFixed(1)}</span><span class="why">${esc(x.why)}</span></li>`).join('')}</ol></div>`};
+  const own=(state.own||[]).map(byId).filter(Boolean);
+  const best=own.length?bestTeamFrom(own,state.w):{};
+  const bestSlots=SLOTS.filter(s=>best[s]);
+  const bt=teamScore(Object.fromEntries(SLOTS.map(s=>[s,best[s]||null])),state.w),ct=teamScore(team,state.w);
+  const ownList=[...own].sort((a,b)=>(a.h===b.h?b.sc-a.sc:a.h?-1:1));
+  const builder=`<div class="panel" style="display:grid;gap:14px">
+    <div class="head"><div><h3>Auto-build from cards I own</h3><p class="small muted">Add the cards in your collection. Dugout puts every hitter at the position where he helps most, then picks your 5 starters and 6 relievers.</p></div>
+    ${bestSlots.length?`<div class="stat"><div class="label">Best team score</div><div class="v num">${bt.total.toFixed(1)}</div><div class="small muted">yours now ${ct.total.toFixed(1)}</div></div>`:''}</div>
+    <div class="grid2">
+      <div style="display:grid;gap:10px;align-content:start;min-width:0">
+        <label class="field"><span class="label">Add a card you own</span><input id="own-q" type="search" placeholder="Search by name" autocomplete="off" data-ownq="1"></label>
+        <div id="own-r"></div>
+        <div class="plist">${ownList.map(c=>`<div class="pitem ${bestSlots.some(s=>best[s].id===c.id)?'pick':''}">${ovrChip(c)}<span class="nm" title="${esc(c.n)} · ${esc(c.se)}">${esc(c.n)} <span class="muted">${esc(c.p)} · ${esc(c.se)}</span></span><span class="num small">${c.sc.toFixed(1)}</span><button class="btn small" type="button" data-ownrm="${esc(c.id)}" aria-label="Remove ${esc(c.n)}">×</button></div>`).join('')||'<p class="muted small">No cards yet. Search above, or start with your current team.</p>'}</div>
+        <div class="btnrow"><span class="small muted">${own.filter(c=>c.h).length} hitters · ${own.filter(c=>c.p==='SP').length} starters · ${own.filter(c=>c.p==='RP').length} relievers</span><button class="btn small" type="button" data-act="own-team">Add My Team cards</button>${own.length?'<button class="btn small" type="button" data-act="own-clear">Clear</button>':''}</div>
+      </div>
+      <div style="display:grid;gap:10px;align-content:start;min-width:0">
+        ${bestSlots.length?`<div class="give">${bestSlots.map(s=>{const c=best[s],P=slotPos(s),cur=team[s];const d=scoreAt(c,P,state.w)-(cur?scoreAt(cur,P,state.w):0);return `<div class="give-row"><span class="pos">${s}</span><span style="min-width:0"><button class="btn link" type="button" data-card="${esc(c.id)}" style="text-align:left">${esc(c.n)}</button> <span class="psub">${esc(c.se)}</span></span><span class="num small">${scoreAt(c,P,state.w).toFixed(1)}${cur&&cur.id===c.id?'':` <span class="delta ${d>=0?'up':'down'}">${d>=0?'+':''}${d.toFixed(1)}</span>`}</span></div>`}).join('')}</div>
+        ${SLOTS.filter(s=>!best[s]).length?`<p class="small muted">Not enough cards for: ${SLOTS.filter(s=>!best[s]).join(', ')}.</p>`:''}
+        <div class="btnrow"><button class="btn primary" type="button" data-act="own-apply">Use this as My Team</button><span class="small muted">The batting orders below update from it.</span></div>`:'<p class="muted small">Your best possible team shows here once you add cards.</p>'}
+      </div>
+    </div></div>`;
+  $('#v-lineup').innerHTML=`${builder}
+    <div class="head"><div><h2>Batting order</h2><p class="muted">Built from the sabermetric batting-order research: best three bats in the 1, 2 and 4 holes, on-base first, power at cleanup, a second leadoff man at 9. Separate orders because split ratings swing more games in The Show than order does. The number is each hitter's offense score against that hand.</p></div></div>
+    ${hitters.length<9?`<div class="notice"><p>${hitters.length} of 9 hitters set. Fill C through DH on My Team for a full order.</p><a class="btn" href="#team">Go to My Team</a></div>`:''}
+    ${hitters.length?`<div class="grid2">${side('R')}${side('L')}</div>`:''}`;
+}
+function ownSearch(){
+  const q=($('#own-q')?.value||'').trim().toLowerCase();const box=$('#own-r');if(!box)return;
+  if(q.length<2){box.innerHTML='';return}
+  const have=new Set(state.own||[]);
+  const list=CARDS.filter(c=>!have.has(c.id)&&c.n.toLowerCase().includes(q)).sort((a,b)=>b.o-a.o).slice(0,8);
+  box.innerHTML=list.length?`<div class="sres">${list.map(c=>`<button type="button" data-ownadd="${esc(c.id)}">${ovrChip(c)}<span>${esc(c.n)} <span class="muted small">${esc(c.p)} · ${esc(c.se)}</span></span></button>`).join('')}</div>`:'<p class="small muted">No card by that name.</p>';
+}
+function posOf(c,team){for(const s of [...HIT_POS,'DH'])if(team[s]&&team[s].id===c.id)return s;return c.p}
+
+/* ---------- Moneyball ---------- */
+function renderMoneyball(){
+  if(isFree()){$('#v-moneyball').innerHTML=lockedPanel('Moneyball');return}
+  let body='';
+  if(state.mb==='value'){
+    const list=valueList(MODEL,state.mbPos,Number(state.mbMax)||Infinity).slice(0,40);
+    body=`<div class="filters"><label class="field"><span class="label">Position</span><select id="mbpos">${['ALL',...BOARD_POS].map(p=>`<option ${p===state.mbPos?'selected':''}>${p}</option>`).join('')}</select></label>
+      <label class="field"><span class="label">Max price</span><input id="mbmax" type="number" min="0" step="1000" value="${esc(state.mbMax)}"></label></div>
+      <p class="small muted">Replacement level is the median score of cards that cost 1,000 stubs or less at that position. Value = points above replacement for every 1,000 stubs.</p>
+      <div class="scroll"><table class="tbl"><thead><tr><th>Card</th><th>Pos</th><th>OVR</th><th class="r">Score</th><th class="r">Over repl.</th><th class="r">Pts per 1k</th><th class="r">Price</th></tr></thead><tbody>
+      ${list.map(x=>`<tr class="click" data-card="${esc(x.c.id)}" tabindex="0"><td class="pname">${esc(x.c.n)}</td><td>${x.P}</td><td>${ovrChip(x.c)}</td><td class="r score">${x.c.sc.toFixed(1)}</td><td class="r num">+${x.over.toFixed(1)}</td><td class="r num">${x.per1k.toFixed(2)}</td><td class="r">${price(x.c)}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">No priced cards beat replacement level here.</td></tr>'}
+      </tbody></table></div>`;
+  }else{
+    const list=flipList(CARDS,Number(state.flipMin)||0,Number(state.flipMax)||Infinity).slice(0,40);
+    body=`<div class="filters"><label class="field"><span class="label">Min sell price</span><input id="fmin" type="number" min="0" step="500" value="${esc(state.flipMin)}"></label>
+      <label class="field"><span class="label">Max sell price</span><input id="fmax" type="number" min="0" step="1000" value="${esc(state.flipMax)}"></label></div>
+      <p class="small muted">Buy order at best buy + 1, sell order at best sell − 1, minus the 10% market tax. The price feed doesn't include sales volume, so check the card's recent sales in game before you commit stubs.</p>
+      <div class="scroll"><table class="tbl"><thead><tr><th>Card</th><th>OVR</th><th class="r">Buy at</th><th class="r">Sell at</th><th class="r">Profit</th><th class="r">ROI</th></tr></thead><tbody>
+      ${list.map(x=>`<tr class="click" data-card="${esc(x.c.id)}" tabindex="0"><td class="pname">${esc(x.c.n)} <span class="psub">${esc(x.c.p)}</span></td><td>${ovrChip(x.c)}</td><td class="r stub">${fmt(x.buyAt)}</td><td class="r stub">${fmt(x.sellAt)}</td><td class="r num">${fmt(x.profit)}</td><td class="r num">${(x.roi*100).toFixed(1)}%</td></tr>`).join('')||'<tr><td colspan="6" class="muted">No profitable flips in that price range.</td></tr>'}
+      </tbody></table></div>`;
+  }
+  $('#v-moneyball').innerHTML=`<div class="head"><div><h2>Moneyball</h2><p class="muted">Where your stubs buy the most score, and which cards have the widest spread to flip.</p></div>
+    <div class="seg" role="group" aria-label="Moneyball mode"><button type="button" data-mb="value" aria-pressed="${state.mb==='value'}">Value per stub</button><button type="button" data-mb="flip" aria-pressed="${state.mb==='flip'}">Flip finder</button></div></div>${body}`;
+}
+
+/* ---------- Co-op draft ---------- */
+function seedCoopExample(){
+  const R=mulberry(7);const hit=CARDS.filter(c=>c.h&&!c.custom),pit=CARDS.filter(c=>!c.h&&!c.custom);
+  const take=(arr,k)=>{const a=[...arr];const out=[];while(out.length<k&&a.length)out.push(a.splice(Math.floor(R()*a.length),1)[0].id);return out};
+  state.coop.players.forEach((p,i)=>{p.ids=[...take(hit,7),...take(pit,6)];p.name='Player '+(i+1)});
+  state.coop.example=true;state.coop.seeded=true;
+}
+function renderCoop(){
+  if(isFree()){$('#v-coop').innerHTML=lockedPanel('Co-op Draft');return}
+  const C=state.coop;
+  if(DATA.source==='example'&&!C.seeded&&C.players.every(p=>!p.ids.length))seedCoopExample();
+  const players=C.players.slice(0,C.n);
+  const pools=players.map(p=>p.ids.map(byId).filter(Boolean));
+  if(C.spq==null){C.spq=1;C.rpq=2}
+  const res=coopSolve(pools,C.hq,C.spq,C.rpq,state.w);
+  const picked=new Set(Object.values(res.team).map(c=>c.id));
+  const opts=(v,arr)=>arr.map(x=>`<option value="${x}" ${x==v?'selected':''}>${x}</option>`).join('');
+  const poolHtml=players.map((p,i)=>{
+    const list=pools[i].map(c=>({c,v:c.sc})).sort((a,b)=>(a.c.h===b.c.h?b.v-a.v:a.c.h?-1:1));
+    return `<div class="pool">
+      <input class="pname-in" id="cp-n-${i}" value="${esc(p.name)}" aria-label="Player ${i+1} name">
+      <label class="field"><span class="label">Add a card they own</span><input id="cp-q-${i}" type="search" placeholder="Search by name" autocomplete="off" data-cpq="${i}"></label>
+      <div id="cp-r-${i}"></div>
+      <div class="plist">${list.map(({c})=>`<div class="pitem ${picked.has(c.id)&&res.hit.byPlayer[i].concat(res.pit.byPlayer[i]).some(x=>x.c.id===c.id)?'pick':''}">${ovrChip(c)}<span class="nm" title="${esc(c.n)} · ${esc(c.se)}">${esc(c.n)} <span class="muted">${esc(c.p)} · ${esc(c.se)}</span></span><span class="num small">${c.sc.toFixed(1)}</span><button class="btn small" type="button" data-cprm="${i}|${esc(c.id)}" aria-label="Remove ${esc(c.n)}">×</button></div>`).join('')||'<p class="muted small">No cards yet. Search above to add the cards this person owns.</p>'}</div>
+      <div class="btnrow"><span class="small muted">${pools[i].filter(c=>c.h).length} hitters · ${pools[i].filter(c=>!c.h).length} pitchers</span><button class="btn small" type="button" data-cpteam="${i}">Add My Team cards</button>${p.ids.length?`<button class="btn small" type="button" data-cpclear="${i}">Clear</button>`:''}</div>
+    </div>`}).join('');
+  const giveHtml=players.map((p,i)=>{
+    const rows=res.hit.byPlayer[i].concat(res.pit.byPlayer[i]);
+    const pl=(k,w1)=>k>0?`${k} more ${w1}${k>1?'s':''}`:'';
+    const short=[pl(res.hit.short[i],'hitter'),pl(res.sp.short[i],'starter'),pl(res.rp.short[i],'reliever')].filter(Boolean).join(', ');
+    return `<div class="up"><div class="label">${esc(p.name)} brings</div><div class="give">${rows.map(x=>`<div class="give-row"><span class="pos">${esc(x.P==='SP'||x.P==='RP'?x.P:x.slot)}</span><button class="btn link" type="button" data-card="${esc(x.c.id)}" style="text-align:left">${esc(x.c.n)}</button><span class="num small">${scoreAt(x.c,x.P,state.w).toFixed(1)}</span></div>`).join('')||'<p class="muted small">Nothing usable yet.</p>'}</div>${short?`<p class="small" style="color:var(--bad)">Needs ${short} in their pool to fill their quota.</p>`:''}</div>`}).join('');
+  const hitters=COOP_HIT.map(s=>res.team[s]).filter(Boolean);
+  const L=hitters.length?buildLineup(hitters,'R',state.w):[];
+  const empty=COOP_HIT.filter(s=>!res.team[s]);
+  $('#v-coop').innerHTML=`
+    <div class="head"><div><h2>Co-op draft</h2><p class="muted">Each person adds the cards they own. Dugout picks exactly which ${C.hq} hitters, ${C.spq} starter${C.spq===1?'':'s'} and ${C.rpq} reliever${C.rpq===1?'':'s'} each of you should bring so the combined team is as strong as possible, with every hitter at the position where he helps most.</p></div></div>
+    ${C.example?`<div class="notice"><p>These pools are made-up examples so you can see how it works. Clear them and add your real cards.</p><button class="btn" type="button" data-act="cp-reset">Clear example pools</button></div>`:''}
+    <div class="filters">
+      <label class="field"><span class="label">Players</span><select id="cp-n">${opts(C.n,[2,3,4])}</select></label>
+      <label class="field"><span class="label">Hitters each</span><select id="cp-hq">${opts(C.hq,[1,2,3,4,5])}</select></label>
+      <label class="field"><span class="label">Starters each</span><select id="cp-spq">${opts(C.spq,[0,1,2,3])}</select></label>
+      <label class="field"><span class="label">Relievers each</span><select id="cp-rpq">${opts(C.rpq,[0,1,2,3,4])}</select></label>
+    </div>
+    <div class="pools">${poolHtml}</div>
+    <div class="head"><h3>Who brings what</h3><div class="stat"><div class="label">Squad score</div><div class="v num">${res.avg.toFixed(1)}</div></div></div>
+    <div class="grid3">${giveHtml}</div>
+    ${res.dupes.length?`<div class="notice"><p>Two versions of ${esc(res.dupes.join(', '))} made the team. The game may not allow both; remove one version from a pool.</p></div>`:''}
+    ${hitters.length?`<div class="grid2"><div class="panel"><h3>Combined lineup vs RHP</h3><ol class="lineup">${L.map(x=>`<li><span class="n">${x.spot}</span><span class="pname">${esc(x.c.n)} <span class="psub">${esc(COOP_HIT.find(s=>res.team[s]&&res.team[s].id===x.c.id)||x.c.p)} · ${esc(players[pools.findIndex(pl=>pl.some(c=>c.id===x.c.id))]?.name||'')}</span></span><span class="num small">${x.off.toFixed(1)}</span><span class="why">${esc(x.why)}</span></li>`).join('')}</ol>${empty.length?`<p class="small muted">Open spots: ${empty.join(', ')}. ${C.n*C.hq<9?'Your quotas cover fewer than 9 hitters, so the game fills the rest.':'Nobody has an eligible card for these.'}</p>`:''}</div>
+    <div class="panel"><h3>Staff</h3><div class="give">${Object.keys(res.team).filter(s=>/^(SP|RP)/.test(s)).sort((a,b)=>(a[0]===b[0]?+a.slice(2)-+b.slice(2):a<b?1:-1)).map(s=>`<div class="give-row"><span class="pos">${s}</span><span>${esc(res.team[s].n)} <span class="psub">${esc(players[pools.findIndex(pl=>pl.some(c=>c.id===res.team[s].id))]?.name||'')}</span></span><span class="num small">${scoreAt(res.team[s],slotPos(s),state.w).toFixed(1)}</span></div>`).join('')||'<p class="muted small">No pitchers picked yet.</p>'}</div></div></div>`:''}
+    <p class="small muted">Picks use your current weights. If two of you own the same card, it only gets brought once.</p>`;
+}
+function coopSearch(i){
+  const q=($('#cp-q-'+i)?.value||'').trim().toLowerCase();const box=$('#cp-r-'+i);if(!box)return;
+  if(q.length<2){box.innerHTML='';return}
+  const have=new Set(state.coop.players[i].ids);
+  const list=CARDS.filter(c=>!have.has(c.id)&&c.n.toLowerCase().includes(q)).sort((a,b)=>b.o-a.o).slice(0,8);
+  box.innerHTML=list.length?`<div class="sres">${list.map(c=>`<button type="button" data-cpadd="${i}|${esc(c.id)}">${ovrChip(c)}<span>${esc(c.n)} <span class="muted small">${esc(c.p)} · ${esc(c.se)}</span></span></button>`).join('')}</div>`:'<p class="small muted">No card by that name.</p>';
+}
+
+/* ---------- Game log ---------- */
+function renderLog(){
+  if(isFree()){$('#v-log').innerHTML=lockedPanel('Game log');return}
+  const L=state.log;
+  const by={};for(const g of L){const k=g.style||'Unlabeled';const o=by[k]||(by[k]={w:0,l:0,rf:0,ra:0,e:0,n:0});o.n++;o.rf+=g.rf;o.ra+=g.ra;o.e+=g.e;if(g.rf>g.ra)o.w++;else if(g.rf<g.ra)o.l++}
+  const summary=Object.entries(by).map(([k,o])=>`<tr><td class="pname">${esc(k)}</td><td class="r num">${o.w}-${o.l}</td><td class="r num">${(o.rf/o.n).toFixed(1)}</td><td class="r num">${(o.ra/o.n).toFixed(1)}</td><td class="r num">${(o.e/o.n).toFixed(1)}</td></tr>`).join('');
+  const today=new Date().toISOString().slice(0,10);
+  $('#v-log').innerHTML=`
+    <div class="head"><div><h2>Game log</h2><p class="muted">Track games against your roommates by lineup style. After a few weeks this answers whether the glove-and-contact build actually wins in The Show.</p></div></div>
+    <form id="lform" class="panel form-grid">
+      <label class="field"><span class="label">Date</span><input id="lf-d" type="date" value="${today}"></label>
+      <label class="field"><span class="label">Opponent</span><input id="lf-opp" placeholder="Roommate"></label>
+      <label class="field"><span class="label">My style</span><select id="lf-s">${Object.values(PRESETS).map(p=>`<option ${p.label===(PRESETS[state.preset]?.label)?'selected':''}>${p.label}</option>`).join('')}<option ${!PRESETS[state.preset]?'selected':''}>Custom</option></select></label>
+      <label class="field"><span class="label">My runs</span><input id="lf-rf" type="number" min="0" required></label>
+      <label class="field"><span class="label">Their runs</span><input id="lf-ra" type="number" min="0" required></label>
+      <label class="field"><span class="label">My hits</span><input id="lf-h" type="number" min="0"></label>
+      <label class="field"><span class="label">My errors</span><input id="lf-e" type="number" min="0"></label>
+      <div style="grid-column:1/-1"><button class="btn primary" type="submit">Log game</button></div>
+    </form>
+    ${L.length?`<h3>By style</h3><div class="scroll"><table class="tbl"><thead><tr><th>Style</th><th class="r">W-L</th><th class="r">Runs/G</th><th class="r">Allowed/G</th><th class="r">Errors/G</th></tr></thead><tbody>${summary}</tbody></table></div>
+    <h3>Games</h3><div class="scroll"><table class="tbl"><thead><tr><th>Date</th><th>Opponent</th><th>Style</th><th class="r">Score</th><th class="r">H</th><th class="r">E</th><th></th></tr></thead><tbody>
+    ${L.map((g,i)=>`<tr><td class="num">${esc(g.d)}</td><td>${esc(g.opp)}</td><td>${esc(g.style)}</td><td class="r num"><b class="${g.rf>g.ra?'delta up':g.rf<g.ra?'delta down':''}">${g.rf>g.ra?'W':g.rf<g.ra?'L':'T'}</b> ${g.rf}-${g.ra}</td><td class="r num">${g.h??'—'}</td><td class="r num">${g.e}</td><td class="r"><button class="btn small" type="button" data-del="${i}">${state.confirmDel===i?'Confirm delete':'Delete'}</button></td></tr>`).join('')}
+    </tbody></table></div>`:'<p class="muted">No games logged yet. Your first result shows up here with a record by lineup style.</p>'}`;
+}
+
+/* ---------- Weights ---------- */
+function renderWeights(){
+  if(isFree()){$('#v-weights').innerHTML=lockedPanel('Custom weights');return}
+  const w=state.w;
+  const sl=(k,l,max)=>`<div class="slider"><label for="w-${k}">${l}</label><input id="w-${k}" type="range" min="0" max="${max}" value="${w[k]}" data-w="${k}"><span class="num" id="wv-${k}">${w[k]}${k==='def'||k==='spd'?'%':''}</span></div>`;
+  const share=P=>{const wd=(POSDEF[P]||0)*w.def/100,ws=SPD_BASE*w.spd/100,t=1+wd+ws;return `${Math.round(wd/t*100)}% / ${Math.round(ws/t*100)}%`};
+  $('#v-weights').innerHTML=`
+    <div class="head"><div><h2>Your weights</h2><p class="muted">Start from a preset, then tune. Every ranking, report, upgrade and lineup re-scores live.</p></div>
+    <div class="seg" role="group" aria-label="Preset">${Object.entries(PRESETS).map(([k,p])=>`<button type="button" data-preset="${k}" aria-pressed="${state.preset===k}">${p.label}</button>`).join('')}</div></div>
+    <div class="grid2">
+      <div class="panel" style="display:grid;gap:12px"><h3>Hitting mix</h3>
+        ${sl('con','Contact',60)}${sl('pow','Power',60)}${sl('vis','Plate vision',60)}${sl('dis','Discipline',60)}${sl('clu','Clutch',60)}
+        <p class="small muted">Relative weights. Contact and power use the split vs each hand; the board blends 70% vs RHP and 30% vs LHP.</p></div>
+      <div class="panel" style="display:grid;gap:12px"><h3>Glove & legs</h3>
+        ${sl('def','Defense importance',250)}${sl('spd','Speed & baserunning',250)}
+        <div class="scroll"><table class="tbl"><thead><tr><th>Pos</th><th class="r">Defense / speed share of score</th></tr></thead><tbody>
+        ${['C','SS','CF','2B','3B','RF','LF','1B','DH'].map(P=>`<tr><td>${P}</td><td class="r num" id="share-${P}">${share(P)}</td></tr>`).join('')}</tbody></table></div>
+        <p class="small muted">Defense counts most at C, SS and CF and barely at 1B. Speed covers steals and taking the extra base. Pitchers use fixed weights in this version.</p></div>
+    </div>`;
+}
+
+/* ---------- Data ---------- */
+function renderData(){
+  const live=DATA.source==='live';
+  $('#v-data').innerHTML=`
+    <div class="head"><div><h2>Card data</h2><p class="muted">${live?`Live cards loaded: ${fmt(DATA.cards.length)} cards from ${esc(DATA.game||'The Show')}, ${new Date(DATA.at).toLocaleString()}.`:'You are looking at made-up example cards so every tool works out of the box. Load the real Show 26 cards below; it takes about two minutes on a laptop.'}</p></div></div>
+    <div class="panel" style="display:grid;gap:14px">
+      <h3>Load live cards and prices</h3>
+      <ol class="steps">
+        <li>On a computer, open <a href="https://mlb26.theshow.com/apis/items.json" target="_blank" rel="noopener">mlb26.theshow.com</a> in Chrome, Edge, Firefox or Safari.</li>
+        <li>Open the console: <span class="mono">F12</span> on Windows, <span class="mono">Cmd+Option+J</span> on Mac (Safari needs Develop menu turned on).</li>
+        <li>Copy the loader below, paste it into the console, press Enter, and wait for "Done" (2–3 minutes). Then type <span class="mono">copy(window.__dugout)</span> and press Enter.</li>
+        <li>Click in the box below and paste.</li>
+      </ol>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" data-act="copy-snippet">Copy loader</button></div>
+      <pre class="code" id="snipView"></pre>
+      <label class="field"><span class="label">Paste card data</span><textarea id="paste" placeholder="Paste here after the console says Done"></textarea></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" type="button" data-act="load">Load cards</button>${live?'<button class="btn" type="button" data-act="example">Switch back to example cards</button>':''}</div>
+      <p class="small muted">Next year, run the same loader on mlb27.theshow.com. Prices are a snapshot, so reload them when you're about to buy.</p>
+    </div>`;
+  $('#snipView').textContent=$('#snippet').textContent.trim();
+}
+
+/* ---------- routing / chrome ---------- */
+function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'board'}
+function render(){
+  const v=currentView();
+  for(const x of VIEWS)$('#v-'+x).hidden=x!==v;
+  document.querySelectorAll('.tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+v?'page':'false'));
+  $('#tierPro').setAttribute('aria-pressed',String(!isFree()));$('#tierFree').setAttribute('aria-pressed',String(isFree()));
+  const live=DATA.source==='live';
+  $('#dataDot').className='dot'+(live?' live':'');
+  $('#dataLabel').textContent=live?`Live · ${fmt(DATA.cards.length)} cards`:'Example cards (made up)';
+  renderCmpBar();
+  ({coop:renderCoop,board:renderBoard,top:renderTop,team:renderTeam,lineup:renderLineup,moneyball:renderMoneyball,log:renderLog,weights:renderWeights,data:renderData})[v]();
+}
+function rescore(){rebuild();persist()}
+
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,tr.click,.tile,.fit-row[data-card],[data-act]');if(!t)return;
+  const d=t.dataset;
+  if(d.act==='close'){closeSheet();return}
+  if(d.act==='tier-pro'){state.tier='pro';persist();closeSheet();render();return}
+  if(d.act==='more'){state.board.limit+=40;render();return}
+  if(d.act==='topmore'){state.top.limit+=48;render();return}
+  if(d.act==='cmp-clear'){state.compare=[];state.cmpPick=false;renderCmpBar();return}
+  if(d.cmp){
+    if(state.compare.length===1&&state.compare[0]!==d.cmp){const a=byId(state.compare[0]),b=byId(d.cmp);state.compare=[];state.cmpPick=false;renderCmpBar();if(a&&b)openCompare(a,b);return}
+    state.compare=[d.cmp];state.cmpPick=true;closeSheet();renderCmpBar();toast('Now open the card to compare against');return}
+  if(d.bmode){state.board.mode=d.bmode;render();return}
+  if(d.ownadd){state.own=state.own||[];if(!state.own.includes(d.ownadd))state.own.push(d.ownadd);persist();render();const q=$('#own-q');if(q)q.focus();return}
+  if(d.ownrm){state.own=(state.own||[]).filter(x=>x!==d.ownrm);persist();render();return}
+  if(d.act==='own-team'){state.own=state.own||[];for(const id of Object.values(state.team))if(id&&!state.own.includes(id))state.own.push(id);persist();render();return}
+  if(d.act==='own-clear'){state.own=[];persist();render();return}
+  if(d.act==='own-apply'){const own=(state.own||[]).map(byId).filter(Boolean);const b=bestTeamFrom(own,state.w);state.team={};for(const s of SLOTS)if(b[s])state.team[s]=b[s].id;persist();render();toast('My Team updated with your best lineup');return}
+  if(d.act==='cp-reset'){state.coop.players.forEach(p=>p.ids=[]);state.coop.example=false;state.coop.seeded=true;persist();render();return}
+  if(d.cpadd){const [i,id]=d.cpadd.split('|');const p=state.coop.players[+i];if(!p.ids.includes(id))p.ids.push(id);persist();render();const q=$('#cp-q-'+i);if(q)q.focus();return}
+  if(d.cprm){const [i,id]=d.cprm.split('|');const p=state.coop.players[+i];p.ids=p.ids.filter(x=>x!==id);persist();render();return}
+  if(d.cpteam){const p=state.coop.players[+d.cpteam];for(const id of Object.values(state.team))if(id&&!p.ids.includes(id))p.ids.push(id);persist();render();return}
+  if(d.cpclear){state.coop.players[+d.cpclear].ids=[];persist();render();return}
+  if(d.topk){state.top.kind=d.topk;state.top.limit=48;render();return}
+  if(d.act==='copy-snippet'){const s=$('#snippet').textContent.trim();navigator.clipboard?.writeText(s).then(()=>toast('Loader copied')).catch(()=>{const r=document.createRange();r.selectNodeContents($('#snipView'));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);toast('Selected. Press Cmd/Ctrl+C')});return}
+  if(d.act==='load'){
+    const txt=$('#paste').value.trim();if(!txt){toast('Paste the card data first');return}
+    try{
+      const res=parseCards(txt);
+      if(!res.cards.length)throw new Error('no cards');
+      if(!res.healthy){toast('Loaded, but most ratings are blank. The feed fields may have changed.')}
+      DATA={cards:res.cards,source:'live',game:res.game,at:res.at};
+      if(!lsSet(LS_CARDS,txt))toast('Loaded. Too big to keep in this browser, so paste again next visit.');
+      else toast(`Loaded ${fmt(res.cards.length)} cards`);
+      state.team={};rescore();location.hash='#board';render();
+    }catch(err){toast("That doesn't look like Dugout card data. Run the loader again and paste its output.")}
+    return;
+  }
+  if(d.act==='example'){DATA={cards:exampleCards(),source:'example',game:'',at:0};try{localStorage.removeItem(LS_CARDS)}catch(e){}state.team=exampleTeam(DATA.cards);rescore();render();return}
+  if(d.pos){state.board.pos=d.pos;state.board.limit=40;render();return}
+  if(d.card){openReport(d.card);return}
+  if(d.slot){openPicker(d.slot);return}
+  if(d.pick){const [s,id]=d.pick.split('|');state.team[s]=id;persist();closeSheet();render();toast(byId(id).n+' set at '+s);return}
+  if(d.clear){delete state.team[d.clear];persist();closeSheet();render();return}
+  if(d.custom){openCustom(d.custom);return}
+  if(d.apply){const [s,id]=d.apply.split('|');state.team[s]=id;persist();closeSheet();render();toast(byId(id).n+' set at '+s);return}
+  if(d.uptab){state.upTab=d.uptab;persist();render();return}
+  if(d.mb){state.mb=d.mb;render();return}
+  if(d.preset){state.preset=d.preset;state.w={...PRESETS[d.preset]};rescore();render();return}
+  if(d.del!=null){const i=Number(d.del);if(state.confirmDel===i){state.log.splice(i,1);state.confirmDel=null;persist()}else state.confirmDel=i;render();return}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!$('#sheet').hidden)closeSheet();
+  if(e.key==='Enter'&&e.target.matches('tr.click,.tile,.fit-row[data-card]'))e.target.click();
+});
+$('#sheetBack').addEventListener('click',closeSheet);
+$('#dataChip').addEventListener('click',()=>{location.hash='#data'});
+$('#tierPro').addEventListener('click',()=>{state.tier='pro';persist();render()});
+$('#tierFree').addEventListener('click',()=>{state.tier='free';persist();render()});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.dataset&&t.dataset.cpq!=null){coopSearch(+t.dataset.cpq);return}
+  if(t.dataset&&t.dataset.ownq!=null){ownSearch();return}
+  if(t.id==='bq'){state.board.q=t.value;state.board.limit=40;const pos=t.selectionStart;render();const n=$('#bq');n.focus();n.setSelectionRange(pos,pos)}
+  else if(t.dataset.w){state.w[t.dataset.w]=Number(t.value);state.preset='custom';$('#wv-'+t.dataset.w).textContent=t.value+(t.dataset.w==='def'||t.dataset.w==='spd'?'%':'');document.querySelectorAll('[data-preset]').forEach(b=>b.setAttribute('aria-pressed','false'));
+    for(const P of ['C','SS','CF','2B','3B','RF','LF','1B','DH']){const wd=(POSDEF[P]||0)*state.w.def/100,ws=SPD_BASE*state.w.spd/100,tt=1+wd+ws;const el=$('#share-'+P);if(el)el.textContent=`${Math.round(wd/tt*100)}% / ${Math.round(ws/tt*100)}%`}
+    clearTimeout(rescore.t);rescore.t=setTimeout(rescore,250)}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='bmax'){state.board.max=t.value;render()}
+  else if(t.id==='tmax'){state.top.max=t.value;render()}
+  else if(['cp-n','cp-hq','cp-spq','cp-rpq'].includes(t.id)){state.coop[{'cp-n':'n','cp-hq':'hq','cp-spq':'spq','cp-rpq':'rpq'}[t.id]]=Number(t.value);persist();render()}
+  else if(t.id.startsWith('cp-n-')){state.coop.players[+t.id.slice(5)].name=t.value.trim()||'Player '+(+t.id.slice(5)+1);persist();render()}
+  else if(t.id==='budget'){state.budget=Number(t.value)||0;persist();render()}
+  else if(t.id==='mktonly'){state.mktOnly=t.checked;persist();render()}
+  else if(t.id==='mbpos'){state.mbPos=t.value;render()}
+  else if(t.id==='mbmax'){state.mbMax=t.value;render()}
+  else if(t.id==='fmin'){state.flipMin=t.value;render()}
+  else if(t.id==='fmax'){state.flipMax=t.value;render()}
+});
+document.addEventListener('submit',e=>{
+  if(e.target.id!=='lform')return;
+  e.preventDefault();
+  const n=id=>{const v=$(id).value;return v===''?null:Number(v)};
+  state.log.unshift({d:$('#lf-d').value,opp:$('#lf-opp').value.trim()||'—',style:$('#lf-s').value,rf:n('#lf-rf')||0,ra:n('#lf-ra')||0,h:n('#lf-h'),e:n('#lf-e')||0});
+  persist();render();toast('Game logged');
+});
+window.addEventListener('hashchange',()=>{closeSheet();render();window.scrollTo(0,0)});
+
+/* ---------- boot ---------- */
+(function boot(){
+  try{const s=lsGet(LS_STATE);if(s)applySaved(JSON.parse(s))}catch(e){}
+  const cached=lsGet(LS_CARDS);
+  if(cached){try{const r=parseCards(cached);DATA={cards:r.cards,source:'live',game:r.game,at:r.at}}catch(e){}}
+  if(!DATA.cards.length){DATA={cards:exampleCards(),source:'example',game:'',at:0};if(!Object.keys(state.team).length)state.team=exampleTeam(DATA.cards)}
+  rebuild();render();
+  // Saved team, weights and game log follow the signed-in viewer across devices
+  (async()=>{
+    try{
+      if(!window.claude||!window.claude.use)return;
+      const [user,db]=await Promise.all([window.claude.use('user'),window.claude.use('db')]);
+      if(!user||!db)return;
+      const id=await user.id();if(!id)return;
+      dbRef=db.doc(`data/users/${id}/state/main`);
+      const timer=new Promise(r=>setTimeout(()=>r(null),10000));
+      const snap=await Promise.race([dbRef.get(),timer]);
+      if(snap&&snap.exists){const d=snap.data();if(d&&d.json){const b=JSON.parse(d.json);const team=state.team;applySaved(b);if(DATA.source==='example'&&b.dataSource==='live')state.team=team;rebuild();render()}}
+    }catch(e){dbRef=null}
+  })();
+})();
+</script>
+
+</body>
+</html>
